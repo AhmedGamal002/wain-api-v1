@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Place;
+use App\Support\OpenNow;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,12 +12,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * created_by...) ولا مسار الصورة الأصلية.
  *
  * `distance_km` بيتحسب في الاستعلام (`distance_m`) ويرجع null من غير lat/lng.
- * `is_open_now` بيرجع null لحد ما `place_hours` يتبني (أسبوع 3). `is_saved` false لحد F9 (أسبوع 11).
+ * `is_open_now` بيتحسب بتوقيت القاهرة (null لو المواعيد فاضية). `is_saved` false لحد F9 (أسبوع 11).
  *
  * @mixin Place
  */
 class PlaceCardResource extends JsonResource
 {
+    /** اسم attribute الـ request اللي الـ controller بيحط فيه لحظة «دلوقتي» الواحدة للطلب */
+    public const OPEN_NOW_ATTRIBUTE = 'open_now';
+
     /**
      * @return array<string, mixed>
      */
@@ -54,11 +58,16 @@ class PlaceCardResource extends JsonResource
                 'count' => $this->rating_count,
             ],
             'listing_tier' => $this->listing_tier,
-            'is_open_now' => null,
+            'is_open_now' => $this->openNow($request)->isOpen($this->resource),
             'distance_km' => isset($this->distance_m) ? round($this->distance_m / 1000, 1) : null,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'is_saved' => false,
         ];
+    }
+
+    private function openNow(Request $request): OpenNow
+    {
+        return $request->attributes->get(self::OPEN_NOW_ATTRIBUTE) ?? OpenNow::at();
     }
 }

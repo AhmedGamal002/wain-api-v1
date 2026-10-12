@@ -32,6 +32,8 @@ class IndexPlacesRequest extends FormRequest
             // التصنيفات بـ OR (F5): المكان يظهر لو أي تصنيف من تصنيفاته مطابق
             'categories' => ['nullable', 'array', 'max:8'],
             'categories.*' => ['string', Rule::exists('categories', 'slug')],
+            // «مفتوح دلوقتي» بتوقيت القاهرة (03 القسم 7.1): المكان من غير مواعيد ما بيظهرش
+            'open_now' => ['nullable', 'boolean'],
             'sort' => ['nullable', Rule::in(self::SORTS)],
             // الموقع زوج واحد: الاتنين أو ولا واحد
             'lat' => ['nullable', 'numeric', 'between:-90,90', 'required_with:lng', 'required_if:sort,nearest'],
@@ -49,6 +51,11 @@ class IndexPlacesRequest extends FormRequest
     public function perPage(): int
     {
         return (int) ($this->validated('per_page') ?? self::DEFAULT_PER_PAGE);
+    }
+
+    public function openNow(): bool
+    {
+        return $this->boolean('open_now');
     }
 
     public function hasLocation(): bool

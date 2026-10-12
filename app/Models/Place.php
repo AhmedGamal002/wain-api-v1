@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\OpenNow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,6 +64,28 @@ class Place extends Model
     public function scopePublished(Builder $query): void
     {
         $query->where('places.status', 'active');
+    }
+
+    /**
+     * فلتر «مفتوح دلوقتي» (03 القسم 7.1): `WHERE EXISTS` على الدقيقة الحالية في `place_hours`.
+     * جوه رمضان بيستخدم صفوف رمضان للمكان اللي ليه مواعيد رمضان، والباقي بصفوفه العادية.
+     * المكان من غير مواعيد ما بيظهرش (مفيش صفوف).
+     *
+     * @param  Builder<Place>  $query
+     */
+    public function scopeOpenNow(Builder $query, OpenNow $now): void
+    {
+        $query->whereExists(function ($hours) use ($now) {
+            $hours->selectRaw('1')
+                ->from('place_hours')
+                ->whereColumn('place_hours.place_id', 'places.id')
+                ->where('place_hours.opens_minute', '<=', $now->weekMinute)
+                ->where('place_hours.closes_minute', '>', $now->weekMinute)
+                ->where('place_hours.is_ramadan', function ($flag) use ($now) {
+                    // صفوف رمضان بس لو إحنا في رمضان والمكان عنده صفوف رمضان، وإلا العادية
+                    $flag->selectRaw('CASE WHEN ? AND EXISTS (SELECT 1 FROM place_hours r WHERE r.place_id = places.id AND r.is_ramadan = 1) THEN 1 ELSE 0 END', [$now->ramadan ? 1 : 0]);
+                });
+        });
     }
 
     /**

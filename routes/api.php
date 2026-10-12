@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('places', [PlaceController::class, 'index']);
+    Route::get('places/nearby', [PlaceController::class, 'nearby']);
 
     Route::prefix('auth')->group(function () {
         // 5 محاولات في الدقيقة لكل IP + إيميل (SEC-01)

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\PlaceHoursBuilder;
 use App\Support\PlaceLocation;
 use App\Support\PriceRange;
 use Illuminate\Database\Seeder;
@@ -23,8 +24,8 @@ use RuntimeException;
  * الصور روابط placeholder من picsum.photos بدل ملفات على R2 (ما فيش معالجة صور لحد أسبوع 9)،
  * فالـ resource بتاع الـ API لازم يمرّر الرابط المطلق زي ما هو.
  *
- * بيستخدم DB::table (مفيش Place model لسه)، فـ search_text و place_hours بيتبنوا بعدين من الـ
- * listeners/الـ command بتوع معلوم. إعادة التشغيل بتتخطى الأماكن الموجودة (بالـ slug).
+ * بيستخدم DB::table (مفيش Place model لسه)، فـ search_text بيتبني بعدين من الـ listener بتاع معلوم،
+ * و place_hours بيتبني هنا بـ PlaceHoursBuilder. إعادة التشغيل بتتخطى الأماكن الموجودة (بالـ slug).
  */
 class DemoPlaceSeeder extends Seeder
 {
@@ -163,6 +164,9 @@ class DemoPlaceSeeder extends Seeder
         }
 
         DB::table('places')->where('id', $placeId)->update(['cover_photo_id' => $coverId]);
+
+        // الجدول المشتق لفلتر «مفتوح دلوقتي»: الـ seeder بيكتب بـ DB::table فمفيش PlaceChanged ينفّذ الـ listener
+        PlaceHoursBuilder::rebuild($placeId);
     }
 
     private function insertPhoto(int $placeId, string $slug, string $type, int $order, int $userId): int

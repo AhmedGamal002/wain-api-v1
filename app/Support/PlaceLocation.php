@@ -43,6 +43,37 @@ final class PlaceLocation
         return sprintf('ST_Distance_Sphere(%s, %s)', $wrapped, self::pointSql($lat, $lng));
     }
 
+    /**
+     * شرط مستطيل حوالين نقطة بنصف قطر بالكيلومتر: `MBRContains(POLYGON, location)`.
+     *
+     * ده اللي بيخلّي الـ SPATIAL INDEX يتستخدم (EXPLAIN في README)، وبعده بنحسب المسافة الدقيقة
+     * بـ distanceMetersSql على النتيجة الصغيرة بس. المستطيل أكبر من الدايرة، فالدقة بتيجي من الفلتر التاني.
+     */
+    public static function boundingBoxSql(float $lat, float $lng, float $radiusKm, string $column = 'location'): string
+    {
+        self::assertValid($lat, $lng);
+
+        $wrapped = DB::connection()->getQueryGrammar()->wrap($column);
+        $latDelta = $radiusKm / 110.574;
+        // عند القطبين cos بيقرّب من صفر، فبنحدّه عشان المستطيل ما يبقاش لانهائي
+        $lngDelta = $radiusKm / (111.320 * max(cos(deg2rad($lat)), 0.01));
+
+        $minLat = max($lat - $latDelta, -90.0);
+        $maxLat = min($lat + $latDelta, 90.0);
+        $minLng = max($lng - $lngDelta, -180.0);
+        $maxLng = min($lng + $lngDelta, 180.0);
+
+        $ring = implode(', ', [
+            self::format($minLng).' '.self::format($minLat),
+            self::format($maxLng).' '.self::format($minLat),
+            self::format($maxLng).' '.self::format($maxLat),
+            self::format($minLng).' '.self::format($maxLat),
+            self::format($minLng).' '.self::format($minLat),
+        ]);
+
+        return sprintf("MBRContains(ST_GeomFromText('POLYGON((%s))'), %s)", $ring, $wrapped);
+    }
+
     private static function assertValid(float $lat, float $lng): void
     {
         if (! is_finite($lat) || ! is_finite($lng) || abs($lat) > 90 || abs($lng) > 180) {
