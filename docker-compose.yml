@@ -1,0 +1,28 @@
+# MariaDB 11.8 = نفس نسخة استضافة Hostinger (11.8.9). مش MySQL.
+# البورت 3307 عشان MySQL بتاع WAMP (لو شغال) بياخد 3306.
+services:
+  mariadb:
+    image: mariadb:11.8
+    container_name: wain-mariadb
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: wain_db
+      MARIADB_USER: wain
+      MARIADB_PASSWORD: secret
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - wain_mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  wain_mariadb_data:
