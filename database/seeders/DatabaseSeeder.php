@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -11,15 +10,19 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * Seed the application's database.
+     * الـ seeders اللي بتروح على production: التصنيفات والمدينة والمنطقة والخصائص (والأدوار
+     * والإعدادات في أسبوع 2، وباقي المناطق في أسبوع 3). الأماكن التجريبية `local` بس.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            CategorySeeder::class,
+            CityAreaSeeder::class,
+            AttributeSeeder::class,
         ]);
+
+        if (app()->environment('local')) {
+            $this->call(DemoPlaceSeeder::class);
+        }
     }
 }
