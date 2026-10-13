@@ -10,12 +10,15 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * الـ seeders اللي بتروح على production: التصنيفات والمدينة والمنطقة والخصائص (والأدوار
-     * والإعدادات في أسبوع 2، وباقي المناطق في أسبوع 3). الأماكن التجريبية `local` بس.
+     * الـ seeders اللي بتروح على production: الأدوار وحسابات الأدمن والإعدادات والتصنيفات والمدينة
+     * والمنطقة والخصائص (وباقي المناطق في أسبوع 3). الأماكن التجريبية `local` بس.
      */
     public function run(): void
     {
         $this->call([
+            RoleSeeder::class,
+            AdminUserSeeder::class,
+            SettingSeeder::class,
             CategorySeeder::class,
             CityAreaSeeder::class,
             AttributeSeeder::class,
