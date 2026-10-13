@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Hash;
 /**
  * F2 الأساسي (06 القسم 3): register وlogin وlogout وme. نسيت الباسورد وتأكيد الإيميل وGoogle/Apple
  * والحذف بتتضاف في أسابيعها (4 و14 و20).
+ *
+ * @group Auth
  */
 class AuthController extends Controller
 {
@@ -66,6 +68,8 @@ class AuthController extends Controller
 
     /**
      * POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).
+     *
+     * @authenticated
      */
     public function logout(Request $request): Response
     {
@@ -76,6 +80,8 @@ class AuthController extends Controller
 
     /**
      * GET /auth/me
+     *
+     * @authenticated
      */
     public function me(Request $request): UserResource
     {

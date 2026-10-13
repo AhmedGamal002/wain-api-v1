@@ -4,8 +4,13 @@
 // (التطبيق بيعرض كل رسالة تحت الحقل نفسه، معيار قبول F2).
 return [
     'accepted' => 'لازم توافق على :attribute.',
+    'array' => ':attribute لازم يكون قايمة.',
+    'boolean' => ':attribute لازم يكون صح أو غلط.',
     'between' => [
         'numeric' => ':attribute لازم يكون بين :min و:max.',
+        'string' => ':attribute لازم يكون من :min لـ :max حرف.',
+        'array' => ':attribute لازم يكون فيه من :min لـ :max عنصر.',
+        'file' => ':attribute لازم يكون من :min لـ :max كيلوبايت.',
     ],
     'confirmed' => ':attribute مش مطابق للتأكيد.',
     'email' => 'اكتب إيميل صحيح.',
@@ -15,10 +20,14 @@ return [
     'max' => [
         'numeric' => ':attribute لازم يكون :max أو أقل.',
         'string' => ':attribute لازم يكون أقل من :max حرف.',
+        'array' => ':attribute لازم ما يزيدش عن :max عنصر.',
+        'file' => ':attribute لازم يكون :max كيلوبايت أو أقل.',
     ],
     'min' => [
         'numeric' => ':attribute لازم يكون :min أو أكتر.',
         'string' => ':attribute لازم يكون :min حروف على الأقل.',
+        'array' => ':attribute لازم يكون فيه :min عنصر على الأقل.',
+        'file' => ':attribute لازم يكون :min كيلوبايت على الأقل.',
     ],
     'numeric' => ':attribute لازم يكون رقم.',
     'required' => ':attribute مطلوب.',

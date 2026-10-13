@@ -1,0 +1,946 @@
+openapi: 3.0.3
+info:
+  title: 'Wain API'
+  description: 'API تطبيق وين (Wain): الأماكن والتصنيفات والحساب. العقد بين الـ backend والموبايل.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: Auth
+    description: ''
+  -
+    name: Categories
+    description: ''
+  -
+    name: Places
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: http
+      scheme: bearer
+      description: 'الـ token بيرجع من <code>POST /auth/register</code> أو <code>POST /auth/login</code>. الـ endpoints العامة بتشتغل من غيره، ولو بعتّه بيتفعّل <code>is_saved</code>.'
+security:
+  -
+    default: []
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: 'POST /auth/register — بيعمل الحساب ويرجّع token، فالمستخدم يدخل على طول.'
+      operationId: pOSTauthregisterToken
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses: {  }
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 50 حرف.'
+                  example: b
+                email:
+                  type: string
+                  description: 'اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
+                  example: zbailey@example.net
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+                terms_accepted:
+                  type: boolean
+                  description: 'Must be accepted.'
+                  example: true
+              required:
+                - name
+                - email
+                - password
+                - terms_accepted
+      security: []
+  /api/v1/auth/login:
+    post:
+      summary: 'POST /auth/login — رسالة واحدة للإيميل والباسورد الغلط (ما نقولش إن الإيميل مش موجود).'
+      operationId: pOSTauthlogin
+      description: '5 محاولات في الدقيقة لكل IP + إيميل (limiter `auth`).'
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses: {  }
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'اكتب إيميل صحيح.'
+                  example: gbailey@example.net
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+              required:
+                - email
+                - password
+      security: []
+  /api/v1/auth/logout:
+    post:
+      summary: 'POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).'
+      operationId: pOSTauthlogoutToken
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses: {  }
+      tags:
+        - Auth
+  /api/v1/auth/me:
+    get:
+      summary: 'GET /auth/me'
+      operationId: gETauthme
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'سجّل الدخول عشان تكمّل.'
+                  code: UNAUTHENTICATED
+                properties:
+                  message:
+                    type: string
+                    example: 'سجّل الدخول عشان تكمّل.'
+                  code:
+                    type: string
+                    example: UNAUTHENTICATED
+      tags:
+        - Auth
+  /api/v1/categories:
+    get:
+      summary: 'List categories'
+      operationId: listCategories
+      description: "قائمة التصنيفات. التصنيفات الظاهرة بالترتيب اللي حدده الأدمن (A2): شريط الرئيسية وألوان الـ pins على الخريطة.\nالتصنيف المخفي ما بيرجعش. الـ `slug` ما بيتغيرش، فالتطبيق بيفلتر بيه. بيتخزن في cache ساعة وبيتمسح مع\nأي تعديل من اللوحة."
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      slug: cafes
+                      name: كافيهات
+                      icon: ☕
+                      color: '#6F4E37'
+                    -
+                      slug: restaurants
+                      name: مطاعم
+                      icon: 🍽️
+                      color: '#E8593C'
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        slug: cafes
+                        name: كافيهات
+                        icon: ☕
+                        color: '#6F4E37'
+                      -
+                        slug: restaurants
+                        name: مطاعم
+                        icon: 🍽️
+                        color: '#E8593C'
+                    items:
+                      type: object
+                      properties:
+                        slug:
+                          type: string
+                          example: cafes
+                        name:
+                          type: string
+                          example: كافيهات
+                        icon:
+                          type: string
+                          example: ☕
+                        color:
+                          type: string
+                          example: '#6F4E37'
+      tags:
+        - Categories
+      security: []
+  /api/v1/places:
+    get:
+      summary: 'GET /places — القائمة بكروت المكان مع pagination (06 القسم 1: `data` و`meta` من 4 حقول).'
+      operationId: gETplacesPagination061datameta4
+      description: 'بترجّع المنشور بس. الفلاتر الكاملة مع F5 (أسبوع 4)، والـ cache مع /home (أسبوع 8).'
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'البيانات اللي دخلتها مش صحيحة.'
+                  code: VALIDATION_ERROR
+                  errors:
+                    area:
+                      - 'المنطقة المختار مش موجود.'
+                    categories.0:
+                      - 'التصنيف المختار مش موجود.'
+                properties:
+                  message:
+                    type: string
+                    example: 'البيانات اللي دخلتها مش صحيحة.'
+                  code:
+                    type: string
+                    example: VALIDATION_ERROR
+                  errors:
+                    type: object
+                    properties:
+                      area:
+                        type: array
+                        example:
+                          - 'المنطقة المختار مش موجود.'
+                        items:
+                          type: string
+                      categories.0:
+                        type: array
+                        example:
+                          - 'التصنيف المختار مش موجود.'
+                        items:
+                          type: string
+      tags:
+        - Places
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                area:
+                  type: string
+                  description: 'Must match an existing stored value.'
+                  example: architecto
+                  nullable: true
+                categories:
+                  type: array
+                  description: 'Must match an existing stored value.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+                open_now:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: true
+                sort:
+                  type: string
+                  description: ''
+                  example: recommended
+                  enum:
+                    - recommended
+                    - nearest
+                    - rating
+                    - newest
+                  nullable: true
+                lat:
+                  type: number
+                  description: 'This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90.'
+                  example: -89
+                  nullable: true
+                lng:
+                  type: number
+                  description: 'This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180.'
+                  example: -180
+                  nullable: true
+                page:
+                  type: integer
+                  description: 'value لازم يكون 1 أو أكتر.'
+                  example: 66
+                  nullable: true
+                per_page:
+                  type: integer
+                  description: 'value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل.'
+                  example: 17
+                  nullable: true
+      security: []
+  /api/v1/places/nearby:
+    get:
+      summary: 'GET /places/nearby — «قريب منك»: المنشور جوه نصف القطر مرتب بالأقرب (03 القسم 7.5).'
+      operationId: gETplacesnearby0375
+      description: "بيفلتر أولاً بمستطيل حوالين النقطة (MBRContains، بيستخدم الـ SPATIAL INDEX)، وبعدين بالمسافة الدقيقة.\nالقائمة صغيرة (limit أقصى 30) فمفيش meta."
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data: []
+                properties:
+                  data:
+                    type: array
+                    example: []
+      tags:
+        - Places
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: 'value لازم يكون بين -90 و90.'
+                  example: -89
+                lng:
+                  type: number
+                  description: 'value لازم يكون بين -180 و180.'
+                  example: -179
+                radius:
+                  type: number
+                  description: 'value لازم يكون 0.1 أو أكتر. value لازم يكون 30 أو أقل.'
+                  example: 7
+                  nullable: true
+                limit:
+                  type: integer
+                  description: 'value لازم يكون 1 أو أكتر. value لازم يكون 30 أو أقل.'
+                  example: 16
+                  nullable: true
+              required:
+                - lat
+                - lng
+      security: []
+  '/api/v1/places/{slug}':
+    get:
+      summary: 'Get place details'
+      operationId: getPlaceDetails
+      description: "تفاصيل المكان. صفحة المكان (F7): كل حقول الكارت + الوصف والعنوان والتصنيفات والخصائص (متجمّعة) والتواصل والمواعيد\nوالصور والمنيو.\n\n- بيرجّع المنشور (`status = active`) والمغلق نهائياً (`status = closed`) بس. غير كده (مخفي أو مسودة أو\n  قيد المراجعة أو مرفوض أو محذوف أو مش موجود) 404 `PLACE_NOT_AVAILABLE` واحدة من غير ما تكشف السبب.\n- المغلق نهائياً: `is_open_now` و`hours.status_text` بـ `null` و`hours.week` فاضية، والموبايل بيعرض\n  بانر «المكان ده قفل نهائياً» وبيخفي أزرار التواصل.\n- الـ slug القديم بعد ما يتغيّر بيرجّع المكان بالـ slug الجديد (الروابط المتشاركة تفضل شغالة).\n- الأجزاء الفاضية: `description` بـ `null`، و`attributes` و`photos` و`menu_photos` قايمة فاضية، وحقول\n  `contact` بـ `null`.\n- `distance_km` بـ `null` من غير `lat` و`lng`. `is_saved` دايماً `false` لحد F9."
+      parameters:
+        -
+          in: query
+          name: lat
+          description: 'خط عرض المستخدم، لحساب `distance_km`. لازم مع `lng`. This field is required when <code>lng</code> is present. value لازم يكون بين -90 و90.'
+          example: 30.03
+          required: false
+          schema:
+            type: number
+            description: 'خط عرض المستخدم، لحساب `distance_km`. لازم مع `lng`. This field is required when <code>lng</code> is present. value لازم يكون بين -90 و90.'
+            example: 30.03
+            nullable: true
+        -
+          in: query
+          name: lng
+          description: 'خط طول المستخدم، لحساب `distance_km`. لازم مع `lat`. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180.'
+          example: 31.47
+          required: false
+          schema:
+            type: number
+            description: 'خط طول المستخدم، لحساب `distance_km`. لازم مع `lat`. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180.'
+            example: 31.47
+            nullable: true
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    slug: el-mahatta-coffee
+                    name: 'قهوة المحطة'
+                    primary_category:
+                      slug: cafes
+                      name: كافيهات
+                      icon: ☕
+                      color: '#6F4E37'
+                    area:
+                      slug: new-cairo
+                      name: 'التجمع الخامس'
+                    cover:
+                      thumb: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/240/160'
+                      medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533'
+                    price:
+                      min: 60
+                      max: 140
+                      range: budget
+                    rating:
+                      avg: 4.5
+                      count: 120
+                    listing_tier: featured
+                    is_open_now: true
+                    distance_km: 2.1
+                    latitude: 30.0283
+                    longitude: 31.4913
+                    is_saved: false
+                    status: active
+                    description: 'كافيه هادي بإضاءة دافية ومساحات شغل واسعة، قهوة مختصة وحلويات بيتي. مناسب للمذاكرة والشغل بالساعات.'
+                    address: 'شارع التسعين الشمالي، التجمع الخامس'
+                    categories:
+                      -
+                        slug: cafes
+                        name: كافيهات
+                      -
+                        slug: desserts
+                        name: حلويات
+                    attributes:
+                      -
+                        group: الجو
+                        items:
+                          -
+                            slug: quiet
+                            name: هادي
+                            icon: 🤫
+                      -
+                        group: الخدمات
+                        items:
+                          -
+                            slug: wifi
+                            name: 'واي فاي'
+                            icon: 📶
+                          -
+                            slug: power-outlets
+                            name: 'فيش كهربا'
+                            icon: 🔌
+                      -
+                        group: 'مناسب لـ'
+                        items:
+                          -
+                            slug: study-work
+                            name: 'المذاكرة والشغل'
+                            icon: 📚
+                    contact:
+                      phone: '+201000000001'
+                      whatsapp: '+201000000001'
+                      instagram: wain.demo.01
+                      facebook_url: null
+                      website: null
+                      menu_url: null
+                    hours:
+                      is_open_now: true
+                      state: open
+                      status_text: 'مفتوح · بيقفل 1:00 ص'
+                      is_ramadan: false
+                      week:
+                        -
+                          day: sat
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                        -
+                          day: sun
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                        -
+                          day: mon
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                        -
+                          day: tue
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: true
+                        -
+                          day: wed
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                        -
+                          day: thu
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                        -
+                          day: fri
+                          state: open
+                          slots:
+                            -
+                              - '09:00'
+                              - '01:00'
+                          is_today: false
+                    photos:
+                      -
+                        id: 1
+                        medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533'
+                        large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/1600/1066'
+                        caption: null
+                      -
+                        id: 2
+                        medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-1/800/533'
+                        large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-1/1600/1066'
+                        caption: null
+                      -
+                        id: 3
+                        medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-2/800/533'
+                        large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-2/1600/1066'
+                        caption: null
+                    menu_photos: []
+                    closed_at: null
+                    verified_at: '2026-10-08'
+                    is_claimed: false
+                    share_url: 'https://wain.app/p/el-mahatta-coffee'
+                    latest_reviews: []
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: el-mahatta-coffee
+                      name:
+                        type: string
+                        example: 'قهوة المحطة'
+                      primary_category:
+                        type: object
+                        properties:
+                          slug:
+                            type: string
+                            example: cafes
+                          name:
+                            type: string
+                            example: كافيهات
+                          icon:
+                            type: string
+                            example: ☕
+                          color:
+                            type: string
+                            example: '#6F4E37'
+                      area:
+                        type: object
+                        properties:
+                          slug:
+                            type: string
+                            example: new-cairo
+                          name:
+                            type: string
+                            example: 'التجمع الخامس'
+                      cover:
+                        type: object
+                        properties:
+                          thumb:
+                            type: string
+                            example: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/240/160'
+                          medium:
+                            type: string
+                            example: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533'
+                      price:
+                        type: object
+                        properties:
+                          min:
+                            type: integer
+                            example: 60
+                          max:
+                            type: integer
+                            example: 140
+                          range:
+                            type: string
+                            example: budget
+                      rating:
+                        type: object
+                        properties:
+                          avg:
+                            type: number
+                            example: 4.5
+                          count:
+                            type: integer
+                            example: 120
+                      listing_tier:
+                        type: string
+                        example: featured
+                      is_open_now:
+                        type: boolean
+                        example: true
+                      distance_km:
+                        type: number
+                        example: 2.1
+                      latitude:
+                        type: number
+                        example: 30.0283
+                      longitude:
+                        type: number
+                        example: 31.4913
+                      is_saved:
+                        type: boolean
+                        example: false
+                      status:
+                        type: string
+                        example: active
+                      description:
+                        type: string
+                        example: 'كافيه هادي بإضاءة دافية ومساحات شغل واسعة، قهوة مختصة وحلويات بيتي. مناسب للمذاكرة والشغل بالساعات.'
+                      address:
+                        type: string
+                        example: 'شارع التسعين الشمالي، التجمع الخامس'
+                      categories:
+                        type: array
+                        example:
+                          -
+                            slug: cafes
+                            name: كافيهات
+                          -
+                            slug: desserts
+                            name: حلويات
+                        items:
+                          type: object
+                          properties:
+                            slug:
+                              type: string
+                              example: cafes
+                            name:
+                              type: string
+                              example: كافيهات
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            group: الجو
+                            items:
+                              -
+                                slug: quiet
+                                name: هادي
+                                icon: 🤫
+                          -
+                            group: الخدمات
+                            items:
+                              -
+                                slug: wifi
+                                name: 'واي فاي'
+                                icon: 📶
+                              -
+                                slug: power-outlets
+                                name: 'فيش كهربا'
+                                icon: 🔌
+                          -
+                            group: 'مناسب لـ'
+                            items:
+                              -
+                                slug: study-work
+                                name: 'المذاكرة والشغل'
+                                icon: 📚
+                        items:
+                          type: object
+                          properties:
+                            group:
+                              type: string
+                              example: الجو
+                            items:
+                              type: array
+                              example:
+                                -
+                                  slug: quiet
+                                  name: هادي
+                                  icon: 🤫
+                              items:
+                                type: object
+                                properties:
+                                  slug:
+                                    type: string
+                                    example: quiet
+                                  name:
+                                    type: string
+                                    example: هادي
+                                  icon:
+                                    type: string
+                                    example: 🤫
+                      contact:
+                        type: object
+                        properties:
+                          phone:
+                            type: string
+                            example: '+201000000001'
+                          whatsapp:
+                            type: string
+                            example: '+201000000001'
+                          instagram:
+                            type: string
+                            example: wain.demo.01
+                          facebook_url:
+                            type: string
+                            example: null
+                            nullable: true
+                          website:
+                            type: string
+                            example: null
+                            nullable: true
+                          menu_url:
+                            type: string
+                            example: null
+                            nullable: true
+                      hours:
+                        type: object
+                        properties:
+                          is_open_now:
+                            type: boolean
+                            example: true
+                          state:
+                            type: string
+                            example: open
+                          status_text:
+                            type: string
+                            example: 'مفتوح · بيقفل 1:00 ص'
+                          is_ramadan:
+                            type: boolean
+                            example: false
+                          week:
+                            type: array
+                            example:
+                              -
+                                day: sat
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                              -
+                                day: sun
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                              -
+                                day: mon
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                              -
+                                day: tue
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: true
+                              -
+                                day: wed
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                              -
+                                day: thu
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                              -
+                                day: fri
+                                state: open
+                                slots:
+                                  -
+                                    - '09:00'
+                                    - '01:00'
+                                is_today: false
+                            items:
+                              type: object
+                              properties:
+                                day:
+                                  type: string
+                                  example: sat
+                                state:
+                                  type: string
+                                  example: open
+                                slots:
+                                  type: array
+                                  example:
+                                    -
+                                      - '09:00'
+                                      - '01:00'
+                                  items:
+                                    type: array
+                                is_today:
+                                  type: boolean
+                                  example: false
+                      photos:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533'
+                            large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/1600/1066'
+                            caption: null
+                          -
+                            id: 2
+                            medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-1/800/533'
+                            large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-1/1600/1066'
+                            caption: null
+                          -
+                            id: 3
+                            medium: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-2/800/533'
+                            large: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-2/1600/1066'
+                            caption: null
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            medium:
+                              type: string
+                              example: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533'
+                            large:
+                              type: string
+                              example: 'https://picsum.photos/seed/el-mahatta-coffee-gallery-0/1600/1066'
+                            caption:
+                              type: string
+                              example: null
+                              nullable: true
+                      menu_photos:
+                        type: array
+                        example: []
+                      closed_at:
+                        type: string
+                        example: null
+                        nullable: true
+                      verified_at:
+                        type: string
+                        example: '2026-10-08'
+                      is_claimed:
+                        type: boolean
+                        example: false
+                      share_url:
+                        type: string
+                        example: 'https://wain.app/p/el-mahatta-coffee'
+                      latest_reviews:
+                        type: array
+                        example: []
+        404:
+          description: 'مخفي أو مسودة أو محذوف أو مش موجود'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'المكان مش متاح دلوقتي.'
+                  code: PLACE_NOT_AVAILABLE
+                properties:
+                  message:
+                    type: string
+                    example: 'المكان مش متاح دلوقتي.'
+                  code:
+                    type: string
+                    example: PLACE_NOT_AVAILABLE
+      tags:
+        - Places
+      security: []
+    parameters:
+      -
+        in: path
+        name: slug
+        description: 'slug المكان.'
+        example: el-mahatta-coffee
+        required: true
+        schema:
+          type: string

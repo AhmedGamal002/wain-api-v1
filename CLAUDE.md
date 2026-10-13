@@ -10,7 +10,10 @@ docker compose up -d mariadb          # MariaDB 11.8 على 3307 (wain_db + wain
 php artisan migrate:fresh --seed
 php artisan test                      # على MariaDB wain_test، مش SQLite
 vendor/bin/pint                       # Pint لازم يعدّي قبل أي PR
+php artisan scribe:generate           # توثيق الـ API (public/docs) بيتحدّث مع كل PR بيغيّر الـ API
 ```
+
+الـ CI (`.github/workflows/ci.yml`) بيشغّل Pint والتستات على MariaDB 11.8 لكل push وPR على `dev` و`main`.
 
 ## قواعد مش بديهية
 
@@ -31,11 +34,19 @@ vendor/bin/pint                       # Pint لازم يعدّي قبل أي PR
 - شكل الخطأ `{ message, code, errors? }` وأكواد الأخطاء في `06` القسم 1. الـ `ApiErrorRenderer` بيحوّل أي خطأ على `/api/*` للشكل ده تلقائياً (validation و401 و403 و404 و429). لأخطاء الدومين: `throw new ApiException(401, 'INVALID_CREDENTIALS')`، والرسالة بتتاخد من `lang/{ar,en}/api.php` بالـ code، فضيف الكود الجديد هناك بالاتنين.
 - اللغة من `Accept-Language` (`ar` الافتراضي) بـ `SetApiLocale` (global، بيشتغل كمان على الـ 404). في التستات: Symfony بيحط `Accept-Language: en-us` في أي request مصطنع، فابعت الهيدر صراحةً (`['Accept-Language' => 'ar']`) أو فاضي لـ «من غير هيدر».
 - `GET /api/v1/categories` أول endpoint. شكل التصنيف `{ slug, name, icon, color }` زي كارت المكان (`03` القسم 5.2).
-- أي تغيير في الـ API يتكتب في Scribe الأول ويتقال لمعلوم.
+- `GET /api/v1/places/{slug}` (F7): `PlaceDetailResource` = الكارت + التفاصيل (`03` القسم 5.3). بيرجّع `active` و`closed` بس (`Place::viewable`)، وغير كده 404 `PLACE_NOT_AVAILABLE` واحدة. الـ slug القديم (`place_slug_redirects`) بيرجّع المكان بالـ slug الجديد. المغلق نهائياً بيرجع `is_open_now` و`hours.status_text` بـ null. الـ cache (5 دقايق) لسه، بيتضاف مع `PlaceObserver` (أسبوع 4).
+- `places/{slug}` آخر راوت في الجروب وبيستثني `Place::RESERVED_SLUGS` (`nearby` و`count` و`map`). أي مسار ثابت جديد تحت `/places` لازم يتضاف للقايمة دي، ومولّد الـ slug في A1 لازم يتخطاها.
+- العلاقة في `Place` اسمها `placeAttributes()` مش `attributes()`، لإن `$place->attributes` هي خاصية Eloquent الداخلية.
+- أي تغيير في الـ API يتكتب في Scribe الأول ويتقال لمعلوم. الـ docs بتتولّد بـ `php artisan scribe:generate` (من الداتابيز المحلية) وبيتعمل commit لـ `public/docs` و`.scribe`، فتغيير العقد (`openapi.yaml`) بيبان في الـ PR. العنوان (أول سطر في الـ docblock) بالإنجليزي عشان الـ `operationId` يطلع فريد، والشرح بالعربي. أمثلة الـ response الطويلة في `resources/api-examples/`. endpoint محمي بـ `auth:sanctum` لازم `@authenticated` في الـ docblock.
+- رسائل الـ validation العربي في `lang/ar/validation.php`: أي rule جديدة (خصوصاً `max` و`min` و`between` على array أو file) لازم يتضاف لها نوعها هناك، وإلا Scribe بيفشل في التوليد والرسالة بترجع بالإنجليزي.
 
 ## الملكية والـ PR
 
 - `PlaceObserver` ملكنا وبيطلق `PlaceChanged`، والـ listeners (`search_text` والـ cache و`place_hours`) عند معلوم. متحطّش منطقهم جوه الـ Observer.
 - `PlaceCard` و`AuthGateSheet` والـ API client ملك معلوم.
 - لوحة Filament مقفولة بـ `User::canAccessPanel` (دور `admin` أو `moderator` وحالة `active`).
+- الأدوار `admin` و`moderator` و`owner` من `RoleSeeder` (أدوار بس، من غير permissions منفصلة): الـ Policies بتحكم بالدور حسب مصفوفة الصلاحيات في `02`. حسابات الأدمن من `.env` (`WAIN_ADMIN_1_*` و`WAIN_ADMIN_2_*`) بـ `AdminUserSeeder`، ومفيش باسورد في الكود. `php artisan db:seed --class=AdminUserSeeder` بعد ما تملاهم.
+- A2 التصنيفات (`App\Filament\Resources\Categories`): Admin يعدّل والـ Moderator عرض (`CategoryPolicy`). الـ slug تلقائي ومايتغيرش (الموديل بيتجاهل أي تعديل). الحذف ممنوع لتصنيف فيه أماكن (حتى المحذوفة soft)، بيتخفى بدل كده. الـ reorder بالسحب بيعمل `UPDATE` واحد من غير model events، فمسح الـ cache في `afterReordering`.
+- أعمدة الجدول اللي بتتعدّل inline (`ToggleColumn`) بتتخطى الـ Policy: لازم `->disabled(fn ($record) => Gate::denies('update', $record))`.
+- تستات Filament: `Livewire::test(ManageCategories::class)` مع `callAction(TestAction::make('edit')->table($record), $data)` و`Filament::setCurrentPanel('admin')` في الـ setUp.
 - كل PR بيتراجع من التاني خلال يوم عمل.

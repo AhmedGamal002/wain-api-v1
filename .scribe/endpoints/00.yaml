@@ -1,0 +1,44 @@
+name: Categories
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/categories
+    metadata:
+      custom: []
+      groupName: Categories
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List categories'
+      description: |-
+        قائمة التصنيفات. التصنيفات الظاهرة بالترتيب اللي حدده الأدمن (A2): شريط الرئيسية وألوان الـ pins على الخريطة.
+        التصنيف المخفي ما بيرجعش. الـ `slug` ما بيتغيرش، فالتطبيق بيفلتر بيه. بيتخزن في cache ساعة وبيتمسح مع
+        أي تعديل من اللوحة.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"slug": "cafes", "name": "كافيهات", "icon": "☕", "color": "#6F4E37"}, {"slug": "restaurants", "name": "مطاعم", "icon": "🍽️", "color": "#E8593C"}]}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

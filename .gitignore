@@ -27,3 +27,6 @@ Homestead.yaml
 Thumbs.db
 /scripts/hosting-check/.hosting-check.env
 /scripts/hosting-check/.hosting-check-heartbeat.log
+
+# Scribe: cache الاستخراج بيتعاد توليده، والباقي (.scribe/endpoints وpublic/docs) بيتعمله commit كعقد للـ API
+/.scribe/endpoints.cache

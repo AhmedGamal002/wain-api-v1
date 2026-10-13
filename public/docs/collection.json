@@ -1,0 +1,409 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost"
+        }
+    ],
+    "info": {
+        "name": "Wain API",
+        "_postman_id": "9c7a55d3-4620-4f3e-bd10-f70bb0a215b2",
+        "description": "API \u062a\u0637\u0628\u064a\u0642 \u0648\u064a\u0646 (Wain): \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062d\u0633\u0627\u0628. \u0627\u0644\u0639\u0642\u062f \u0628\u064a\u0646 \u0627\u0644\u0640 backend \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "description": "",
+            "item": [
+                {
+                    "name": "POST \/auth\/register \u2014 \u0628\u064a\u0639\u0645\u0644 \u0627\u0644\u062d\u0633\u0627\u0628 \u0648\u064a\u0631\u062c\u0651\u0639 token\u060c \u0641\u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u064a\u062f\u062e\u0644 \u0639\u0644\u0649 \u0637\u0648\u0644.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/register",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/register"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"email\":\"zbailey@example.net\",\"password\":\"|]|{+-\",\"terms_accepted\":true}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/auth\/login \u2014 \u0631\u0633\u0627\u0644\u0629 \u0648\u0627\u062d\u062f\u0629 \u0644\u0644\u0625\u064a\u0645\u064a\u0644 \u0648\u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f \u0627\u0644\u063a\u0644\u0637 (\u0645\u0627 \u0646\u0642\u0648\u0644\u0634 \u0625\u0646 \u0627\u0644\u0625\u064a\u0645\u064a\u0644 \u0645\u0634 \u0645\u0648\u062c\u0648\u062f).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"gbailey@example.net\",\"password\":\"|]|{+-\"}"
+                        },
+                        "description": "5 \u0645\u062d\u0627\u0648\u0644\u0627\u062a \u0641\u064a \u0627\u0644\u062f\u0642\u064a\u0642\u0629 \u0644\u0643\u0644 IP + \u0625\u064a\u0645\u064a\u0644 (limiter `auth`).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/auth\/logout \u2014 \u0628\u064a\u0645\u0633\u062d \u0627\u0644\u0640 token \u0627\u0644\u062d\u0627\u0644\u064a \u0628\u0633 (\u0628\u0627\u0642\u064a \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u062a\u0641\u0636\u0644 \u0634\u063a\u0627\u0644\u0629).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/auth\/me",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"message\":\"\\u0633\\u062c\\u0651\\u0644 \\u0627\\u0644\\u062f\\u062e\\u0648\\u0644 \\u0639\\u0634\\u0627\\u0646 \\u062a\\u0643\\u0645\\u0651\\u0644.\",\"code\":\"UNAUTHENTICATED\"}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Categories",
+            "description": "",
+            "item": [
+                {
+                    "name": "List categories",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/categories",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/categories"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a. \u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0627\u0644\u0638\u0627\u0647\u0631\u0629 \u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u0627\u0644\u0644\u064a \u062d\u062f\u062f\u0647 \u0627\u0644\u0623\u062f\u0645\u0646 (A2): \u0634\u0631\u064a\u0637 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629 \u0648\u0623\u0644\u0648\u0627\u0646 \u0627\u0644\u0640 pins \u0639\u0644\u0649 \u0627\u0644\u062e\u0631\u064a\u0637\u0629.\n\u0627\u0644\u062a\u0635\u0646\u064a\u0641 \u0627\u0644\u0645\u062e\u0641\u064a \u0645\u0627 \u0628\u064a\u0631\u062c\u0639\u0634. \u0627\u0644\u0640 `slug` \u0645\u0627 \u0628\u064a\u062a\u063a\u064a\u0631\u0634\u060c \u0641\u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u0628\u064a\u0641\u0644\u062a\u0631 \u0628\u064a\u0647. \u0628\u064a\u062a\u062e\u0632\u0646 \u0641\u064a cache \u0633\u0627\u0639\u0629 \u0648\u0628\u064a\u062a\u0645\u0633\u062d \u0645\u0639\n\u0623\u064a \u062a\u0639\u062f\u064a\u0644 \u0645\u0646 \u0627\u0644\u0644\u0648\u062d\u0629.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [{\"slug\": \"cafes\", \"name\": \"\u0643\u0627\u0641\u064a\u0647\u0627\u062a\", \"icon\": \"\u2615\", \"color\": \"#6F4E37\"}, {\"slug\": \"restaurants\", \"name\": \"\u0645\u0637\u0627\u0639\u0645\", \"icon\": \"\ud83c\udf7d\ufe0f\", \"color\": \"#E8593C\"}]}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Places",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/places \u2014 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0628\u0643\u0631\u0648\u062a \u0627\u0644\u0645\u0643\u0627\u0646 \u0645\u0639 pagination (06 \u0627\u0644\u0642\u0633\u0645 1: `data` \u0648`meta` \u0645\u0646 4 \u062d\u0642\u0648\u0644).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/places"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"area\":\"architecto\",\"categories\":[\"architecto\"],\"open_now\":true,\"sort\":\"recommended\",\"lat\":-89,\"lng\":-180,\"page\":66,\"per_page\":17}"
+                        },
+                        "description": "\u0628\u062a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u0628\u0633. \u0627\u0644\u0641\u0644\u0627\u062a\u0631 \u0627\u0644\u0643\u0627\u0645\u0644\u0629 \u0645\u0639 F5 (\u0623\u0633\u0628\u0648\u0639 4)\u060c \u0648\u0627\u0644\u0640 cache \u0645\u0639 \/home (\u0623\u0633\u0628\u0648\u0639 8).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                }
+                            ],
+                            "code": 422,
+                            "body": "{\"message\":\"\\u0627\\u0644\\u0628\\u064a\\u0627\\u0646\\u0627\\u062a \\u0627\\u0644\\u0644\\u064a \\u062f\\u062e\\u0644\\u062a\\u0647\\u0627 \\u0645\\u0634 \\u0635\\u062d\\u064a\\u062d\\u0629.\",\"code\":\"VALIDATION_ERROR\",\"errors\":{\"area\":[\"\\u0627\\u0644\\u0645\\u0646\\u0637\\u0642\\u0629 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"],\"categories.0\":[\"\\u0627\\u0644\\u062a\\u0635\\u0646\\u064a\\u0641 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"]}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET \/places\/nearby \u2014 \u00ab\u0642\u0631\u064a\u0628 \u0645\u0646\u0643\u00bb: \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u062c\u0648\u0647 \u0646\u0635\u0641 \u0627\u0644\u0642\u0637\u0631 \u0645\u0631\u062a\u0628 \u0628\u0627\u0644\u0623\u0642\u0631\u0628 (03 \u0627\u0644\u0642\u0633\u0645 7.5).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places\/nearby",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/places\/nearby"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"lat\":-89,\"lng\":-179,\"radius\":7,\"limit\":16}"
+                        },
+                        "description": "\u0628\u064a\u0641\u0644\u062a\u0631 \u0623\u0648\u0644\u0627\u064b \u0628\u0645\u0633\u062a\u0637\u064a\u0644 \u062d\u0648\u0627\u0644\u064a\u0646 \u0627\u0644\u0646\u0642\u0637\u0629 (MBRContains\u060c \u0628\u064a\u0633\u062a\u062e\u062f\u0645 \u0627\u0644\u0640 SPATIAL INDEX)\u060c \u0648\u0628\u0639\u062f\u064a\u0646 \u0628\u0627\u0644\u0645\u0633\u0627\u0641\u0629 \u0627\u0644\u062f\u0642\u064a\u0642\u0629.\n\u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0635\u063a\u064a\u0631\u0629 (limit \u0623\u0642\u0635\u0649 30) \u0641\u0645\u0641\u064a\u0634 meta.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                }
+                            ],
+                            "code": 200,
+                            "body": "{\"data\":[]}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Get place details",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places\/:slug",
+                            "query": [
+                                {
+                                    "key": "lat",
+                                    "value": "30.03",
+                                    "description": "\u062e\u0637 \u0639\u0631\u0636 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u060c \u0644\u062d\u0633\u0627\u0628 `distance_km`. \u0644\u0627\u0632\u0645 \u0645\u0639 `lng`. This field is required when lng is present. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 -90 \u064890.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "lng",
+                                    "value": "31.47",
+                                    "description": "\u062e\u0637 \u0637\u0648\u0644 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u060c \u0644\u062d\u0633\u0627\u0628 `distance_km`. \u0644\u0627\u0632\u0645 \u0645\u0639 `lat`. This field is required when lat is present. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 -180 \u0648180.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/places\/:slug?lat=30.03&lng=31.47",
+                            "variable": [
+                                {
+                                    "id": "slug",
+                                    "key": "slug",
+                                    "value": "el-mahatta-coffee",
+                                    "description": "slug \u0627\u0644\u0645\u0643\u0627\u0646."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0645\u0643\u0627\u0646. \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0643\u0627\u0646 (F7): \u0643\u0644 \u062d\u0642\u0648\u0644 \u0627\u0644\u0643\u0627\u0631\u062a + \u0627\u0644\u0648\u0635\u0641 \u0648\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062e\u0635\u0627\u0626\u0635 (\u0645\u062a\u062c\u0645\u0651\u0639\u0629) \u0648\u0627\u0644\u062a\u0648\u0627\u0635\u0644 \u0648\u0627\u0644\u0645\u0648\u0627\u0639\u064a\u062f\n\u0648\u0627\u0644\u0635\u0648\u0631 \u0648\u0627\u0644\u0645\u0646\u064a\u0648.\n\n- \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 (`status = active`) \u0648\u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b (`status = closed`) \u0628\u0633. \u063a\u064a\u0631 \u0643\u062f\u0647 (\u0645\u062e\u0641\u064a \u0623\u0648 \u0645\u0633\u0648\u062f\u0629 \u0623\u0648\n  \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0623\u0648 \u0645\u0631\u0641\u0648\u0636 \u0623\u0648 \u0645\u062d\u0630\u0648\u0641 \u0623\u0648 \u0645\u0634 \u0645\u0648\u062c\u0648\u062f) 404 `PLACE_NOT_AVAILABLE` \u0648\u0627\u062d\u062f\u0629 \u0645\u0646 \u063a\u064a\u0631 \u0645\u0627 \u062a\u0643\u0634\u0641 \u0627\u0644\u0633\u0628\u0628.\n- \u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b: `is_open_now` \u0648`hours.status_text` \u0628\u0640 `null` \u0648`hours.week` \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644 \u0628\u064a\u0639\u0631\u0636\n  \u0628\u0627\u0646\u0631 \u00ab\u0627\u0644\u0645\u0643\u0627\u0646 \u062f\u0647 \u0642\u0641\u0644 \u0646\u0647\u0627\u0626\u064a\u0627\u064b\u00bb \u0648\u0628\u064a\u062e\u0641\u064a \u0623\u0632\u0631\u0627\u0631 \u0627\u0644\u062a\u0648\u0627\u0635\u0644.\n- \u0627\u0644\u0640 slug \u0627\u0644\u0642\u062f\u064a\u0645 \u0628\u0639\u062f \u0645\u0627 \u064a\u062a\u063a\u064a\u0651\u0631 \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0643\u0627\u0646 \u0628\u0627\u0644\u0640 slug \u0627\u0644\u062c\u062f\u064a\u062f (\u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0645\u062a\u0634\u0627\u0631\u0643\u0629 \u062a\u0641\u0636\u0644 \u0634\u063a\u0627\u0644\u0629).\n- \u0627\u0644\u0623\u062c\u0632\u0627\u0621 \u0627\u0644\u0641\u0627\u0636\u064a\u0629: `description` \u0628\u0640 `null`\u060c \u0648`attributes` \u0648`photos` \u0648`menu_photos` \u0642\u0627\u064a\u0645\u0629 \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u062d\u0642\u0648\u0644\n  `contact` \u0628\u0640 `null`.\n- `distance_km` \u0628\u0640 `null` \u0645\u0646 \u063a\u064a\u0631 `lat` \u0648`lng`. `is_saved` \u062f\u0627\u064a\u0645\u0627\u064b `false` \u0644\u062d\u062f F9.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n    \"data\": {\n        \"id\": 1,\n        \"slug\": \"el-mahatta-coffee\",\n        \"name\": \"\u0642\u0647\u0648\u0629 \u0627\u0644\u0645\u062d\u0637\u0629\",\n        \"primary_category\": {\n            \"slug\": \"cafes\",\n            \"name\": \"\u0643\u0627\u0641\u064a\u0647\u0627\u062a\",\n            \"icon\": \"\u2615\",\n            \"color\": \"#6F4E37\"\n        },\n        \"area\": {\n            \"slug\": \"new-cairo\",\n            \"name\": \"\u0627\u0644\u062a\u062c\u0645\u0639 \u0627\u0644\u062e\u0627\u0645\u0633\"\n        },\n        \"cover\": {\n            \"thumb\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-0\/240\/160\",\n            \"medium\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-0\/800\/533\"\n        },\n        \"price\": {\n            \"min\": 60,\n            \"max\": 140,\n            \"range\": \"budget\"\n        },\n        \"rating\": {\n            \"avg\": 4.5,\n            \"count\": 120\n        },\n        \"listing_tier\": \"featured\",\n        \"is_open_now\": true,\n        \"distance_km\": 2.1,\n        \"latitude\": 30.0283,\n        \"longitude\": 31.4913,\n        \"is_saved\": false,\n        \"status\": \"active\",\n        \"description\": \"\u0643\u0627\u0641\u064a\u0647 \u0647\u0627\u062f\u064a \u0628\u0625\u0636\u0627\u0621\u0629 \u062f\u0627\u0641\u064a\u0629 \u0648\u0645\u0633\u0627\u062d\u0627\u062a \u0634\u063a\u0644 \u0648\u0627\u0633\u0639\u0629\u060c \u0642\u0647\u0648\u0629 \u0645\u062e\u062a\u0635\u0629 \u0648\u062d\u0644\u0648\u064a\u0627\u062a \u0628\u064a\u062a\u064a. \u0645\u0646\u0627\u0633\u0628 \u0644\u0644\u0645\u0630\u0627\u0643\u0631\u0629 \u0648\u0627\u0644\u0634\u063a\u0644 \u0628\u0627\u0644\u0633\u0627\u0639\u0627\u062a.\",\n        \"address\": \"\u0634\u0627\u0631\u0639 \u0627\u0644\u062a\u0633\u0639\u064a\u0646 \u0627\u0644\u0634\u0645\u0627\u0644\u064a\u060c \u0627\u0644\u062a\u062c\u0645\u0639 \u0627\u0644\u062e\u0627\u0645\u0633\",\n        \"categories\": [\n            {\n                \"slug\": \"cafes\",\n                \"name\": \"\u0643\u0627\u0641\u064a\u0647\u0627\u062a\"\n            },\n            {\n                \"slug\": \"desserts\",\n                \"name\": \"\u062d\u0644\u0648\u064a\u0627\u062a\"\n            }\n        ],\n        \"attributes\": [\n            {\n                \"group\": \"\u0627\u0644\u062c\u0648\",\n                \"items\": [\n                    {\n                        \"slug\": \"quiet\",\n                        \"name\": \"\u0647\u0627\u062f\u064a\",\n                        \"icon\": \"\ud83e\udd2b\"\n                    }\n                ]\n            },\n            {\n                \"group\": \"\u0627\u0644\u062e\u062f\u0645\u0627\u062a\",\n                \"items\": [\n                    {\n                        \"slug\": \"wifi\",\n                        \"name\": \"\u0648\u0627\u064a \u0641\u0627\u064a\",\n                        \"icon\": \"\ud83d\udcf6\"\n                    },\n                    {\n                        \"slug\": \"power-outlets\",\n                        \"name\": \"\u0641\u064a\u0634 \u0643\u0647\u0631\u0628\u0627\",\n                        \"icon\": \"\ud83d\udd0c\"\n                    }\n                ]\n            },\n            {\n                \"group\": \"\u0645\u0646\u0627\u0633\u0628 \u0644\u0640\",\n                \"items\": [\n                    {\n                        \"slug\": \"study-work\",\n                        \"name\": \"\u0627\u0644\u0645\u0630\u0627\u0643\u0631\u0629 \u0648\u0627\u0644\u0634\u063a\u0644\",\n                        \"icon\": \"\ud83d\udcda\"\n                    }\n                ]\n            }\n        ],\n        \"contact\": {\n            \"phone\": \"+201000000001\",\n            \"whatsapp\": \"+201000000001\",\n            \"instagram\": \"wain.demo.01\",\n            \"facebook_url\": null,\n            \"website\": null,\n            \"menu_url\": null\n        },\n        \"hours\": {\n            \"is_open_now\": true,\n            \"state\": \"open\",\n            \"status_text\": \"\u0645\u0641\u062a\u0648\u062d \u00b7 \u0628\u064a\u0642\u0641\u0644 1:00 \u0635\",\n            \"is_ramadan\": false,\n            \"week\": [\n                {\n                    \"day\": \"sat\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                },\n                {\n                    \"day\": \"sun\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                },\n                {\n                    \"day\": \"mon\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                },\n                {\n                    \"day\": \"tue\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": true\n                },\n                {\n                    \"day\": \"wed\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                },\n                {\n                    \"day\": \"thu\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                },\n                {\n                    \"day\": \"fri\",\n                    \"state\": \"open\",\n                    \"slots\": [\n                        [\n                            \"09:00\",\n                            \"01:00\"\n                        ]\n                    ],\n                    \"is_today\": false\n                }\n            ]\n        },\n        \"photos\": [\n            {\n                \"id\": 1,\n                \"medium\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-0\/800\/533\",\n                \"large\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-0\/1600\/1066\",\n                \"caption\": null\n            },\n            {\n                \"id\": 2,\n                \"medium\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-1\/800\/533\",\n                \"large\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-1\/1600\/1066\",\n                \"caption\": null\n            },\n            {\n                \"id\": 3,\n                \"medium\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-2\/800\/533\",\n                \"large\": \"https:\/\/picsum.photos\/seed\/el-mahatta-coffee-gallery-2\/1600\/1066\",\n                \"caption\": null\n            }\n        ],\n        \"menu_photos\": [],\n        \"closed_at\": null,\n        \"verified_at\": \"2026-10-08\",\n        \"is_claimed\": false,\n        \"share_url\": \"https:\/\/wain.app\/p\/el-mahatta-coffee\",\n        \"latest_reviews\": []\n    }\n}\n",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"message\": \"\u0627\u0644\u0645\u0643\u0627\u0646 \u0645\u0634 \u0645\u062a\u0627\u062d \u062f\u0644\u0648\u0642\u062a\u064a.\", \"code\": \"PLACE_NOT_AVAILABLE\"}",
+                            "name": "\u0645\u062e\u0641\u064a \u0623\u0648 \u0645\u0633\u0648\u062f\u0629 \u0623\u0648 \u0645\u062d\u0630\u0648\u0641 \u0623\u0648 \u0645\u0634 \u0645\u0648\u062c\u0648\u062f"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}
