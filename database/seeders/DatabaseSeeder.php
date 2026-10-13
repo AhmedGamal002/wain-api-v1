@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
 
     /**
      * الـ seeders اللي بتروح على production: الأدوار وحسابات الأدمن والإعدادات والتصنيفات والمدينة
-     * والمنطقة والخصائص (وباقي المناطق في أسبوع 3). الأماكن التجريبية `local` بس.
+     * والمنطقة وباقي المناطق (غير فعّالة) والخصائص. الأماكن التجريبية `local` بس.
      */
     public function run(): void
     {
@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             CategorySeeder::class,
             CityAreaSeeder::class,
+            AreaSeeder::class,
             AttributeSeeder::class,
         ]);
 
