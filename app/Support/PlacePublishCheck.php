@@ -119,11 +119,29 @@ final class PlacePublishCheck
         $gallery = $place->photos_count ?? DB::table('place_photos')
             ->where('place_id', $place->id)->where('type', 'gallery')->where('status', 'ready')->count();
 
+        return self::recommendedFor([
+            'phone' => $place->phone,
+            'whatsapp' => $place->whatsapp,
+            'description_en' => $place->description_en,
+            'menu_url' => $place->menu_url,
+            'gallery_count' => $gallery,
+        ]);
+    }
+
+    /**
+     * «مفضّل» من لقطة بيانات (الـ form بيستخدمها قبل الحفظ). مفاتيح اللقطة: phone، whatsapp، description_en،
+     * menu_url، gallery_count.
+     *
+     * @param  array<string, mixed>  $data
+     * @return list<array{key: string, label: string, ok: bool}>
+     */
+    public static function recommendedFor(array $data): array
+    {
         return [
-            ['key' => 'contact', 'label' => 'التليفون أو الواتساب', 'ok' => filled($place->phone) || filled($place->whatsapp)],
-            ['key' => 'gallery', 'label' => '3 صور معرض على الأقل', 'ok' => $gallery >= 3],
-            ['key' => 'description_en', 'label' => 'الوصف بالإنجليزي', 'ok' => filled($place->description_en)],
-            ['key' => 'menu_url', 'label' => 'رابط المنيو', 'ok' => filled($place->menu_url)],
+            ['key' => 'contact', 'label' => 'التليفون أو الواتساب', 'ok' => filled($data['phone'] ?? null) || filled($data['whatsapp'] ?? null)],
+            ['key' => 'gallery', 'label' => '3 صور معرض على الأقل', 'ok' => (int) ($data['gallery_count'] ?? 0) >= 3],
+            ['key' => 'description_en', 'label' => 'الوصف بالإنجليزي', 'ok' => filled($data['description_en'] ?? null)],
+            ['key' => 'menu_url', 'label' => 'رابط المنيو', 'ok' => filled($data['menu_url'] ?? null)],
         ];
     }
 
@@ -158,8 +176,10 @@ final class PlacePublishCheck
     /**
      * كل يوم من الأيام السبعة ليه حالة صالحة، واليوم المفتوح ليه فترة على الأقل وفتراته صحيحة (من ≠ إلى) ومن
      * غير تداخل. الفترة اللي «إلى» فيها أصغر من «من» بتعدّي نص الليل (18:00 لـ 02:00) ومسموحة (03 القسم 4.4).
+     *
+     * public لإن جدول مواعيد رمضان في الـ form بيتحقق بنفس القاعدة (مش بنسخة تانية منها).
      */
-    private static function hoursComplete(mixed $hours): bool
+    public static function hoursComplete(mixed $hours): bool
     {
         if (! is_array($hours)) {
             return false;
@@ -171,7 +191,7 @@ final class PlacePublishCheck
                 return false;
             }
 
-            if ($entry['state'] === 'open' && ! self::slotsValid($entry['slots'] ?? null)) {
+            if ($entry['state'] === 'open' && self::slotProblem($entry['slots'] ?? null) !== null) {
                 return false;
             }
         }
@@ -179,24 +199,47 @@ final class PlacePublishCheck
         return true;
     }
 
-    private static function slotsValid(mixed $slots): bool
+    /** سبب إن فترات اليوم المفتوح مش صالحة، أو null لو صالحة. القيم مفاتيح بيحوّلها الـ form لرسالة. */
+    public const SLOT_EMPTY = 'empty';
+
+    public const SLOT_TOO_MANY = 'too_many';
+
+    public const SLOT_MALFORMED = 'malformed';
+
+    public const SLOT_EQUAL = 'equal';
+
+    public const SLOT_OVERLAP = 'overlap';
+
+    /**
+     * فترات يوم مفتوح: فترة أو اتنين، كل فترة «من» و«إلى» صالحين ومختلفين، والفترتين ما يتداخلوش.
+     * مكان واحد للقاعدة: `hoursComplete` بيعتمد عليه، والـ form بيستخدم السبب لرسالة بتسمّي المشكلة.
+     */
+    public static function slotProblem(mixed $slots): ?string
     {
-        if (! is_array($slots) || $slots === [] || count($slots) > 2) {
-            return false;
+        if (! is_array($slots) || $slots === []) {
+            return self::SLOT_EMPTY;
+        }
+
+        if (count($slots) > 2) {
+            return self::SLOT_TOO_MANY;
         }
 
         $intervals = [];
         foreach ($slots as $slot) {
             if (! is_array($slot) || count($slot) !== 2 || ! is_string($slot[0] ?? null) || ! is_string($slot[1] ?? null)) {
-                return false;
+                return self::SLOT_MALFORMED;
             }
 
             $from = OpeningHours::toMinutes($slot[0]);
             $to = OpeningHours::toMinutes($slot[1]);
-            if ($from === null || $to === null || $from === $to
+            if ($from === null || $to === null
                 || $from >= OpeningHours::MINUTES_PER_DAY
                 || $to > OpeningHours::MINUTES_PER_DAY) {
-                return false;
+                return self::SLOT_MALFORMED;
+            }
+
+            if ($from === $to) {
+                return self::SLOT_EQUAL;
             }
 
             $intervals[] = [$from, $to > $from ? $to : $to + OpeningHours::MINUTES_PER_DAY];
@@ -206,10 +249,10 @@ final class PlacePublishCheck
         if (count($intervals) === 2) {
             [[$aStart, $aEnd], [$bStart, $bEnd]] = $intervals;
             if ($aStart < $bEnd && $bStart < $aEnd) {
-                return false;
+                return self::SLOT_OVERLAP;
             }
         }
 
-        return true;
+        return null;
     }
 }
