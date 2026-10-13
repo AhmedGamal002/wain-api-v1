@@ -6,6 +6,7 @@ return [
     'INVALID_CREDENTIALS' => 'الإيميل أو الباسورد غلط.',
     'ACCOUNT_SUSPENDED' => 'الحساب ده موقوف. تواصل مع الدعم.',
     'FORBIDDEN' => 'مش مسموح لك بالعملية دي.',
+    'PLACE_NOT_AVAILABLE' => 'المكان مش متاح دلوقتي.',
     'NOT_FOUND' => 'مش موجود.',
     'VALIDATION_ERROR' => 'البيانات اللي دخلتها مش صحيحة.',
     'TOO_MANY_REQUESTS' => 'طلبات كتير، حاول تاني بعد شوية.',

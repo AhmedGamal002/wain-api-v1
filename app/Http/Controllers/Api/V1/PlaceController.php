@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\IndexPlacesRequest;
 use App\Http\Requests\NearbyPlacesRequest;
+use App\Http\Requests\ShowPlaceRequest;
 use App\Http\Resources\PlaceCardResource;
+use App\Http\Resources\PlaceDetailResource;
 use App\Models\Place;
 use App\Support\OpenNow;
 use App\Support\PlaceLocation;
@@ -13,6 +16,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @group Places
+ */
 class PlaceController extends Controller
 {
     /**
@@ -95,6 +101,54 @@ class PlaceController extends Controller
 
         return response()->json([
             'data' => PlaceCardResource::collection($places)->resolve($request),
+        ]);
+    }
+
+    /**
+     * Get place details
+     *
+     * تفاصيل المكان. صفحة المكان (F7): كل حقول الكارت + الوصف والعنوان والتصنيفات والخصائص (متجمّعة) والتواصل والمواعيد
+     * والصور والمنيو.
+     *
+     * - بيرجّع المنشور (`status = active`) والمغلق نهائياً (`status = closed`) بس. غير كده (مخفي أو مسودة أو
+     *   قيد المراجعة أو مرفوض أو محذوف أو مش موجود) 404 `PLACE_NOT_AVAILABLE` واحدة من غير ما تكشف السبب.
+     * - المغلق نهائياً: `is_open_now` و`hours.status_text` بـ `null` و`hours.week` فاضية، والموبايل بيعرض
+     *   بانر «المكان ده قفل نهائياً» وبيخفي أزرار التواصل.
+     * - الـ slug القديم بعد ما يتغيّر بيرجّع المكان بالـ slug الجديد (الروابط المتشاركة تفضل شغالة).
+     * - الأجزاء الفاضية: `description` بـ `null`، و`attributes` و`photos` و`menu_photos` قايمة فاضية، وحقول
+     *   `contact` بـ `null`.
+     * - `distance_km` بـ `null` من غير `lat` و`lng`. `is_saved` دايماً `false` لحد F9.
+     *
+     * @urlParam slug string required slug المكان. Example: el-mahatta-coffee
+     *
+     * @responseFile 200 resources/api-examples/place-detail.json
+     *
+     * @response 404 scenario="مخفي أو مسودة أو محذوف أو مش موجود" {"message": "المكان مش متاح دلوقتي.", "code": "PLACE_NOT_AVAILABLE"}
+     */
+    public function show(ShowPlaceRequest $request, string $slug): JsonResponse
+    {
+        // الـ cache (5 دقايق بمفتاح فيه رقم نسخة، 03 القسم 5.5) بيتضاف مع PlaceObserver في أسبوع 4:
+        // من غير الـ Observer مفيش حاجة تمسحه.
+        $request->attributes->set(PlaceCardResource::OPEN_NOW_ATTRIBUTE, OpenNow::at());
+
+        $query = Place::query()
+            ->viewable()
+            ->with(['primaryCategory', 'area', 'coverPhoto', 'categories', 'placeAttributes', 'photos'])
+            ->select('places.*');
+
+        if ($request->hasLocation()) {
+            $query->selectRaw(PlaceLocation::distanceMetersSql($request->lat(), $request->lng()).' as distance_m');
+        }
+
+        $place = (clone $query)->where('places.slug', $slug)->first()
+            ?? $query->whereIn('places.id', DB::table('place_slug_redirects')->where('old_slug', $slug)->select('place_id'))->first();
+
+        if ($place === null) {
+            throw new ApiException(404, 'PLACE_NOT_AVAILABLE');
+        }
+
+        return response()->json([
+            'data' => (new PlaceDetailResource($place))->resolve($request),
         ]);
     }
 

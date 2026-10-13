@@ -1,0 +1,205 @@
+{
+    "data": {
+        "id": 1,
+        "slug": "el-mahatta-coffee",
+        "name": "قهوة المحطة",
+        "primary_category": {
+            "slug": "cafes",
+            "name": "كافيهات",
+            "icon": "☕",
+            "color": "#6F4E37"
+        },
+        "area": {
+            "slug": "new-cairo",
+            "name": "التجمع الخامس"
+        },
+        "cover": {
+            "thumb": "https://picsum.photos/seed/el-mahatta-coffee-gallery-0/240/160",
+            "medium": "https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533"
+        },
+        "price": {
+            "min": 60,
+            "max": 140,
+            "range": "budget"
+        },
+        "rating": {
+            "avg": 4.5,
+            "count": 120
+        },
+        "listing_tier": "featured",
+        "is_open_now": true,
+        "distance_km": 2.1,
+        "latitude": 30.0283,
+        "longitude": 31.4913,
+        "is_saved": false,
+        "status": "active",
+        "description": "كافيه هادي بإضاءة دافية ومساحات شغل واسعة، قهوة مختصة وحلويات بيتي. مناسب للمذاكرة والشغل بالساعات.",
+        "address": "شارع التسعين الشمالي، التجمع الخامس",
+        "categories": [
+            {
+                "slug": "cafes",
+                "name": "كافيهات"
+            },
+            {
+                "slug": "desserts",
+                "name": "حلويات"
+            }
+        ],
+        "attributes": [
+            {
+                "group": "الجو",
+                "items": [
+                    {
+                        "slug": "quiet",
+                        "name": "هادي",
+                        "icon": "🤫"
+                    }
+                ]
+            },
+            {
+                "group": "الخدمات",
+                "items": [
+                    {
+                        "slug": "wifi",
+                        "name": "واي فاي",
+                        "icon": "📶"
+                    },
+                    {
+                        "slug": "power-outlets",
+                        "name": "فيش كهربا",
+                        "icon": "🔌"
+                    }
+                ]
+            },
+            {
+                "group": "مناسب لـ",
+                "items": [
+                    {
+                        "slug": "study-work",
+                        "name": "المذاكرة والشغل",
+                        "icon": "📚"
+                    }
+                ]
+            }
+        ],
+        "contact": {
+            "phone": "+201000000001",
+            "whatsapp": "+201000000001",
+            "instagram": "wain.demo.01",
+            "facebook_url": null,
+            "website": null,
+            "menu_url": null
+        },
+        "hours": {
+            "is_open_now": true,
+            "state": "open",
+            "status_text": "مفتوح · بيقفل 1:00 ص",
+            "is_ramadan": false,
+            "week": [
+                {
+                    "day": "sat",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                },
+                {
+                    "day": "sun",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                },
+                {
+                    "day": "mon",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                },
+                {
+                    "day": "tue",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": true
+                },
+                {
+                    "day": "wed",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                },
+                {
+                    "day": "thu",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                },
+                {
+                    "day": "fri",
+                    "state": "open",
+                    "slots": [
+                        [
+                            "09:00",
+                            "01:00"
+                        ]
+                    ],
+                    "is_today": false
+                }
+            ]
+        },
+        "photos": [
+            {
+                "id": 1,
+                "medium": "https://picsum.photos/seed/el-mahatta-coffee-gallery-0/800/533",
+                "large": "https://picsum.photos/seed/el-mahatta-coffee-gallery-0/1600/1066",
+                "caption": null
+            },
+            {
+                "id": 2,
+                "medium": "https://picsum.photos/seed/el-mahatta-coffee-gallery-1/800/533",
+                "large": "https://picsum.photos/seed/el-mahatta-coffee-gallery-1/1600/1066",
+                "caption": null
+            },
+            {
+                "id": 3,
+                "medium": "https://picsum.photos/seed/el-mahatta-coffee-gallery-2/800/533",
+                "large": "https://picsum.photos/seed/el-mahatta-coffee-gallery-2/1600/1066",
+                "caption": null
+            }
+        ],
+        "menu_photos": [],
+        "closed_at": null,
+        "verified_at": "2026-10-08",
+        "is_claimed": false,
+        "share_url": "https://wain.app/p/el-mahatta-coffee",
+        "latest_reviews": []
+    }
+}

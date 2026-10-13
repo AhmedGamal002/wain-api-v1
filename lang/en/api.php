@@ -6,6 +6,7 @@ return [
     'INVALID_CREDENTIALS' => 'Wrong email or password.',
     'ACCOUNT_SUSPENDED' => 'This account is suspended. Please contact support.',
     'FORBIDDEN' => 'You are not allowed to do this.',
+    'PLACE_NOT_AVAILABLE' => 'This place is not available right now.',
     'NOT_FOUND' => 'Not found.',
     'VALIDATION_ERROR' => 'The given data was invalid.',
     'TOO_MANY_REQUESTS' => 'Too many requests. Please try again shortly.',

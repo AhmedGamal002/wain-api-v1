@@ -6,6 +6,8 @@ use App\Support\OpenNow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -15,6 +17,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Place extends Model
 {
     use SoftDeletes;
+
+    /**
+     * كلمات مسارات `/places/{...}` الثابتة. ما تنفعش slug لمكان (مولّد الـ slug في A1 لازم يتخطاها)،
+     * وراوت `places/{slug}` بيستثنيها.
+     */
+    public const RESERVED_SLUGS = ['nearby', 'count', 'map'];
 
     protected $guarded = [];
 
@@ -56,6 +64,36 @@ class Place extends Model
     }
 
     /**
+     * كل تصنيفات المكان (من 1 لـ 3، والرئيسي منهم).
+     *
+     * @return BelongsToMany<Category, $this>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'place_category');
+    }
+
+    /**
+     * خصائص المكان. اسمها placeAttributes مش attributes عشان `$place->attributes` هي خاصية Eloquent الداخلية.
+     *
+     * @return BelongsToMany<Attribute, $this>
+     */
+    public function placeAttributes(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class, 'attribute_place');
+    }
+
+    /**
+     * صور المعرض والمنيو (بالنوع `type`) بترتيبها.
+     *
+     * @return HasMany<PlacePhoto, $this>
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(PlacePhoto::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
      * قاعدة الظهور (03 القسم 5.1): الـ API بيرجّع المنشور بس. المخفي والمسودة وقيد المراجعة
      * والمرفوض والمغلق نهائياً ما بيظهروش في أي قائمة.
      *
@@ -64,6 +102,17 @@ class Place extends Model
     public function scopePublished(Builder $query): void
     {
         $query->where('places.status', 'active');
+    }
+
+    /**
+     * قاعدة الظهور لصفحة المكان بس (03 القسم 5.1): المنشور والمغلق نهائياً. غير كده (مسودة، قيد
+     * المراجعة، مرفوض، مخفي، محذوف) 404 واحدة.
+     *
+     * @param  Builder<Place>  $query
+     */
+    public function scopeViewable(Builder $query): void
+    {
+        $query->whereIn('places.status', ['active', 'closed']);
     }
 
     /**
@@ -93,10 +142,28 @@ class Place extends Model
      */
     public function localizedName(): string
     {
-        if (app()->getLocale() === 'en' && filled($this->name_en)) {
-            return $this->name_en;
+        return $this->localized('name') ?? $this->name_ar;
+    }
+
+    /**
+     * الوصف بلغة الطلب (الإنجليزي الفاضي بيرجع العربي)، أو null لو مفيش وصف.
+     */
+    public function localizedDescription(): ?string
+    {
+        return $this->localized('description');
+    }
+
+    public function localizedAddress(): string
+    {
+        return $this->localized('address') ?? '';
+    }
+
+    private function localized(string $field): ?string
+    {
+        if (app()->getLocale() === 'en' && filled($this->{$field.'_en'})) {
+            return $this->{$field.'_en'};
         }
 
-        return $this->name_ar;
+        return filled($this->{$field.'_ar'}) ? $this->{$field.'_ar'} : null;
     }
 }

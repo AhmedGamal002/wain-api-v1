@@ -46,4 +46,16 @@ class PlacePhoto extends Model
     {
         return $this->status === 'ready';
     }
+
+    /**
+     * الوصف بلغة الطلب (الإنجليزي الفاضي بيرجع العربي)، أو null لو مفيش.
+     */
+    public function localizedCaption(): ?string
+    {
+        if (app()->getLocale() === 'en' && filled($this->caption_en)) {
+            return $this->caption_en;
+        }
+
+        return filled($this->caption_ar) ? $this->caption_ar : null;
+    }
 }
