@@ -77,11 +77,26 @@
                                                                                 <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-login">
                                 <a href="#auth-POSTapi-v1-auth-login">POST /auth/login — رسالة واحدة للإيميل والباسورد الغلط (ما نقولش إن الإيميل مش موجود).</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-password-forgot">
+                                <a href="#auth-POSTapi-v1-auth-password-forgot">Forgot password: send a code</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-password-verify">
+                                <a href="#auth-POSTapi-v1-auth-password-verify">Check the code</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-password-reset">
+                                <a href="#auth-POSTapi-v1-auth-password-reset">Set the new password</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-logout">
                                 <a href="#auth-POSTapi-v1-auth-logout">POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="auth-GETapi-v1-auth-me">
                                 <a href="#auth-GETapi-v1-auth-me">GET /auth/me</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-email-resend">
+                                <a href="#auth-POSTapi-v1-auth-email-resend">Send the verification code</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-v1-auth-email-verify">
+                                <a href="#auth-POSTapi-v1-auth-email-verify">Verify the email</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -135,6 +150,9 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places-nearby">
                                 <a href="#places-GETapi-v1-places-nearby">GET /places/nearby — «قريب منك»: المنشور جوه نصف القطر مرتب بالأقرب (03 القسم 7.5).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="places-GETapi-v1-places-count">
+                                <a href="#places-GETapi-v1-places-count">Count places</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places--slug-">
                                 <a href="#places-GETapi-v1-places--slug-">Get place details</a>
@@ -538,6 +556,531 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
+                    <h2 id="auth-POSTapi-v1-auth-password-forgot">Forgot password: send a code</h2>
+
+<p>
+</p>
+
+<p>بيبعت كود 6 أرقام للإيميل (صالح 15 دقيقة، و5 محاولات). <strong>الرد واحد دايماً</strong> سواء الإيميل مسجّل أو لأ،
+عشان ما نكشفش مين عنده حساب. وهو نفسه «ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر إرسال بيرجّع نفس
+الرد من غير ما يبعت كود جديد، و<code>resend_in</code> هو الباقي بالثواني. الكود الجديد بيلغي القديم.</p>
+<p>5 محاولات في الدقيقة لكل IP + إيميل، ولكل خطوة من الـ 3 (forgot وverify وreset) ميزانيتها لوحدها
+(<code>429 TOO_MANY_REQUESTS</code> ومعاه هيدر <code>Retry-After</code>).</p>
+
+<span id="example-requests-POSTapi-v1-auth-password-forgot">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/password/forgot" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar" \
+    --data "{
+    \"email\": \"user@example.com\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/password/forgot"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+let body = {
+    "email": "user@example.com"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-password-forgot">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;resend_in&quot;: 60
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-password-forgot" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-password-forgot"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-password-forgot"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-password-forgot" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-password-forgot">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-password-forgot" data-method="POST"
+      data-path="api/v1/auth/password/forgot"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-password-forgot', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-password-forgot"
+                    onclick="tryItOut('POSTapi-v1-auth-password-forgot');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-password-forgot"
+                    onclick="cancelTryOut('POSTapi-v1-auth-password-forgot');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-password-forgot"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/password/forgot</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-password-forgot"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-password-forgot"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-auth-password-forgot"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-v1-auth-password-forgot"
+               value="user@example.com"
+               data-component="body">
+    <br>
+<p>الإيميل اللي هيتبعت له الكود. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف. Example: <code>user@example.com</code></p>
+        </div>
+        </form>
+
+                    <h2 id="auth-POSTapi-v1-auth-password-verify">Check the code</h2>
+
+<p>
+</p>
+
+<p>بيتحقق من الكود. لو صح بيرجّع <code>reset_token</code> (لمرة واحدة، صالح 10 دقايق) يتبعت مع الباسورد الجديد،
+عشان شاشة الكود تتحقق قبل ما تفتح شاشة الباسورد.</p>
+<p>أخطاء (422، والرسالة تحت حقل <code>code</code>):</p>
+<ul>
+<li><code>INVALID_CODE</code>: الكود غلط (أو مفيش كود مطلوب).</li>
+<li><code>CODE_EXPIRED</code>: الكود انتهت صلاحيته، اطلب كود جديد.</li>
+<li><code>CODE_ATTEMPTS_EXCEEDED</code>: خلّص الـ 5 محاولات، اطلب كود جديد.</li>
+</ul>
+
+<span id="example-requests-POSTapi-v1-auth-password-verify">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/password/verify" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar" \
+    --data "{
+    \"email\": \"user@example.com\",
+    \"code\": \"482915\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/password/verify"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+let body = {
+    "email": "user@example.com",
+    "code": "482915"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-password-verify">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;reset_token&quot;: &quot;Zq1...&quot;,
+        &quot;expires_in&quot;: 600
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-password-verify" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-password-verify"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-password-verify"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-password-verify" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-password-verify">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-password-verify" data-method="POST"
+      data-path="api/v1/auth/password/verify"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-password-verify', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-password-verify"
+                    onclick="tryItOut('POSTapi-v1-auth-password-verify');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-password-verify"
+                    onclick="cancelTryOut('POSTapi-v1-auth-password-verify');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-password-verify"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/password/verify</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-password-verify"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-password-verify"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-auth-password-verify"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-v1-auth-password-verify"
+               value="user@example.com"
+               data-component="body">
+    <br>
+<p>نفس الإيميل اللي اتبعت له الكود. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف. Example: <code>user@example.com</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="code"                data-endpoint="POSTapi-v1-auth-password-verify"
+               value="482915"
+               data-component="body">
+    <br>
+<p>الكود 6 أرقام. value لازم يكون 6 أرقام. Example: <code>482915</code></p>
+        </div>
+        </form>
+
+                    <h2 id="auth-POSTapi-v1-auth-password-reset">Set the new password</h2>
+
+<p>
+</p>
+
+<p>بيغيّر الباسورد بالـ <code>reset_token</code> (مرة واحدة). <strong>كل الـ tokens القديمة بتتمسح</strong>، فالمستخدم يدخل
+من جديد بالباسورد الجديد (<code>204</code>). الكود اللي وصل للإيميل بيثبّت إن الإيميل بتاعه، فالحساب بيتأكّد.</p>
+<ul>
+<li><code>RESET_TOKEN_INVALID</code> (422): الـ token غلط أو منتهي أو اتستخدم، ابدأ من أول.</li>
+<li>أخطاء الباسورد (422 <code>VALIDATION_ERROR</code>) تحت حقل <code>password</code>.</li>
+</ul>
+
+<span id="example-requests-POSTapi-v1-auth-password-reset">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/password/reset" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar" \
+    --data "{
+    \"email\": \"user@example.com\",
+    \"reset_token\": \"k3Jx...\",
+    \"password\": \"newpass123\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/password/reset"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+let body = {
+    "email": "user@example.com",
+    "reset_token": "k3Jx...",
+    "password": "newpass123"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-password-reset">
+            <blockquote>
+            <p>Example response (204):</p>
+        </blockquote>
+                <pre>
+<code>Empty response</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-password-reset" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-password-reset"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-password-reset"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-password-reset" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-password-reset">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-password-reset" data-method="POST"
+      data-path="api/v1/auth/password/reset"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-password-reset', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-password-reset"
+                    onclick="tryItOut('POSTapi-v1-auth-password-reset');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-password-reset"
+                    onclick="cancelTryOut('POSTapi-v1-auth-password-reset');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-password-reset"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/password/reset</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="user@example.com"
+               data-component="body">
+    <br>
+<p>الإيميل. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف. Example: <code>user@example.com</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>reset_token</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="reset_token"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="k3Jx..."
+               data-component="body">
+    <br>
+<p>الـ <code>reset_token</code> اللي رجع من <code>POST /auth/password/verify</code> (لمرة واحدة، 10 دقايق). Example: <code>k3Jx...</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="POSTapi-v1-auth-password-reset"
+               value="newpass123"
+               data-component="body">
+    <br>
+<p>الباسورد الجديد: 8 حروف على الأقل وفيه حرف ورقم. Example: <code>newpass123</code></p>
+        </div>
+        </form>
+
                     <h2 id="auth-POSTapi-v1-auth-logout">POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).</h2>
 
 <p>
@@ -834,6 +1377,324 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>Example: <code>ar</code></p>
             </div>
                         </form>
+
+                    <h2 id="auth-POSTapi-v1-auth-email-resend">Send the verification code</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>بيبعت كود 6 أرقام لإيميل الحساب (صالح 15 دقيقة، و5 محاولات). هو نفسه «ابعت تاني»: بعد 60 ثانية من
+آخر إرسال بس، قبلها <code>429 TOO_MANY_REQUESTS</code> ومعاه هيدر <code>Retry-After</code> بالثواني. الكود الجديد بيلغي القديم.
+لو الإيميل متأكّد خلاص: <code>422 EMAIL_ALREADY_VERIFIED</code>. وفوق ده 5 طلبات في الدقيقة لكل مستخدم
+(<code>429 TOO_MANY_REQUESTS</code>).</p>
+
+<span id="example-requests-POSTapi-v1-auth-email-resend">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/email/resend" \
+    --header "Authorization: Bearer {YOUR_TOKEN}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/email/resend"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_TOKEN}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-email-resend">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;resend_in&quot;: 60
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-email-resend" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-email-resend"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-email-resend"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-email-resend" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-email-resend">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-email-resend" data-method="POST"
+      data-path="api/v1/auth/email/resend"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-email-resend', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-email-resend"
+                    onclick="tryItOut('POSTapi-v1-auth-email-resend');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-email-resend"
+                    onclick="cancelTryOut('POSTapi-v1-auth-email-resend');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-email-resend"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/email/resend</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-v1-auth-email-resend"
+               value="Bearer {YOUR_TOKEN}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_TOKEN}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-email-resend"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-email-resend"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-auth-email-resend"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="auth-POSTapi-v1-auth-email-verify">Verify the email</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>بيتحقق من الكود وبيأكّد الإيميل. بيرجّع المستخدم (<code>email_verified: true</code>). لو الإيميل متأكّد قبل كده
+بيرجّع المستخدم من غير ما يعمل حاجة.</p>
+<p>أخطاء (422، تحت حقل <code>code</code>): <code>INVALID_CODE</code> و<code>CODE_EXPIRED</code> و<code>CODE_ATTEMPTS_EXCEEDED</code>.
+5 طلبات في الدقيقة لكل مستخدم (<code>429 TOO_MANY_REQUESTS</code>).</p>
+
+<span id="example-requests-POSTapi-v1-auth-email-verify">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/email/verify" \
+    --header "Authorization: Bearer {YOUR_TOKEN}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar" \
+    --data "{
+    \"code\": \"482915\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/email/verify"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_TOKEN}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+let body = {
+    "code": "482915"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-email-verify">
+</span>
+<span id="execution-results-POSTapi-v1-auth-email-verify" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-email-verify"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-email-verify"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-email-verify" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-email-verify">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-email-verify" data-method="POST"
+      data-path="api/v1/auth/email/verify"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-email-verify', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-email-verify"
+                    onclick="tryItOut('POSTapi-v1-auth-email-verify');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-email-verify"
+                    onclick="cancelTryOut('POSTapi-v1-auth-email-verify');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-email-verify"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/email/verify</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-v1-auth-email-verify"
+               value="Bearer {YOUR_TOKEN}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_TOKEN}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-email-verify"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-email-verify"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-auth-email-verify"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="code"                data-endpoint="POSTapi-v1-auth-email-verify"
+               value="482915"
+               data-component="body">
+    <br>
+<p>الكود 6 أرقام اللي اتبعت لإيميل الحساب. value لازم يكون 6 أرقام. Example: <code>482915</code></p>
+        </div>
+        </form>
 
                 <h1 id="config">Config</h1>
 
@@ -1484,7 +2345,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>
 </p>
 
-<p>بترجّع المنشور بس. الفلاتر الكاملة مع F5 (أسبوع 4)، والـ cache مع /home (أسبوع 8).</p>
+<p>بترجّع المنشور بس، بالفلاتر (المنطقة والتصنيفات والخصائص والسعر والتقييم و open_now) من
+PlaceFilterRequest، والـ cache مع /home (أسبوع 8).</p>
 
 <span id="example-requests-GETapi-v1-places">
 <blockquote>Example request:</blockquote>
@@ -1492,23 +2354,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/places" \
+    --get "http://localhost/api/v1/places?area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1&amp;sort=recommended&amp;lat=30.03&amp;lng=31.47&amp;page=1&amp;per_page=20" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
-    --header "Accept-Language: ar" \
-    --data "{
-    \"area\": \"architecto\",
-    \"categories\": [
-        \"architecto\"
-    ],
-    \"open_now\": false,
-    \"sort\": \"nearest\",
-    \"lat\": -89,
-    \"lng\": -180,
-    \"page\": 66,
-    \"per_page\": 17
-}"
-</code></pre></div>
+    --header "Accept-Language: ar"</code></pre></div>
 
 
 <div class="javascript-example">
@@ -1516,29 +2365,33 @@ You can check the Dev Tools console for debugging information.</code></pre>
     "http://localhost/api/v1/places"
 );
 
+const params = {
+    "area": "new-cairo",
+    "categories[0]": "architecto",
+    "attributes[0]": "architecto",
+    "price_min": "100",
+    "price_max": "300",
+    "rating_min": "4",
+    "open_now": "1",
+    "sort": "recommended",
+    "lat": "30.03",
+    "lng": "31.47",
+    "page": "1",
+    "per_page": "20",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
 const headers = {
     "Content-Type": "application/json",
     "Accept": "application/json",
     "Accept-Language": "ar",
 };
 
-let body = {
-    "area": "architecto",
-    "categories": [
-        "architecto"
-    ],
-    "open_now": false,
-    "sort": "nearest",
-    "lat": -89,
-    "lng": -180,
-    "page": 66,
-    "per_page": 17
-};
 
 fetch(url, {
     method: "GET",
     headers,
-    body: JSON.stringify(body),
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -1560,11 +2413,11 @@ access-control-allow-origin: *
     &quot;message&quot;: &quot;البيانات اللي دخلتها مش صحيحة.&quot;,
     &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
     &quot;errors&quot;: {
-        &quot;area&quot;: [
-            &quot;المنطقة المختار مش موجود.&quot;
-        ],
         &quot;categories.0&quot;: [
             &quot;التصنيف المختار مش موجود.&quot;
+        ],
+        &quot;attributes.0&quot;: [
+            &quot;الخاصية المختار مش موجود.&quot;
         ]
     }
 }</code>
@@ -1653,118 +2506,168 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>Example: <code>ar</code></p>
             </div>
-                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
-        <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
 <small>string</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="text" style="display: none"
                               name="area"                data-endpoint="GETapi-v1-places"
-               value="architecto"
-               data-component="body">
+               value="new-cairo"
+               data-component="query">
     <br>
-<p>Must match an existing stored value. Example: <code>architecto</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>categories</code></b>&nbsp;&nbsp;
+<p>slug المنطقة (من <code>GET /areas</code>). Must match an existing stored value. Example: <code>new-cairo</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>categories</code></b>&nbsp;&nbsp;
 <small>string[]</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="text" style="display: none"
                               name="categories[0]"                data-endpoint="GETapi-v1-places"
-               data-component="body">
+               data-component="query">
         <input type="text" style="display: none"
                name="categories[1]"                data-endpoint="GETapi-v1-places"
-               data-component="body">
+               data-component="query">
     <br>
 <p>Must match an existing stored value.</p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>open_now</code></b>&nbsp;&nbsp;
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="attributes[0]"                data-endpoint="GETapi-v1-places"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="attributes[1]"                data-endpoint="GETapi-v1-places"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_min</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_min"                data-endpoint="GETapi-v1-places"
+               value="100"
+               data-component="query">
+    <br>
+<p>أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>100</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_max</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_max"                data-endpoint="GETapi-v1-places"
+               value="300"
+               data-component="query">
+    <br>
+<p>أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي <code>price_min</code>. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>300</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>rating_min</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="rating_min"                data-endpoint="GETapi-v1-places"
+               value="4"
+               data-component="query">
+    <br>
+<p>أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5. Example: <code>4</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>open_now</code></b>&nbsp;&nbsp;
 <small>boolean</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <label data-endpoint="GETapi-v1-places" style="display: none">
             <input type="radio" name="open_now"
-                   value="true"
+                   value="1"
                    data-endpoint="GETapi-v1-places"
-                   data-component="body"             >
+                   data-component="query"             >
             <code>true</code>
         </label>
         <label data-endpoint="GETapi-v1-places" style="display: none">
             <input type="radio" name="open_now"
-                   value="false"
+                   value="0"
                    data-endpoint="GETapi-v1-places"
-                   data-component="body"             >
+                   data-component="query"             >
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
+<p>الأماكن المفتوحة دلوقتي بتوقيت القاهرة (<code>1</code>). Example: <code>true</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
 <small>string</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="text" style="display: none"
                               name="sort"                data-endpoint="GETapi-v1-places"
-               value="nearest"
-               data-component="body">
+               value="recommended"
+               data-component="query">
     <br>
-<p>Example: <code>nearest</code></p>
+<p>الترتيب: <code>recommended</code> (الافتراضي) أو <code>nearest</code> (محتاج <code>lat</code> و<code>lng</code>) أو <code>rating</code> أو <code>newest</code>. Example: <code>recommended</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>recommended</code></li> <li><code>nearest</code></li> <li><code>rating</code></li> <li><code>newest</code></li></ul>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>lat</code></b>&nbsp;&nbsp;
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lat</code></b>&nbsp;&nbsp;
 <small>number</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="lat"                data-endpoint="GETapi-v1-places"
-               value="-89"
-               data-component="body">
+               value="30.03"
+               data-component="query">
     <br>
-<p>This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90. Example: <code>-89</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>lng</code></b>&nbsp;&nbsp;
+<p>خط العرض. بيرجّع <code>distance_km</code> في كل كارت. لازم مع <code>lng</code>. This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90. Example: <code>30.03</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lng</code></b>&nbsp;&nbsp;
 <small>number</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="lng"                data-endpoint="GETapi-v1-places"
-               value="-180"
-               data-component="body">
+               value="31.47"
+               data-component="query">
     <br>
-<p>This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180. Example: <code>-180</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
+<p>خط الطول. لازم مع <code>lat</code>. This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180. Example: <code>31.47</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="page"                data-endpoint="GETapi-v1-places"
-               value="66"
-               data-component="body">
+               value="1"
+               data-component="query">
     <br>
-<p>value لازم يكون 1 أو أكتر. Example: <code>66</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<p>رقم الصفحة (من 1). value لازم يكون 1 أو أكتر. Example: <code>1</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="per_page"                data-endpoint="GETapi-v1-places"
-               value="17"
-               data-component="body">
+               value="20"
+               data-component="query">
     <br>
-<p>value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل. Example: <code>17</code></p>
-        </div>
-        </form>
+<p>عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل. Example: <code>20</code></p>
+            </div>
+                </form>
 
                     <h2 id="places-GETapi-v1-places-nearby">GET /places/nearby — «قريب منك»: المنشور جوه نصف القطر مرتب بالأقرب (03 القسم 7.5).</h2>
 
@@ -1971,6 +2874,252 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
+                    <h2 id="places-GETapi-v1-places-count">Count places</h2>
+
+<p>
+</p>
+
+<p>عدد الأماكن بنفس فلاتر <code>GET /places</code> (للزرار «ورّيني 23 مكان» في شاشة الفلاتر). بيرجّع المنشور بس،
+ومن غير pagination. بيقبل نفس الـ query بتاعة القائمة وبيتجاهل الترتيب والموقع والصفحة.</p>
+
+<span id="example-requests-GETapi-v1-places-count">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/places/count?area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/places/count"
+);
+
+const params = {
+    "area": "new-cairo",
+    "categories[0]": "architecto",
+    "attributes[0]": "architecto",
+    "price_min": "100",
+    "price_max": "300",
+    "rating_min": "4",
+    "open_now": "1",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-places-count">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;count&quot;: 23
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-places-count" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-places-count"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-places-count"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-places-count" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-places-count">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-places-count" data-method="GET"
+      data-path="api/v1/places/count"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-places-count', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-places-count"
+                    onclick="tryItOut('GETapi-v1-places-count');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-places-count"
+                    onclick="cancelTryOut('GETapi-v1-places-count');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-places-count"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/places/count</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-places-count"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-places-count"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-places-count"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="area"                data-endpoint="GETapi-v1-places-count"
+               value="new-cairo"
+               data-component="query">
+    <br>
+<p>slug المنطقة (من <code>GET /areas</code>). Must match an existing stored value. Example: <code>new-cairo</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>categories</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="categories[0]"                data-endpoint="GETapi-v1-places-count"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="categories[1]"                data-endpoint="GETapi-v1-places-count"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="attributes[0]"                data-endpoint="GETapi-v1-places-count"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="attributes[1]"                data-endpoint="GETapi-v1-places-count"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_min</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_min"                data-endpoint="GETapi-v1-places-count"
+               value="100"
+               data-component="query">
+    <br>
+<p>أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>100</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_max</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_max"                data-endpoint="GETapi-v1-places-count"
+               value="300"
+               data-component="query">
+    <br>
+<p>أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي <code>price_min</code>. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>300</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>rating_min</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="rating_min"                data-endpoint="GETapi-v1-places-count"
+               value="4"
+               data-component="query">
+    <br>
+<p>أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5. Example: <code>4</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>open_now</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="GETapi-v1-places-count" style="display: none">
+            <input type="radio" name="open_now"
+                   value="1"
+                   data-endpoint="GETapi-v1-places-count"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-v1-places-count" style="display: none">
+            <input type="radio" name="open_now"
+                   value="0"
+                   data-endpoint="GETapi-v1-places-count"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>الأماكن المفتوحة دلوقتي بتوقيت القاهرة (<code>1</code>). Example: <code>true</code></p>
+            </div>
+                </form>
+
                     <h2 id="places-GETapi-v1-places--slug-">Get place details</h2>
 
 <p>
@@ -1987,6 +3136,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <li>الأجزاء الفاضية: <code>description</code> بـ <code>null</code>، و<code>attributes</code> و<code>photos</code> و<code>menu_photos</code> قايمة فاضية، وحقول
 <code>contact</code> بـ <code>null</code>.</li>
 <li><code>distance_km</code> بـ <code>null</code> من غير <code>lat</code> و<code>lng</code>. <code>is_saved</code> دايماً <code>false</code> لحد F9.</li>
+<li>بيانات المكان في cache لمدة 5 دقايق وبتتمسح فوراً مع أي تعديل أو إخفاء. <code>is_open_now</code> والمواعيد واللغة
+و<code>distance_km</code> بتتحسب مع كل طلب.</li>
 </ul>
 
 <span id="example-requests-GETapi-v1-places--slug-">
