@@ -1,0 +1,98 @@
+name: CI
+
+# التستات على MariaDB 11.8 (نفس نسخة الاستضافة 11.8.9)، مش SQLite: دوال الـ spatial
+# (ST_Distance_Sphere وMBRContains) وترتيب المحاور بيتأكدوا هنا (PlaceLocationTest).
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Pint + PHPUnit (PHP 8.3, MariaDB 11.8)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wain_test
+          MARIADB_USER: wain
+          MARIADB_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      # phpunit.xml بيحط 3307 (Docker المحلي)؛ في الـ CI الداتابيز على 3306.
+      # متغيرات البيئة بتغلب <env> في phpunit.xml (من غير force).
+      DB_CONNECTION: mariadb
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: wain_test
+      DB_USERNAME: wain
+      DB_PASSWORD: secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, gd, mbstring, pdo_mysql, zip, exif, bcmath
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Prepare environment file
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate --no-interaction
+
+      - name: Assert the database is MariaDB and align collation
+        run: |
+          php -r '
+            $pdo = new PDO("mysql:host=127.0.0.1;port=3306;dbname=wain_test", "wain", "secret");
+            $version = (string) $pdo->query("SELECT VERSION()")->fetchColumn();
+            echo "Database: {$version}\n";
+            if (stripos($version, "mariadb") === false) {
+                fwrite(STDERR, "Expected MariaDB, got {$version}\n");
+                exit(1);
+            }
+            $pdo->exec("ALTER DATABASE wain_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+          '
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: Tests
+        run: php artisan test
