@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SetApiLocale::class);
+
+        // الحد العام للطلبات على كل routes/api.php (limiter `api` في AppServiceProvider)
+        $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         ApiErrorRenderer::register($exceptions);

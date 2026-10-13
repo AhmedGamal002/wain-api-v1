@@ -30,6 +30,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // SEC-01 / 06 القسم 1: الحد العام على كل /api/v1، زائر 60 طلب في الدقيقة ومستخدم مسجّل 120
+        // (الأرقام في config('wain.rate_limit')). المسجّل بالـ user id من الـ Bearer token. الزائر بالجهاز
+        // (X-Device-Id) مع الـ IP: شبكات الموبايل بتحط ناس كتير ورا IP واحد فالـ IP لوحده كان هيحجب ناس
+        // ملهمش دعوة؛ ومن غير الهيدر بيرجع للـ IP. الـ limiters اللي تحت ده بتتطبق فوقه على نفس الطلب.
+        RateLimiter::for('api', function (Request $request) {
+            $user = $request->user('sanctum');
+
+            if ($user !== null) {
+                return Limit::perMinute((int) config('wain.rate_limit.user'))
+                    ->by('user|'.$user->getAuthIdentifier());
+            }
+
+            $device = substr(trim((string) $request->header('X-Device-Id')), 0, 64);
+
+            return Limit::perMinute((int) config('wain.rate_limit.guest'))
+                ->by('guest|'.$request->ip().'|'.$device);
+        });
+
         // SEC-01: الدخول والتسجيل 5 محاولات في الدقيقة لكل IP + إيميل. الزيادة بترجع 429 TOO_MANY_REQUESTS
         // ومعاها هيدر Retry-After (ApiErrorRenderer).
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)

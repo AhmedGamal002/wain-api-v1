@@ -30,8 +30,8 @@ Route::prefix('v1')->group(function () {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:auth');
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
 
-        // نسيت الباسورد: الإيميل ← الكود ← reset_token ← باسورد جديد. limiter لوحده (10 في الدقيقة لكل IP + إيميل)
-        // عشان ما ياكلش من محاولات الدخول.
+        // نسيت الباسورد: الإيميل ← الكود ← reset_token ← باسورد جديد. limiter لوحده (5 في الدقيقة لكل IP + إيميل،
+        // ولكل خطوة ميزانيتها) عشان ما ياكلش من محاولات الدخول.
         Route::prefix('password')->middleware('throttle:password')->group(function () {
             Route::post('forgot', [PasswordResetController::class, 'forgot']);
             Route::post('verify', [PasswordResetController::class, 'verify']);
