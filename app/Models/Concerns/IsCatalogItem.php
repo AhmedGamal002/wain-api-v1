@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use App\Support\PlaceDetailsCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -14,8 +15,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
  *
  * - الـ slug بيتولّد من `name_en` وقت الإنشاء وما بيتغيرش بعد كده (التطبيق والفلاتر والـ API بيستخدموه).
  * - `sort_order` بيتحط في آخر القائمة لو ما اتحددش.
- * - مفاتيح الـ cache بتتمسح مع أي حفظ أو حذف (`catalogCacheKeys`). الـ reorder بالسحب في Filament بيعمل
- *   UPDATE واحد من غير model events، فلازم الـ afterReordering يمسحها صراحةً (CatalogCache).
+ * - مفاتيح الـ cache بتتمسح مع أي حفظ أو حذف (`catalogCacheKeys`)، وcache تفاصيل الأماكن بيتعامل كـ stale
+ *   (`PlaceDetailsCache::catalogChanged`). الـ reorder بالسحب في Filament بيعمل UPDATE واحد من غير model events،
+ *   فلازم الـ afterReordering يمسحها صراحةً (`forgetCatalogCache`).
  * - كل تغيير بيتسجل في سجل التغييرات (activitylog).
  *
  * الموديل اللي بيستخدمه لازم يعرّف `LOG_NAME` و`LOGGED_FIELDS` و`catalogCacheKeys()` و`isInUse()`.
@@ -66,6 +68,9 @@ trait IsCatalogItem
         foreach (static::catalogCacheKeys() as $key) {
             Cache::forget($key);
         }
+
+        // تفاصيل المكان المخزّنة فيها أسماء التصنيفات والخصائص والمنطقة: بتتعامل كـ stale
+        PlaceDetailsCache::catalogChanged();
     }
 
     public function getActivitylogOptions(): LogOptions

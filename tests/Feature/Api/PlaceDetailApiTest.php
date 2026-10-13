@@ -2,8 +2,14 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Attribute;
+use App\Models\Category;
+use App\Models\Place;
 use Database\Seeders\DemoPlaceSeeder;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -258,7 +264,8 @@ class PlaceDetailApiTest extends TestCase
         $this->assertSame($sorted, $positions);
         $this->assertSame(['slug', 'name', 'icon'], array_keys($json['attributes'][0]['items'][0]));
 
-        DB::table('attributes')->where('slug', 'wifi')->update(['is_active' => false]);
+        // بالموديل زي اللوحة (A3): الـ event هو اللي بيخلّي cache التفاصيل stale
+        Attribute::query()->where('slug', 'wifi')->firstOrFail()->update(['is_active' => false]);
 
         $after = $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk()->json('data.attributes');
         $slugs = collect($after)->flatMap(fn ($g) => array_column($g['items'], 'slug'))->all();
@@ -351,5 +358,177 @@ class PlaceDetailApiTest extends TestCase
         $this->getJson('/api/v1/places/count', self::AR)
             ->assertNotFound()
             ->assertJsonPath('code', 'NOT_FOUND');
+    }
+
+    // ---- cache التفاصيل (03 القسم 5.5): 5 دقايق، بيتمسح مع أي تغيير ----
+
+    private function placesQueries(callable $request): int
+    {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $request();
+        $queries = collect(DB::getQueryLog())->filter(fn ($q) => str_contains($q['query'], 'from `places`'));
+        DB::disableQueryLog();
+
+        return $queries->count();
+    }
+
+    public function test_the_second_request_does_not_query_the_place(): void
+    {
+        $first = $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk()->json('data');
+
+        $queries = $this->placesQueries(fn () => $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk());
+
+        $this->assertSame(0, $queries);
+        $this->assertSame($first, $this->getJson('/api/v1/places/'.self::FULL, self::AR)->json('data'));
+    }
+
+    public function test_language_is_applied_after_the_cache(): void
+    {
+        $ar = $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk()->json('data');
+        $en = $this->getJson('/api/v1/places/'.self::FULL, self::EN)->assertOk()->json('data');
+        $arAgain = $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk()->json('data');
+
+        $this->assertSame('قهوة المحطة', $ar['name']);
+        $this->assertNotSame($ar['name'], $en['name']);
+        $this->assertSame($ar, $arAgain);
+    }
+
+    public function test_open_status_follows_the_clock_while_the_place_is_cached(): void
+    {
+        $place = Place::factory()->published()->create(['slug' => 'cache-probe']);
+        $this->assertSame('cache-probe', $place->slug);
+
+        // سبت 17 أكتوبر 2026 بتوقيت القاهرة (صيفي): المكان مفتوح 09:00 لـ 23:30 كل يوم
+        $this->travelTo(Carbon::parse('2026-10-17 06:00', 'Africa/Cairo'));
+        $closed = $this->getJson('/api/v1/places/cache-probe', self::AR)->assertOk()->json('data');
+
+        $this->travelTo(Carbon::parse('2026-10-17 12:00', 'Africa/Cairo'));
+        $open = $this->getJson('/api/v1/places/cache-probe', self::AR)->assertOk()->json('data');
+        $this->travelBack();
+
+        $this->assertFalse($closed['is_open_now']);
+        $this->assertFalse($closed['hours']['is_open_now']);
+        $this->assertTrue($open['is_open_now']);
+        $this->assertTrue($open['hours']['is_open_now']);
+        $this->assertTrue(Cache::has(Place::detailsCacheKey('cache-probe')));
+    }
+
+    public function test_distance_is_computed_per_request_from_a_cached_place(): void
+    {
+        $url = '/api/v1/places/'.self::FULL;
+        $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.distance_km', null);
+
+        $near = $this->getJson($url.'?lat=30.03&lng=31.47', self::AR)->assertOk()->json('data.distance_km');
+        $far = $this->getJson($url.'?lat=31.2&lng=29.92', self::AR)->assertOk()->json('data.distance_km');
+
+        $this->assertNotNull($near);
+        $this->assertGreaterThan($near + 100, $far);
+        $this->getJson($url, self::AR)->assertJsonPath('data.distance_km', null);
+    }
+
+    public function test_hiding_a_cached_place_makes_it_404_immediately_and_showing_it_brings_it_back(): void
+    {
+        $url = '/api/v1/places/'.self::FULL;
+        $this->getJson($url, self::AR)->assertOk();
+
+        $place = Place::query()->where('slug', self::FULL)->firstOrFail();
+        $place->update(['status' => 'hidden', 'status_reason' => 'بيانات محتاجة مراجعة']);
+        $this->getJson($url, self::AR)->assertNotFound()->assertJsonPath('code', 'PLACE_NOT_AVAILABLE');
+
+        $place->update(['status' => 'active']);
+        $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.slug', self::FULL);
+    }
+
+    public function test_editing_a_cached_place_shows_the_change_on_the_next_request(): void
+    {
+        $url = '/api/v1/places/'.self::FULL;
+        $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.name', 'قهوة المحطة');
+
+        Place::query()->where('slug', self::FULL)->firstOrFail()->update(['name_ar' => 'قهوة المحطة الجديدة']);
+
+        $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.name', 'قهوة المحطة الجديدة');
+    }
+
+    public function test_renaming_the_slug_serves_both_links_with_no_stale_cache(): void
+    {
+        $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk();
+
+        Place::query()->where('slug', self::FULL)->firstOrFail()->update(['slug' => 'el-mahatta-new']);
+
+        $this->getJson('/api/v1/places/el-mahatta-new', self::AR)->assertOk()->assertJsonPath('data.slug', 'el-mahatta-new');
+        $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk()->assertJsonPath('data.slug', 'el-mahatta-new');
+    }
+
+    public function test_a_catalog_change_is_visible_without_waiting_for_the_cache(): void
+    {
+        $url = '/api/v1/places/'.self::FULL;
+        $before = $this->getJson($url, self::AR)->assertOk()->json('data');
+        $category = Category::query()->where('slug', $before['primary_category']['slug'])->firstOrFail();
+
+        $category->update(['name_ar' => 'اسم تصنيف جديد']);
+
+        $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.primary_category.name', 'اسم تصنيف جديد');
+    }
+
+    public function test_unavailable_places_are_not_cached(): void
+    {
+        $slug = $this->slugWithStatus('hidden');
+
+        $this->getJson('/api/v1/places/'.$slug, self::AR)->assertNotFound();
+
+        $this->assertFalse(Cache::has(Place::detailsCacheKey($slug)));
+    }
+
+    public function test_the_cache_never_holds_internal_fields(): void
+    {
+        Place::query()->where('slug', self::FULL)->firstOrFail()->update(['internal_notes' => 'ملاحظة داخلية']);
+        $this->getJson('/api/v1/places/'.self::FULL, self::AR)->assertOk();
+
+        $snapshot = Cache::get(Place::detailsCacheKey(self::FULL));
+
+        $this->assertIsArray($snapshot);
+        foreach (['internal_notes', 'search_text', 'location', 'distance_m'] as $field) {
+            $this->assertArrayNotHasKey($field, $snapshot['place']);
+        }
+        $this->assertStringNotContainsString('ملاحظة داخلية', serialize($snapshot));
+    }
+
+    public function test_slug_case_does_not_create_a_second_stale_cache_entry(): void
+    {
+        $this->getJson('/api/v1/places/'.strtoupper(self::FULL), self::AR)->assertOk();
+        $this->assertTrue(Cache::has(Place::detailsCacheKey(self::FULL)));
+
+        Place::query()->where('slug', self::FULL)->firstOrFail()->update(['name_ar' => 'اسم متغيّر']);
+
+        $this->getJson('/api/v1/places/'.strtoupper(self::FULL), self::AR)->assertOk()->assertJsonPath('data.name', 'اسم متغيّر');
+    }
+
+    public function test_second_request_served_from_a_real_file_cache_works(): void
+    {
+        $path = storage_path('framework/testing/cache-'.uniqid());
+        config(['cache.default' => 'file', 'cache.stores.file.path' => $path]);
+        Cache::purge();
+
+        try {
+            $url = '/api/v1/places/'.self::FULL;
+
+            $this->getJson($url, self::AR)->assertOk()->assertJsonPath('data.name', 'قهوة المحطة');
+            $this->assertTrue(Cache::has(Place::detailsCacheKey(self::FULL)));
+
+            // من الـ file cache (arrays بس، من غير __PHP_Incomplete_Class): بلغة تانية وبموقع
+            $this->getJson($url.'?lat=30.03&lng=31.47', self::EN)
+                ->assertOk()
+                ->assertJsonPath('data.slug', self::FULL)
+                ->assertJsonStructure(['data' => ['name', 'primary_category' => ['slug', 'name'], 'attributes', 'photos', 'hours' => ['week']]]);
+
+            Place::query()->where('slug', self::FULL)->firstOrFail()->update(['status' => 'hidden', 'status_reason' => 'شكوى']);
+            $this->assertFalse(Cache::has(Place::detailsCacheKey(self::FULL)));
+            $this->getJson($url, self::AR)->assertNotFound();
+        } finally {
+            Cache::flush();
+            Cache::purge();
+            (new Filesystem)->deleteDirectory($path);
+        }
     }
 }

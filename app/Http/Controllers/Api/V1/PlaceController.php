@@ -11,6 +11,7 @@ use App\Http\Resources\PlaceCardResource;
 use App\Http\Resources\PlaceDetailResource;
 use App\Models\Place;
 use App\Support\OpenNow;
+use App\Support\PlaceDetailsCache;
 use App\Support\PlaceLocation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -118,6 +119,8 @@ class PlaceController extends Controller
      * - الأجزاء الفاضية: `description` بـ `null`، و`attributes` و`photos` و`menu_photos` قايمة فاضية، وحقول
      *   `contact` بـ `null`.
      * - `distance_km` بـ `null` من غير `lat` و`lng`. `is_saved` دايماً `false` لحد F9.
+     * - بيانات المكان في cache لمدة 5 دقايق وبتتمسح فوراً مع أي تعديل أو إخفاء. `is_open_now` والمواعيد واللغة
+     *   و`distance_km` بتتحسب مع كل طلب.
      *
      * @urlParam slug string required slug المكان. Example: el-mahatta-coffee
      *
@@ -127,24 +130,21 @@ class PlaceController extends Controller
      */
     public function show(ShowPlaceRequest $request, string $slug): JsonResponse
     {
-        // الـ cache (5 دقايق بمفتاح فيه رقم نسخة، 03 القسم 5.5) بيتضاف مع PlaceObserver في أسبوع 4:
-        // من غير الـ Observer مفيش حاجة تمسحه.
         $request->attributes->set(PlaceCardResource::OPEN_NOW_ATTRIBUTE, OpenNow::at());
 
-        $query = Place::query()
-            ->viewable()
-            ->with(['primaryCategory', 'area', 'coverPhoto', 'categories', 'placeAttributes', 'photos'])
-            ->select('places.*');
-
-        if ($request->hasLocation()) {
-            $query->selectRaw(PlaceLocation::distanceMetersSql($request->lat(), $request->lng()).' as distance_m');
-        }
-
-        $place = (clone $query)->where('places.slug', $slug)->first()
-            ?? $query->whereIn('places.id', DB::table('place_slug_redirects')->where('old_slug', $slug)->select('place_id'))->first();
+        // بيانات المكان من cache التفاصيل (5 دقايق، بيتمسح مع أي تغيير في المكان). اللي بيختلف حسب الطلب
+        // (اللغة و`is_open_now` والمواعيد و`distance_km`) بيتحسب بعد الـ cache (03 القسم 5.5).
+        $place = PlaceDetailsCache::find($slug);
 
         if ($place === null) {
             throw new ApiException(404, 'PLACE_NOT_AVAILABLE');
+        }
+
+        if ($request->hasLocation()) {
+            $place->setAttribute('distance_m', DB::table('places')
+                ->where('id', $place->id)
+                ->selectRaw(PlaceLocation::distanceMetersSql($request->lat(), $request->lng()).' as distance_m')
+                ->value('distance_m'));
         }
 
         return response()->json([
