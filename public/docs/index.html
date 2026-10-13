@@ -85,6 +85,16 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-config" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="config">
+                    <a href="#config">Config</a>
+                </li>
+                                    <ul id="tocify-subheader-config" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="config-GETapi-v1-config">
+                                <a href="#config-GETapi-v1-config">App config</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-categories" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="categories">
                     <a href="#categories">Categories</a>
@@ -92,6 +102,26 @@
                                     <ul id="tocify-subheader-categories" class="tocify-subheader">
                                                     <li class="tocify-item level-2" data-unique="categories-GETapi-v1-categories">
                                 <a href="#categories-GETapi-v1-categories">List categories</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-attributes" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="attributes">
+                    <a href="#attributes">Attributes</a>
+                </li>
+                                    <ul id="tocify-subheader-attributes" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="attributes-GETapi-v1-attributes">
+                                <a href="#attributes-GETapi-v1-attributes">List attributes</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-areas" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="areas">
+                    <a href="#areas">Areas</a>
+                </li>
+                                    <ul id="tocify-subheader-areas" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="areas-GETapi-v1-areas">
+                                <a href="#areas-GETapi-v1-areas">List areas</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -805,6 +835,166 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                         </form>
 
+                <h1 id="config">Config</h1>
+
+    
+
+                                <h2 id="config-GETapi-v1-config">App config</h2>
+
+<p>
+</p>
+
+<p>إعدادات التطبيق من جدول <code>settings</code>: الحد الأدنى لنسخة التطبيق، تواريخ رمضان، روابط الشروط والخصوصية،
+بيانات الدعم وحدود فئات السعر. عام ومن غير token، والتطبيق بيطلبه عند الفتح وبيخزّنه.</p>
+<p>القيمة اللي مش متحددة بترجع <code>null</code> (مثلاً رقم واتساب الدعم لحد ما يبقى فيه رقم). بيتخزن في cache 5 دقايق.</p>
+
+<span id="example-requests-GETapi-v1-config">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/config" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/config"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-config">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;min_app_version&quot;: {
+            &quot;ios&quot;: &quot;1.0.0&quot;,
+            &quot;android&quot;: &quot;1.0.0&quot;
+        },
+        &quot;ramadan&quot;: {
+            &quot;starts_at&quot;: &quot;2027-02-08&quot;,
+            &quot;ends_at&quot;: &quot;2027-03-09&quot;
+        },
+        &quot;terms_version&quot;: &quot;2026-10&quot;,
+        &quot;terms_url&quot;: &quot;https://wain.app/terms&quot;,
+        &quot;privacy_url&quot;: &quot;https://wain.app/privacy&quot;,
+        &quot;support&quot;: {
+            &quot;whatsapp&quot;: null,
+            &quot;email&quot;: &quot;support@wain.app&quot;
+        },
+        &quot;price_ranges&quot;: {
+            &quot;budget_max&quot;: 250,
+            &quot;mid_max&quot;: 600
+        }
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-config" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-config"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-config"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-config" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-config">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-config" data-method="GET"
+      data-path="api/v1/config"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-config', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-config"
+                    onclick="tryItOut('GETapi-v1-config');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-config"
+                    onclick="cancelTryOut('GETapi-v1-config');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-config"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/config</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-config"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-config"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-config"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                        </form>
+
                 <h1 id="categories">Categories</h1>
 
     
@@ -958,6 +1148,333 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                         </form>
 
+                <h1 id="attributes">Attributes</h1>
+
+    
+
+                                <h2 id="attributes-GETapi-v1-attributes">List attributes</h2>
+
+<p>
+</p>
+
+<p>الخصائص الفعّالة (واي فاي، هادي...) مجمّعة حسب المجموعة بترتيب العرض: الجو، الخدمات، مناسب لـ، المكان.
+المجموعة الفاضية ما بترجعش، والخاصية المخفية ما بترجعش.</p>
+<ul>
+<li><code>is_filterable</code>: تظهر في شاشة الفلاتر (S33).</li>
+<li><code>is_quick_filter</code>: تظهر كـ chip سريعة تحت خانة البحث (أقصى 6).</li>
+<li>الخصائص كلها (حتى اللي مش <code>is_filterable</code>) تنفع في تقييم المكان.</li>
+</ul>
+<p>بيتخزن في cache ساعة وبيتمسح مع أي تعديل من اللوحة. اللغة من <code>Accept-Language</code>.</p>
+
+<span id="example-requests-GETapi-v1-attributes">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/attributes" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/attributes"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-attributes">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;key&quot;: &quot;vibe&quot;,
+            &quot;name&quot;: &quot;الجو&quot;,
+            &quot;items&quot;: [
+                {
+                    &quot;slug&quot;: &quot;quiet&quot;,
+                    &quot;name&quot;: &quot;هادي&quot;,
+                    &quot;icon&quot;: &quot;🤫&quot;,
+                    &quot;is_filterable&quot;: true,
+                    &quot;is_quick_filter&quot;: true
+                }
+            ]
+        },
+        {
+            &quot;key&quot;: &quot;services&quot;,
+            &quot;name&quot;: &quot;الخدمات&quot;,
+            &quot;items&quot;: [
+                {
+                    &quot;slug&quot;: &quot;wifi&quot;,
+                    &quot;name&quot;: &quot;واي فاي&quot;,
+                    &quot;icon&quot;: &quot;📶&quot;,
+                    &quot;is_filterable&quot;: true,
+                    &quot;is_quick_filter&quot;: true
+                }
+            ]
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-attributes" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-attributes"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-attributes"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-attributes" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-attributes">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-attributes" data-method="GET"
+      data-path="api/v1/attributes"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-attributes', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-attributes"
+                    onclick="tryItOut('GETapi-v1-attributes');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-attributes"
+                    onclick="cancelTryOut('GETapi-v1-attributes');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-attributes"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/attributes</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-attributes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-attributes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-attributes"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                        </form>
+
+                <h1 id="areas">Areas</h1>
+
+    
+
+                                <h2 id="areas-GETapi-v1-areas">List areas</h2>
+
+<p>
+</p>
+
+<p>المناطق المتاحة للمستخدمين (المنطقة والمدينة الفعّالتين) بترتيب المدينة ثم المنطقة، ومعاها عدد الأماكن
+المنشورة. شاشة اختيار المنطقة (S04 وS21) بتستخدمه، والتطبيق بيحسب أقرب منطقة من <code>center</code>.
+الـ <code>slug</code> هو قيمة بارامتر <code>area</code> في <code>GET /places</code>.</p>
+<p>بيتخزن في cache ساعة وبيتمسح مع أي تعديل في المناطق أو المدن. عدد الأماكن ممكن يتأخر لحد ساعة.</p>
+
+<span id="example-requests-GETapi-v1-areas">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/areas" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/areas"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-areas">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;slug&quot;: &quot;new-cairo&quot;,
+            &quot;name&quot;: &quot;التجمع الخامس&quot;,
+            &quot;city&quot;: {
+                &quot;slug&quot;: &quot;cairo&quot;,
+                &quot;name&quot;: &quot;القاهرة&quot;
+            },
+            &quot;center&quot;: {
+                &quot;lat&quot;: 30.03,
+                &quot;lng&quot;: 31.47
+            },
+            &quot;places_count&quot;: 26
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-areas" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-areas"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-areas"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-areas" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-areas">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-areas" data-method="GET"
+      data-path="api/v1/areas"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-areas', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-areas"
+                    onclick="tryItOut('GETapi-v1-areas');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-areas"
+                    onclick="cancelTryOut('GETapi-v1-areas');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-areas"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/areas</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-areas"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-areas"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-areas"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                        </form>
+
                 <h1 id="places">Places</h1>
 
     
@@ -984,8 +1501,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"categories\": [
         \"architecto\"
     ],
-    \"open_now\": true,
-    \"sort\": \"recommended\",
+    \"open_now\": false,
+    \"sort\": \"nearest\",
     \"lat\": -89,
     \"lng\": -180,
     \"page\": 66,
@@ -1010,8 +1527,8 @@ let body = {
     "categories": [
         "architecto"
     ],
-    "open_now": true,
-    "sort": "recommended",
+    "open_now": false,
+    "sort": "nearest",
     "lat": -89,
     "lng": -180,
     "page": 66,
@@ -1183,7 +1700,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
@@ -1192,10 +1709,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="sort"                data-endpoint="GETapi-v1-places"
-               value="recommended"
+               value="nearest"
                data-component="body">
     <br>
-<p>Example: <code>recommended</code></p>
+<p>Example: <code>nearest</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>recommended</code></li> <li><code>nearest</code></li> <li><code>rating</code></li> <li><code>newest</code></li></ul>
         </div>

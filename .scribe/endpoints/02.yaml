@@ -1,195 +1,30 @@
-name: Auth
+name: Attributes
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/register
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /auth/register — بيعمل الحساب ويرجّع token، فالمستخدم يدخل على طول.'
-      description: ''
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      name:
-        custom: []
-        name: name
-        description: 'value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 50 حرف.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      email:
-        custom: []
-        name: email
-        description: 'اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
-        required: true
-        example: zbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: ''
-        required: true
-        example: '|]|{+-'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      terms_accepted:
-        custom: []
-        name: terms_accepted
-        description: 'Must be accepted.'
-        required: true
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      name: b
-      email: zbailey@example.net
-      password: '|]|{+-'
-      terms_accepted: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/login
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /auth/login — رسالة واحدة للإيميل والباسورد الغلط (ما نقولش إن الإيميل مش موجود).'
-      description: '5 محاولات في الدقيقة لكل IP + إيميل (limiter `auth`).'
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        custom: []
-        name: email
-        description: 'اكتب إيميل صحيح.'
-        required: true
-        example: gbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: ''
-        required: true
-        example: '|]|{+-'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      email: gbailey@example.net
-      password: '|]|{+-'
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/logout
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
       - GET
-    uri: api/v1/auth/me
+    uri: api/v1/attributes
     metadata:
       custom: []
-      groupName: Auth
+      groupName: Attributes
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /auth/me'
-      description: ''
-      authenticated: true
+      title: 'List attributes'
+      description: |-
+        الخصائص الفعّالة (واي فاي، هادي...) مجمّعة حسب المجموعة بترتيب العرض: الجو، الخدمات، مناسب لـ، المكان.
+        المجموعة الفاضية ما بترجعش، والخاصية المخفية ما بترجعش.
+
+        - `is_filterable`: تظهر في شاشة الفلاتر (S33).
+        - `is_quick_filter`: تظهر كـ chip سريعة تحت خانة البحث (أقصى 6).
+        - الخصائص كلها (حتى اللي مش `is_filterable`) تنفع في تقييم المكان.
+
+        بيتخزن في cache ساعة وبيتمسح مع أي تعديل من اللوحة. اللغة من `Accept-Language`.
+      authenticated: false
       deprecated: false
     headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
       Content-Type: application/json
       Accept: application/json
       Accept-Language: ar
@@ -203,18 +38,12 @@ endpoints:
     responses:
       -
         custom: []
-        status: 401
-        content: '{"message":"\u0633\u062c\u0651\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0639\u0634\u0627\u0646 \u062a\u0643\u0645\u0651\u0644.","code":"UNAUTHENTICATED"}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        status: 200
+        content: '{"data": [{"key": "vibe", "name": "الجو", "items": [{"slug": "quiet", "name": "هادي", "icon": "🤫", "is_filterable": true, "is_quick_filter": true}]}, {"key": "services", "name": "الخدمات", "items": [{"slug": "wifi", "name": "واي فاي", "icon": "📶", "is_filterable": true, "is_quick_filter": true}]}]}'
+        headers: []
+        description: ''
     responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    auth: []
     controller: null
     method: null
     route: null

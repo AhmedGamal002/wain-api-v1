@@ -1,0 +1,46 @@
+name: Areas
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/areas
+    metadata:
+      custom: []
+      groupName: Areas
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List areas'
+      description: |-
+        المناطق المتاحة للمستخدمين (المنطقة والمدينة الفعّالتين) بترتيب المدينة ثم المنطقة، ومعاها عدد الأماكن
+        المنشورة. شاشة اختيار المنطقة (S04 وS21) بتستخدمه، والتطبيق بيحسب أقرب منطقة من `center`.
+        الـ `slug` هو قيمة بارامتر `area` في `GET /places`.
+
+        بيتخزن في cache ساعة وبيتمسح مع أي تعديل في المناطق أو المدن. عدد الأماكن ممكن يتأخر لحد ساعة.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"slug": "new-cairo", "name": "التجمع الخامس", "city": {"slug": "cairo", "name": "القاهرة"}, "center": {"lat": 30.03, "lng": 31.47}, "places_count": 26}]}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

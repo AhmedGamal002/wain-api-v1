@@ -11,7 +11,16 @@ tags:
     name: Auth
     description: ''
   -
+    name: Config
+    description: ''
+  -
     name: Categories
+    description: ''
+  -
+    name: Attributes
+    description: ''
+  -
+    name: Areas
     description: ''
   -
     name: Places
@@ -154,6 +163,96 @@ paths:
                     example: UNAUTHENTICATED
       tags:
         - Auth
+  /api/v1/config:
+    get:
+      summary: 'App config'
+      operationId: appConfig
+      description: "إعدادات التطبيق من جدول `settings`: الحد الأدنى لنسخة التطبيق، تواريخ رمضان، روابط الشروط والخصوصية،\nبيانات الدعم وحدود فئات السعر. عام ومن غير token، والتطبيق بيطلبه عند الفتح وبيخزّنه.\n\nالقيمة اللي مش متحددة بترجع `null` (مثلاً رقم واتساب الدعم لحد ما يبقى فيه رقم). بيتخزن في cache 5 دقايق."
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    min_app_version:
+                      ios: 1.0.0
+                      android: 1.0.0
+                    ramadan:
+                      starts_at: '2027-02-08'
+                      ends_at: '2027-03-09'
+                    terms_version: 2026-10
+                    terms_url: 'https://wain.app/terms'
+                    privacy_url: 'https://wain.app/privacy'
+                    support:
+                      whatsapp: null
+                      email: support@wain.app
+                    price_ranges:
+                      budget_max: 250
+                      mid_max: 600
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      min_app_version:
+                        type: object
+                        properties:
+                          ios:
+                            type: string
+                            example: 1.0.0
+                          android:
+                            type: string
+                            example: 1.0.0
+                      ramadan:
+                        type: object
+                        properties:
+                          starts_at:
+                            type: string
+                            example: '2027-02-08'
+                          ends_at:
+                            type: string
+                            example: '2027-03-09'
+                      terms_version:
+                        type: string
+                        example: 2026-10
+                      terms_url:
+                        type: string
+                        example: 'https://wain.app/terms'
+                      privacy_url:
+                        type: string
+                        example: 'https://wain.app/privacy'
+                      support:
+                        type: object
+                        properties:
+                          whatsapp:
+                            type: string
+                            example: null
+                            nullable: true
+                          email:
+                            type: string
+                            example: support@wain.app
+                      price_ranges:
+                        type: object
+                        properties:
+                          budget_max:
+                            type: integer
+                            example: 250
+                          mid_max:
+                            type: integer
+                            example: 600
+      tags:
+        - Config
+      security: []
   /api/v1/categories:
     get:
       summary: 'List categories'
@@ -217,6 +316,190 @@ paths:
                           example: '#6F4E37'
       tags:
         - Categories
+      security: []
+  /api/v1/attributes:
+    get:
+      summary: 'List attributes'
+      operationId: listAttributes
+      description: "الخصائص الفعّالة (واي فاي، هادي...) مجمّعة حسب المجموعة بترتيب العرض: الجو، الخدمات، مناسب لـ، المكان.\nالمجموعة الفاضية ما بترجعش، والخاصية المخفية ما بترجعش.\n\n- `is_filterable`: تظهر في شاشة الفلاتر (S33).\n- `is_quick_filter`: تظهر كـ chip سريعة تحت خانة البحث (أقصى 6).\n- الخصائص كلها (حتى اللي مش `is_filterable`) تنفع في تقييم المكان.\n\nبيتخزن في cache ساعة وبيتمسح مع أي تعديل من اللوحة. اللغة من `Accept-Language`."
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      key: vibe
+                      name: الجو
+                      items:
+                        -
+                          slug: quiet
+                          name: هادي
+                          icon: 🤫
+                          is_filterable: true
+                          is_quick_filter: true
+                    -
+                      key: services
+                      name: الخدمات
+                      items:
+                        -
+                          slug: wifi
+                          name: 'واي فاي'
+                          icon: 📶
+                          is_filterable: true
+                          is_quick_filter: true
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        key: vibe
+                        name: الجو
+                        items:
+                          -
+                            slug: quiet
+                            name: هادي
+                            icon: 🤫
+                            is_filterable: true
+                            is_quick_filter: true
+                      -
+                        key: services
+                        name: الخدمات
+                        items:
+                          -
+                            slug: wifi
+                            name: 'واي فاي'
+                            icon: 📶
+                            is_filterable: true
+                            is_quick_filter: true
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          example: vibe
+                        name:
+                          type: string
+                          example: الجو
+                        items:
+                          type: array
+                          example:
+                            -
+                              slug: quiet
+                              name: هادي
+                              icon: 🤫
+                              is_filterable: true
+                              is_quick_filter: true
+                          items:
+                            type: object
+                            properties:
+                              slug:
+                                type: string
+                                example: quiet
+                              name:
+                                type: string
+                                example: هادي
+                              icon:
+                                type: string
+                                example: 🤫
+                              is_filterable:
+                                type: boolean
+                                example: true
+                              is_quick_filter:
+                                type: boolean
+                                example: true
+      tags:
+        - Attributes
+      security: []
+  /api/v1/areas:
+    get:
+      summary: 'List areas'
+      operationId: listAreas
+      description: "المناطق المتاحة للمستخدمين (المنطقة والمدينة الفعّالتين) بترتيب المدينة ثم المنطقة، ومعاها عدد الأماكن\nالمنشورة. شاشة اختيار المنطقة (S04 وS21) بتستخدمه، والتطبيق بيحسب أقرب منطقة من `center`.\nالـ `slug` هو قيمة بارامتر `area` في `GET /places`.\n\nبيتخزن في cache ساعة وبيتمسح مع أي تعديل في المناطق أو المدن. عدد الأماكن ممكن يتأخر لحد ساعة."
+      parameters:
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      slug: new-cairo
+                      name: 'التجمع الخامس'
+                      city:
+                        slug: cairo
+                        name: القاهرة
+                      center:
+                        lat: 30.03
+                        lng: 31.47
+                      places_count: 26
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        slug: new-cairo
+                        name: 'التجمع الخامس'
+                        city:
+                          slug: cairo
+                          name: القاهرة
+                        center:
+                          lat: 30.03
+                          lng: 31.47
+                        places_count: 26
+                    items:
+                      type: object
+                      properties:
+                        slug:
+                          type: string
+                          example: new-cairo
+                        name:
+                          type: string
+                          example: 'التجمع الخامس'
+                        city:
+                          type: object
+                          properties:
+                            slug:
+                              type: string
+                              example: cairo
+                            name:
+                              type: string
+                              example: القاهرة
+                        center:
+                          type: object
+                          properties:
+                            lat:
+                              type: number
+                              example: 30.03
+                            lng:
+                              type: number
+                              example: 31.47
+                        places_count:
+                          type: integer
+                          example: 26
+      tags:
+        - Areas
       security: []
   /api/v1/places:
     get:
@@ -292,12 +575,12 @@ paths:
                 open_now:
                   type: boolean
                   description: ''
-                  example: true
+                  example: false
                   nullable: true
                 sort:
                   type: string
                   description: ''
-                  example: recommended
+                  example: nearest
                   enum:
                     - recommended
                     - nearest

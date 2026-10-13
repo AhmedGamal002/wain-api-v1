@@ -186,7 +186,7 @@ return [
         // You can override this by listing the groups, subgroups and endpoints here in the order you want them.
         // See https://scribe.knuckles.wtf/blog/laravel-v4#easier-sorting and https://scribe.knuckles.wtf/laravel/reference/config#order for details
         // Note: does not work for `external` docs types
-        'order' => ['Auth', 'Categories', 'Places'],
+        'order' => ['Auth', 'Config', 'Categories', 'Attributes', 'Areas', 'Places'],
     ],
 
     // Custom logo path. This will be used as the value of the src attribute for the <img> tag,

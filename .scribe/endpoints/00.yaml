@@ -1,22 +1,23 @@
-name: Categories
+name: Config
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/categories
+    uri: api/v1/config
     metadata:
       custom: []
-      groupName: Categories
+      groupName: Config
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'List categories'
+      title: 'App config'
       description: |-
-        قائمة التصنيفات. التصنيفات الظاهرة بالترتيب اللي حدده الأدمن (A2): شريط الرئيسية وألوان الـ pins على الخريطة.
-        التصنيف المخفي ما بيرجعش. الـ `slug` ما بيتغيرش، فالتطبيق بيفلتر بيه. بيتخزن في cache ساعة وبيتمسح مع
-        أي تعديل من اللوحة.
+        إعدادات التطبيق من جدول `settings`: الحد الأدنى لنسخة التطبيق، تواريخ رمضان، روابط الشروط والخصوصية،
+        بيانات الدعم وحدود فئات السعر. عام ومن غير token، والتطبيق بيطلبه عند الفتح وبيخزّنه.
+
+        القيمة اللي مش متحددة بترجع `null` (مثلاً رقم واتساب الدعم لحد ما يبقى فيه رقم). بيتخزن في cache 5 دقايق.
       authenticated: false
       deprecated: false
     headers:
@@ -34,7 +35,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data": [{"slug": "cafes", "name": "كافيهات", "icon": "☕", "color": "#6F4E37"}, {"slug": "restaurants", "name": "مطاعم", "icon": "🍽️", "color": "#E8593C"}]}'
+        content: '{"data": {"min_app_version": {"ios": "1.0.0", "android": "1.0.0"}, "ramadan": {"starts_at": "2027-02-08", "ends_at": "2027-03-09"}, "terms_version": "2026-10", "terms_url": "https://wain.app/terms", "privacy_url": "https://wain.app/privacy", "support": {"whatsapp": null, "email": "support@wain.app"}, "price_ranges": {"budget_max": 250, "mid_max": 600}}}'
         headers: []
         description: ''
     responseFields: []
