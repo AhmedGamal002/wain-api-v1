@@ -1,0 +1,138 @@
+name: Deploy staging
+
+# نشر الـ API على الـ staging (Hostinger) بـ SSH: بيبني في الـ CI (من غير Node على الاستضافة)، ويرفع release جديدة
+# بـ rsync، ويعمل migrate وoptimize، وبعدين يبدّل الرابط `current`. يدوي بس (workflow_dispatch): الـ staging فيه
+# بيانات إدخال فعلية من أسبوع 7، فمفيش نشر تلقائي على كل push.
+#
+# مكتوب في الأسبوع 5 وما اتجرّبش على الاستضافة لسه (محتاج المتطلبات في 08-Staging-Setup.md أولاً: subdomain
+# وقاعدة بيانات وSSH key وsecrets). أول تشغيل في أسبوع 6.
+#
+# الـ secrets (Settings ← Environments ← staging):
+#   STAGING_SSH_HOST         92.113.28.121 (أو اسم السيرفر)
+#   STAGING_SSH_PORT         65002
+#   STAGING_SSH_USER         يوزر الـ SSH بتاع الحساب
+#   STAGING_SSH_KEY          المفتاح الخاص (deploy key مخصوص، من غير passphrase)
+#   STAGING_SSH_KNOWN_HOSTS  ناتج `ssh-keyscan -p 65002 <host>` اللي جمال راجع الـ fingerprint بتاعه
+#   STAGING_APP_PATH         مسار التطبيق على السيرفر، مثلاً /home/<user>/wain-staging (برّه public_html)
+#   STAGING_PHP              المسار الكامل لـ PHP CLI، /opt/alt/php83/usr/bin/php
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'الـ branch أو الـ commit اللي يتنشر'
+        required: true
+        default: dev
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build + rsync + migrate (staging)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, gd, mbstring, pdo_mysql, zip, exif, bcmath
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies (no dev)
+        run: composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      # assets بتاعة Filament بتتنسخ لـ public/ (مش في git): بتتبني هنا وبتترفع جاهزة
+      - name: Publish Filament assets
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          php artisan filament:assets --no-interaction
+          rm -f .env
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload release
+        env:
+          HOST: ${{ secrets.STAGING_SSH_HOST }}
+          PORT: ${{ secrets.STAGING_SSH_PORT }}
+          USER: ${{ secrets.STAGING_SSH_USER }}
+          APP_PATH: ${{ secrets.STAGING_APP_PATH }}
+        run: |
+          RELEASE="${APP_PATH}/releases/${GITHUB_SHA}"
+          SSH="ssh -i ~/.ssh/deploy_key -p ${PORT} -o StrictHostKeyChecking=yes"
+          $SSH "${USER}@${HOST}" "mkdir -p '${RELEASE}'"
+          rsync -az --delete \
+            --exclude '.git' --exclude '.github' --exclude 'tests' --exclude 'docker' --exclude 'node_modules' \
+            --exclude 'scripts' --exclude '.env' --exclude '/storage/' \
+            -e "${SSH}" ./ "${USER}@${HOST}:${RELEASE}/"
+
+      - name: Activate release
+        env:
+          HOST: ${{ secrets.STAGING_SSH_HOST }}
+          PORT: ${{ secrets.STAGING_SSH_PORT }}
+          USER: ${{ secrets.STAGING_SSH_USER }}
+          APP_PATH: ${{ secrets.STAGING_APP_PATH }}
+          PHP: ${{ secrets.STAGING_PHP }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${PORT}" -o StrictHostKeyChecking=yes "${USER}@${HOST}" \
+            "APP='${APP_PATH}' PHP='${PHP}' SHA='${GITHUB_SHA}' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          REL="$APP/releases/$SHA"
+          SHARED="$APP/shared"
+
+          # الـ .env بيتعمل مرة واحدة بإيد جمال على السيرفر (مش في git ولا في الـ CI)
+          test -f "$SHARED/.env" || { echo "ناقص $SHARED/.env: اعمله الأول (08-Staging-Setup.md)"; exit 1; }
+
+          mkdir -p "$SHARED/storage/app/public" "$SHARED/storage/framework/cache/data" \
+                   "$SHARED/storage/framework/sessions" "$SHARED/storage/framework/views" \
+                   "$SHARED/storage/logs" "$SHARED/backups"
+
+          ln -sfn "$SHARED/.env" "$REL/.env"
+          rm -rf "$REL/storage"
+          ln -sfn "$SHARED/storage" "$REL/storage"
+          ln -sfn "$SHARED/storage/app/public" "$REL/public/storage"
+
+          cd "$REL"
+
+          # نسخة من الداتابيز قبل أي migration (البيانات اللي بتتدخل أغلى من الكود)
+          DB_NAME="$(grep -E '^DB_DATABASE=' .env | cut -d= -f2-)"
+          DB_USER="$(grep -E '^DB_USERNAME=' .env | cut -d= -f2-)"
+          DB_PASS="$(grep -E '^DB_PASSWORD=' .env | cut -d= -f2-)"
+          MYSQL_PWD="$DB_PASS" mariadb-dump --single-transaction -u"$DB_USER" "$DB_NAME" \
+            | gzip > "$SHARED/backups/pre-$SHA.sql.gz"
+          ls -1t "$SHARED"/backups/pre-*.sql.gz | tail -n +6 | xargs -r rm -f
+
+          "$PHP" artisan migrate --force
+          "$PHP" artisan optimize
+
+          # تبديل الرابط atomically، وبعدها نوقف الـ workers القديمة
+          ln -sfn "$REL" "$APP/current.next"
+          mv -Tf "$APP/current.next" "$APP/current"
+          "$PHP" artisan queue:restart || true
+
+          # نسيب آخر 3 releases
+          ls -1dt "$APP"/releases/* | tail -n +4 | xargs -r rm -rf
+          echo "تم النشر: $SHA"
+          REMOTE
