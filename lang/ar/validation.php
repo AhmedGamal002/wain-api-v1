@@ -15,6 +15,9 @@ return [
     'confirmed' => ':attribute مش مطابق للتأكيد.',
     'email' => 'اكتب إيميل صحيح.',
     'exists' => ':attribute المختار مش موجود.',
+    'gte' => [
+        'numeric' => ':attribute لازم يكون :value أو أكتر.',
+    ],
     'in' => ':attribute المختار مش صحيح.',
     'integer' => ':attribute لازم يكون رقم صحيح.',
     'max' => [
@@ -53,6 +56,12 @@ return [
         'area' => 'المنطقة',
         'categories' => 'التصنيفات',
         'categories.*' => 'التصنيف',
+        'attributes' => 'الخصائص',
+        'attributes.*' => 'الخاصية',
+        'price_min' => 'أقل سعر',
+        'price_max' => 'أعلى سعر',
+        'rating_min' => 'التقييم',
+        'open_now' => 'مفتوح دلوقتي',
         'sort' => 'الترتيب',
         'lat' => 'خط العرض',
         'lng' => 'خط الطول',

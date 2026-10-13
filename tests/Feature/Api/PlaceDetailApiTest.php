@@ -354,8 +354,13 @@ class PlaceDetailApiTest extends TestCase
             ->assertStatus(422)
             ->assertJsonPath('code', 'VALIDATION_ERROR');
 
-        // كلمة محجوزة مش slug: مفيش مسار بيطابقها
+        // count ليه مسار حقيقي (F5): بيرجّع العدد مش PLACE_NOT_AVAILABLE
         $this->getJson('/api/v1/places/count', self::AR)
+            ->assertOk()
+            ->assertJsonStructure(['count']);
+
+        // كلمة محجوزة لسه من غير مسار (map، F6 في أسبوع 7): مش slug، فـ NOT_FOUND مش PLACE_NOT_AVAILABLE
+        $this->getJson('/api/v1/places/map', self::AR)
             ->assertNotFound()
             ->assertJsonPath('code', 'NOT_FOUND');
     }

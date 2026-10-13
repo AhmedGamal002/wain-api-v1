@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CountPlacesRequest;
 use App\Http\Requests\IndexPlacesRequest;
 use App\Http\Requests\NearbyPlacesRequest;
 use App\Http\Requests\ShowPlaceRequest;
@@ -24,7 +25,8 @@ class PlaceController extends Controller
 {
     /**
      * GET /places — القائمة بكروت المكان مع pagination (06 القسم 1: `data` و`meta` من 4 حقول).
-     * بترجّع المنشور بس. الفلاتر الكاملة مع F5 (أسبوع 4)، والـ cache مع /home (أسبوع 8).
+     * بترجّع المنشور بس، بالفلاتر (المنطقة والتصنيفات والخصائص والسعر والتقييم و open_now) من
+     * PlaceFilterRequest، والـ cache مع /home (أسبوع 8).
      */
     public function index(IndexPlacesRequest $request): JsonResponse
     {
@@ -37,21 +39,7 @@ class PlaceController extends Controller
             ->with(['primaryCategory', 'area', 'coverPhoto'])
             ->select('places.*');
 
-        if ($area = $request->validated('area')) {
-            $query->whereHas('area', fn (Builder $q) => $q->where('slug', $area));
-        }
-
-        if ($categories = $request->validated('categories')) {
-            // تصنيف المكان (الرئيسي أو الإضافي) جوه المختار. الرئيسي دايماً موجود في place_category.
-            $query->whereIn('places.id', DB::table('place_category')
-                ->join('categories', 'categories.id', '=', 'place_category.category_id')
-                ->whereIn('categories.slug', $categories)
-                ->select('place_category.place_id'));
-        }
-
-        if ($request->openNow()) {
-            $query->openNow($now);
-        }
+        $request->applyFilters($query, $now);
 
         if ($request->hasLocation()) {
             $lat = (float) $request->validated('lat');
@@ -72,6 +60,23 @@ class PlaceController extends Controller
                 'total' => $page->total(),
             ],
         ]);
+    }
+
+    /**
+     * Count places
+     *
+     * عدد الأماكن بنفس فلاتر `GET /places` (للزرار «ورّيني 23 مكان» في شاشة الفلاتر). بيرجّع المنشور بس،
+     * ومن غير pagination. بيقبل نفس الـ query بتاعة القائمة وبيتجاهل الترتيب والموقع والصفحة.
+     *
+     * @response 200 {"count": 23}
+     */
+    public function count(CountPlacesRequest $request): JsonResponse
+    {
+        $query = Place::query()->published();
+
+        $request->applyFilters($query, OpenNow::at());
+
+        return response()->json(['count' => $query->count()]);
     }
 
     /**
