@@ -25,3 +25,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/scripts/hosting-check/.hosting-check.env
+/scripts/hosting-check/.hosting-check-heartbeat.log
