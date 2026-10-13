@@ -2,17 +2,22 @@
 
 namespace App\Filament\Resources\Places;
 
+use App\Filament\Resources\Places\Pages\CreatePlace;
+use App\Filament\Resources\Places\Pages\EditPlace;
 use App\Filament\Resources\Places\Pages\ListPlaces;
+use App\Filament\Resources\Places\Schemas\PlaceForm;
 use App\Filament\Resources\Places\Tables\PlacesTable;
 use App\Models\Place;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 /**
- * A1 الأماكن (03 القسم 4): المحتوى الأساسي لـ Wain. أسبوع 4 فيه صفحة القائمة بس (التابز والأعمدة والفلاتر)،
- * وصفحتي الإضافة والتعديل (7 تابز) في أسبوع 5، والإجراءات والـ modals والصور والسجل في أسبوع 6.
+ * A1 الأماكن (03 القسم 4): المحتوى الأساسي لـ Wain. أسبوع 4: صفحة القائمة (التابز والأعمدة والفلاتر).
+ * أسبوع 5: صفحتي الإضافة والتعديل (7 تابز والمواعيد والـ map picker وchecklist شروط النشر).
+ * أسبوع 6: الإجراءات والـ modals والصور والسجل.
  *
  * الصلاحيات من `PlacePolicy` (Admin وModerator): الأزرار الممنوعة ما بتظهرش أصلاً والـ Policy بترفض الطلب المباشر.
  */
@@ -34,6 +39,11 @@ class PlaceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
+    public static function form(Schema $schema): Schema
+    {
+        return PlaceForm::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return PlacesTable::configure($table);
@@ -43,6 +53,8 @@ class PlaceResource extends Resource
     {
         return [
             'index' => ListPlaces::route('/'),
+            'create' => CreatePlace::route('/create'),
+            'edit' => EditPlace::route('/{record}/edit'),
         ];
     }
 

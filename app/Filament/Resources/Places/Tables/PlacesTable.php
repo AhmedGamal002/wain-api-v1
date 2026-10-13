@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Places\Tables;
 
+use App\Filament\Resources\Places\PlaceResource;
 use App\Models\Area;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Place;
 use App\Models\User;
 use App\Support\PlacePublishCheck;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -261,9 +263,20 @@ class PlacesTable
             ->defaultSort('updated_at', 'desc')
             ->paginated([25, 50, 100])
             ->defaultPaginationPageOption(25)
+            // الصف المحذوف ما ينفعش يتفتح للتعديل (صفحة العرض والاسترجاع في أسبوع 6)
+            ->recordUrl(fn (Place $record) => $record->trashed()
+                ? null
+                : PlaceResource::getUrl('edit', ['record' => $record]))
             ->emptyStateHeading('مفيش أماكن لسه')
             ->emptyStateDescription('الأماكن اللي هتتضاف هتظهر هنا.')
-            ->emptyStateIcon(Heroicon::OutlinedBuildingStorefront);
+            ->emptyStateIcon(Heroicon::OutlinedBuildingStorefront)
+            ->emptyStateActions([
+                Action::make('create')
+                    ->label('مكان جديد')
+                    ->icon(Heroicon::OutlinedPlus)
+                    ->url(PlaceResource::getUrl('create'))
+                    ->visible(fn () => auth()->user()?->can('create', Place::class) ?? false),
+            ]);
     }
 
     /**

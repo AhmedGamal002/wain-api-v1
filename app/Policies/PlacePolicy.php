@@ -73,6 +73,12 @@ class PlacePolicy
         return $this->admin($user);
     }
 
+    /** إلغاء ملكية المكان (تاب «النشر والإدارة»). */
+    public function releaseClaim(User $user, Place $place): bool
+    {
+        return $this->admin($user);
+    }
+
     public function delete(User $user, Place $place): bool
     {
         return $this->admin($user);

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Places\Pages;
 
 use App\Filament\Resources\Places\PlaceResource;
 use App\Models\Place;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,13 @@ use Illuminate\Database\Eloquent\Builder;
 class ListPlaces extends ListRecords
 {
     protected static string $resource = PlaceResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()->label('مكان جديد'),
+        ];
+    }
 
     /**
      * التابز فوق الجدول، كل تاب بعدده (03 القسم 4.2): الكل · قيد المراجعة · منشور · مخفي · مسودة · مرفوض · مغلق.

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e557c9267d653c10a461e39adbc29f5",
+    "content-hash": "1794cf4b3498b00871a794c5c9029427",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1137,6 +1137,72 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "fahiem/filament-pinpoint",
+            "version": "v1.1.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fahiem152/filament-pinpoint.git",
+                "reference": "e30ea40cc5c5b97354cd7340f9dc390606cb327a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fahiem152/filament-pinpoint/zipball/e30ea40cc5c5b97354cd7340f9dc390606cb327a",
+                "reference": "e30ea40cc5c5b97354cd7340f9dc390606cb327a",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0|^5.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0",
+                "pestphp/pest": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Fahiem\\FilamentPinpoint\\FilamentPinpointServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Fahiem\\FilamentPinpoint\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fahiem",
+                    "email": "amfahiem010502@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Google Maps location picker component for Filament 4 & 5 with search, draggable marker, and reverse geocoding",
+            "homepage": "https://github.com/fahiem152/filament-pinpoint",
+            "keywords": [
+                "filament",
+                "filament-4",
+                "filament-5",
+                "geocoding",
+                "google-maps",
+                "laravel",
+                "location-picker",
+                "maps",
+                "pinpoint"
+            ],
+            "support": {
+                "issues": "https://github.com/fahiem152/filament-pinpoint/issues",
+                "source": "https://github.com/fahiem152/filament-pinpoint/tree/v1.1.9"
+            },
+            "time": "2026-07-22T02:29:35+00:00"
         },
         {
             "name": "filament/actions",
