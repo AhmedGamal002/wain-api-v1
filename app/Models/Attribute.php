@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\IsCatalogItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * الخاصية (A3): واي فاي، هادي، مناسب للعيلات... كل خاصية نعم أو لأ ومتقسمة لـ 4 مجموعات.
@@ -14,8 +16,20 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Attribute extends Model
 {
-    /** المجموعات بترتيب العرض في صفحة المكان (A3). */
+    use IsCatalogItem;
+
+    /** المجموعات بترتيب العرض في صفحة المكان والفلاتر (A3). */
     public const GROUPS = ['vibe', 'services', 'suitable_for', 'facilities'];
+
+    /** أقصى عدد chips سريعة تحت خانة البحث (A3). القيد في الموديل والـ Filament مش في الداتابيز. */
+    public const MAX_QUICK_FILTERS = 6;
+
+    /** مفتاح الـ cache (file) لقايمة الـ API، ساعة، ويتمسح مع أي تعديل. */
+    public const CACHE_KEY = 'attributes';
+
+    public const LOG_NAME = 'attributes';
+
+    public const LOGGED_FIELDS = ['slug', 'name_ar', 'name_en', 'group', 'icon', 'is_filterable', 'is_quick_filter', 'sort_order', 'is_active'];
 
     public $timestamps = false;
 
@@ -31,23 +45,47 @@ class Attribute extends Model
         ];
     }
 
-    /**
-     * @param  Builder<Attribute>  $query
-     */
-    public function scopeActive(Builder $query): void
+    protected static function booted(): void
     {
-        $query->where('attributes.is_active', true);
+        // الـ chip السريعة لازم تكون ظاهرة ومتاحة في الفلاتر: لو الخاصية اتخفت أو اتشالت من الفلاتر
+        // بتطلع من الـ chips تلقائياً، فعدد الـ chips في الداتابيز هو الفعلي دايماً.
+        // `=== false` مش `! $x`: خاصية جديدة من غير is_active (null) هياخد default الداتابيز (true).
+        static::saving(function (Attribute $attribute) {
+            if ($attribute->is_active === false || $attribute->is_filterable === false) {
+                $attribute->is_quick_filter = false;
+            }
+        });
+    }
+
+    public static function catalogCacheKeys(): array
+    {
+        return [self::CACHE_KEY];
     }
 
     /**
-     * الاسم بلغة الطلب، ولو الإنجليزي فاضي بيرجع العربي.
+     * @return BelongsToMany<Place, $this>
      */
-    public function localizedName(): string
+    public function places(): BelongsToMany
     {
-        if (app()->getLocale() === 'en' && filled($this->name_en)) {
-            return $this->name_en;
-        }
+        return $this->belongsToMany(Place::class, 'attribute_place');
+    }
 
-        return $this->name_ar;
+    /**
+     * مستخدمة في أي مكان (حتى المحذوف soft)؟ الـ FK `restrictOnDelete` بيرفض الحذف: بتتخفى بس.
+     */
+    public function isInUse(): bool
+    {
+        return $this->places()->withTrashed()->exists();
+    }
+
+    /**
+     * وصلنا للحد الأقصى من الـ chips السريعة (من غير السجل نفسه)؟
+     */
+    public static function quickFilterLimitReached(?self $except = null): bool
+    {
+        return static::query()
+            ->where('is_quick_filter', true)
+            ->when($except?->exists, fn (Builder $query) => $query->whereKeyNot($except->getKey()))
+            ->count() >= self::MAX_QUICK_FILTERS;
     }
 }

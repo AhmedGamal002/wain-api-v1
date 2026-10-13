@@ -12,7 +12,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
 class CategoriesTable
@@ -45,14 +44,14 @@ class CategoriesTable
                     ->label('ظاهر')
                     ->disabled(fn (Category $record) => Gate::denies('update', $record)),
             ])
-            // الترتيب بالسحب (Admin بس: reorder في CategoryPolicy)
+            // الترتيب بالسحب (Admin بس: reorder في CatalogPolicy)
             ->reorderable('sort_order')
             ->defaultSort('sort_order')
             // الـ reorder بيعمل UPDATE واحد من غير model events، فمسح الـ cache صريح هنا
-            ->afterReordering(fn () => Cache::forget(Category::CACHE_KEY))
+            ->afterReordering(fn () => Category::forgetCatalogCache())
             ->recordActions([
                 EditAction::make(),
-                // مخفي لتصنيف فيه أماكن (CategoryPolicy::delete): بيتخفى بدل ما يتحذف
+                // مخفي لتصنيف فيه أماكن (CatalogPolicy::delete): بيتخفى بدل ما يتحذف
                 DeleteAction::make(),
             ])
             ->toolbarActions([

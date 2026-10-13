@@ -14,7 +14,7 @@ use Filament\Tables\Table;
 
 /**
  * A2 إدارة التصنيفات (02 القسم A2): الإخفاء والترتيب بالسحب ومنع حذف تصنيف فيه أماكن.
- * Admin بيعدّل، والـ Moderator عرض فقط (CategoryPolicy).
+ * Admin بيعدّل، والـ Moderator عرض فقط (CatalogPolicy).
  */
 class CategoryResource extends Resource
 {
