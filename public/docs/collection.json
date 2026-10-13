@@ -10,7 +10,7 @@
     ],
     "info": {
         "name": "Wain API",
-        "_postman_id": "0c31d336-cf65-419e-b7ed-06a8e659ad3f",
+        "_postman_id": "073abbfd-f750-44a6-a56d-335598be87f9",
         "description": "API \u062a\u0637\u0628\u064a\u0642 \u0648\u064a\u0646 (Wain): \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062d\u0633\u0627\u0628. \u0627\u0644\u0639\u0642\u062f \u0628\u064a\u0646 \u0627\u0644\u0640 backend \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644.",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
@@ -90,6 +90,132 @@
                     "response": []
                 },
                 {
+                    "name": "Forgot password: send a code",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/password\/forgot",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/password\/forgot"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"user@example.com\"}"
+                        },
+                        "description": "\u0628\u064a\u0628\u0639\u062a \u0643\u0648\u062f 6 \u0623\u0631\u0642\u0627\u0645 \u0644\u0644\u0625\u064a\u0645\u064a\u0644 (\u0635\u0627\u0644\u062d 15 \u062f\u0642\u064a\u0642\u0629\u060c \u06485 \u0645\u062d\u0627\u0648\u0644\u0627\u062a). **\u0627\u0644\u0631\u062f \u0648\u0627\u062d\u062f \u062f\u0627\u064a\u0645\u0627\u064b** \u0633\u0648\u0627\u0621 \u0627\u0644\u0625\u064a\u0645\u064a\u0644 \u0645\u0633\u062c\u0651\u0644 \u0623\u0648 \u0644\u0623\u060c\n\u0639\u0634\u0627\u0646 \u0645\u0627 \u0646\u0643\u0634\u0641\u0634 \u0645\u064a\u0646 \u0639\u0646\u062f\u0647 \u062d\u0633\u0627\u0628. \u0648\u0647\u0648 \u0646\u0641\u0633\u0647 \u00ab\u0627\u0628\u0639\u062a \u062a\u0627\u0646\u064a\u00bb: \u0644\u0648 \u0644\u0633\u0647 \u0645\u0627 \u0639\u062f\u0651\u062a\u0634 60 \u062b\u0627\u0646\u064a\u0629 \u0645\u0646 \u0622\u062e\u0631 \u0625\u0631\u0633\u0627\u0644 \u0628\u064a\u0631\u062c\u0651\u0639 \u0646\u0641\u0633\n\u0627\u0644\u0631\u062f \u0645\u0646 \u063a\u064a\u0631 \u0645\u0627 \u064a\u0628\u0639\u062a \u0643\u0648\u062f \u062c\u062f\u064a\u062f\u060c \u0648`resend_in` \u0647\u0648 \u0627\u0644\u0628\u0627\u0642\u064a \u0628\u0627\u0644\u062b\u0648\u0627\u0646\u064a. \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u062c\u062f\u064a\u062f \u0628\u064a\u0644\u063a\u064a \u0627\u0644\u0642\u062f\u064a\u0645.\n\n5 \u0645\u062d\u0627\u0648\u0644\u0627\u062a \u0641\u064a \u0627\u0644\u062f\u0642\u064a\u0642\u0629 \u0644\u0643\u0644 IP + \u0625\u064a\u0645\u064a\u0644\u060c \u0648\u0644\u0643\u0644 \u062e\u0637\u0648\u0629 \u0645\u0646 \u0627\u0644\u0640 3 (forgot \u0648verify \u0648reset) \u0645\u064a\u0632\u0627\u0646\u064a\u062a\u0647\u0627 \u0644\u0648\u062d\u062f\u0647\u0627\n(`429 TOO_MANY_REQUESTS` \u0648\u0645\u0639\u0627\u0647 \u0647\u064a\u062f\u0631 `Retry-After`).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"resend_in\": 60}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Check the code",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/password\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/password\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"user@example.com\",\"code\":\"482915\"}"
+                        },
+                        "description": "\u0628\u064a\u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0643\u0648\u062f. \u0644\u0648 \u0635\u062d \u0628\u064a\u0631\u062c\u0651\u0639 `reset_token` (\u0644\u0645\u0631\u0629 \u0648\u0627\u062d\u062f\u0629\u060c \u0635\u0627\u0644\u062d 10 \u062f\u0642\u0627\u064a\u0642) \u064a\u062a\u0628\u0639\u062a \u0645\u0639 \u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f \u0627\u0644\u062c\u062f\u064a\u062f\u060c\n\u0639\u0634\u0627\u0646 \u0634\u0627\u0634\u0629 \u0627\u0644\u0643\u0648\u062f \u062a\u062a\u062d\u0642\u0642 \u0642\u0628\u0644 \u0645\u0627 \u062a\u0641\u062a\u062d \u0634\u0627\u0634\u0629 \u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f.\n\n\u0623\u062e\u0637\u0627\u0621 (422\u060c \u0648\u0627\u0644\u0631\u0633\u0627\u0644\u0629 \u062a\u062d\u062a \u062d\u0642\u0644 `code`):\n- `INVALID_CODE`: \u0627\u0644\u0643\u0648\u062f \u063a\u0644\u0637 (\u0623\u0648 \u0645\u0641\u064a\u0634 \u0643\u0648\u062f \u0645\u0637\u0644\u0648\u0628).\n- `CODE_EXPIRED`: \u0627\u0644\u0643\u0648\u062f \u0627\u0646\u062a\u0647\u062a \u0635\u0644\u0627\u062d\u064a\u062a\u0647\u060c \u0627\u0637\u0644\u0628 \u0643\u0648\u062f \u062c\u062f\u064a\u062f.\n- `CODE_ATTEMPTS_EXCEEDED`: \u062e\u0644\u0651\u0635 \u0627\u0644\u0640 5 \u0645\u062d\u0627\u0648\u0644\u0627\u062a\u060c \u0627\u0637\u0644\u0628 \u0643\u0648\u062f \u062c\u062f\u064a\u062f.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"reset_token\": \"Zq1...\", \"expires_in\": 600}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Set the new password",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/password\/reset",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/password\/reset"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"user@example.com\",\"reset_token\":\"k3Jx...\",\"password\":\"newpass123\"}"
+                        },
+                        "description": "\u0628\u064a\u063a\u064a\u0651\u0631 \u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f \u0628\u0627\u0644\u0640 `reset_token` (\u0645\u0631\u0629 \u0648\u0627\u062d\u062f\u0629). **\u0643\u0644 \u0627\u0644\u0640 tokens \u0627\u0644\u0642\u062f\u064a\u0645\u0629 \u0628\u062a\u062a\u0645\u0633\u062d**\u060c \u0641\u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u064a\u062f\u062e\u0644\n\u0645\u0646 \u062c\u062f\u064a\u062f \u0628\u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f \u0627\u0644\u062c\u062f\u064a\u062f (`204`). \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u0644\u064a \u0648\u0635\u0644 \u0644\u0644\u0625\u064a\u0645\u064a\u0644 \u0628\u064a\u062b\u0628\u0651\u062a \u0625\u0646 \u0627\u0644\u0625\u064a\u0645\u064a\u0644 \u0628\u062a\u0627\u0639\u0647\u060c \u0641\u0627\u0644\u062d\u0633\u0627\u0628 \u0628\u064a\u062a\u0623\u0643\u0651\u062f.\n\n- `RESET_TOKEN_INVALID` (422): \u0627\u0644\u0640 token \u063a\u0644\u0637 \u0623\u0648 \u0645\u0646\u062a\u0647\u064a \u0623\u0648 \u0627\u062a\u0633\u062a\u062e\u062f\u0645\u060c \u0627\u0628\u062f\u0623 \u0645\u0646 \u0623\u0648\u0644.\n- \u0623\u062e\u0637\u0627\u0621 \u0627\u0644\u0628\u0627\u0633\u0648\u0631\u062f (422 `VALIDATION_ERROR`) \u062a\u062d\u062a \u062d\u0642\u0644 `password`.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "{}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
                     "name": "POST \/auth\/logout \u2014 \u0628\u064a\u0645\u0633\u062d \u0627\u0644\u0640 token \u0627\u0644\u062d\u0627\u0644\u064a \u0628\u0633 (\u0628\u0627\u0642\u064a \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u062a\u0641\u0636\u0644 \u0634\u063a\u0627\u0644\u0629).",
                     "request": {
                         "url": {
@@ -166,6 +292,74 @@
                             "name": ""
                         }
                     ]
+                },
+                {
+                    "name": "Send the verification code",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/email\/resend",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/email\/resend"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u0628\u064a\u0628\u0639\u062a \u0643\u0648\u062f 6 \u0623\u0631\u0642\u0627\u0645 \u0644\u0625\u064a\u0645\u064a\u0644 \u0627\u0644\u062d\u0633\u0627\u0628 (\u0635\u0627\u0644\u062d 15 \u062f\u0642\u064a\u0642\u0629\u060c \u06485 \u0645\u062d\u0627\u0648\u0644\u0627\u062a). \u0647\u0648 \u0646\u0641\u0633\u0647 \u00ab\u0627\u0628\u0639\u062a \u062a\u0627\u0646\u064a\u00bb: \u0628\u0639\u062f 60 \u062b\u0627\u0646\u064a\u0629 \u0645\u0646\n\u0622\u062e\u0631 \u0625\u0631\u0633\u0627\u0644 \u0628\u0633\u060c \u0642\u0628\u0644\u0647\u0627 `429 TOO_MANY_REQUESTS` \u0648\u0645\u0639\u0627\u0647 \u0647\u064a\u062f\u0631 `Retry-After` \u0628\u0627\u0644\u062b\u0648\u0627\u0646\u064a. \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u062c\u062f\u064a\u062f \u0628\u064a\u0644\u063a\u064a \u0627\u0644\u0642\u062f\u064a\u0645.\n\u0644\u0648 \u0627\u0644\u0625\u064a\u0645\u064a\u0644 \u0645\u062a\u0623\u0643\u0651\u062f \u062e\u0644\u0627\u0635: `422 EMAIL_ALREADY_VERIFIED`. \u0648\u0641\u0648\u0642 \u062f\u0647 5 \u0637\u0644\u0628\u0627\u062a \u0641\u064a \u0627\u0644\u062f\u0642\u064a\u0642\u0629 \u0644\u0643\u0644 \u0645\u0633\u062a\u062e\u062f\u0645\n(`429 TOO_MANY_REQUESTS`)."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"resend_in\": 60}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Verify the email",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/email\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/email\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"code\":\"482915\"}"
+                        },
+                        "description": "\u0628\u064a\u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0643\u0648\u062f \u0648\u0628\u064a\u0623\u0643\u0651\u062f \u0627\u0644\u0625\u064a\u0645\u064a\u0644. \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 (`email_verified: true`). \u0644\u0648 \u0627\u0644\u0625\u064a\u0645\u064a\u0644 \u0645\u062a\u0623\u0643\u0651\u062f \u0642\u0628\u0644 \u0643\u062f\u0647\n\u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u0645\u0646 \u063a\u064a\u0631 \u0645\u0627 \u064a\u0639\u0645\u0644 \u062d\u0627\u062c\u0629.\n\n\u0623\u062e\u0637\u0627\u0621 (422\u060c \u062a\u062d\u062a \u062d\u0642\u0644 `code`): `INVALID_CODE` \u0648`CODE_EXPIRED` \u0648`CODE_ATTEMPTS_EXCEEDED`.\n5 \u0637\u0644\u0628\u0627\u062a \u0641\u064a \u0627\u0644\u062f\u0642\u064a\u0642\u0629 \u0644\u0643\u0644 \u0645\u0633\u062a\u062e\u062f\u0645 (`429 TOO_MANY_REQUESTS`)."
+                    },
+                    "response": []
                 }
             ]
         },
@@ -359,8 +553,81 @@
                         "url": {
                             "host": "{{baseUrl}}",
                             "path": "api\/v1\/places",
-                            "query": [],
-                            "raw": "{{baseUrl}}\/api\/v1\/places"
+                            "query": [
+                                {
+                                    "key": "area",
+                                    "value": "new-cairo",
+                                    "description": "slug \u0627\u0644\u0645\u0646\u0637\u0642\u0629 (\u0645\u0646 `GET \/areas`). Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "categories[0]",
+                                    "value": "architecto",
+                                    "description": "Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "attributes[0]",
+                                    "value": "architecto",
+                                    "description": "Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "price_min",
+                                    "value": "100",
+                                    "description": "\u0623\u0642\u0644 \u0633\u0639\u0631 \u0641\u0631\u062f \u0628\u0627\u0644\u062c\u0646\u064a\u0647. \u0627\u0644\u0645\u0643\u0627\u0646 \u064a\u0638\u0647\u0631 \u0644\u0648 \u0646\u0637\u0627\u0642 \u0633\u0639\u0631\u0647 \u0628\u064a\u062a\u0642\u0627\u0637\u0639 \u0645\u0639 \u0627\u0644\u0646\u0637\u0627\u0642 \u0627\u0644\u0645\u062e\u062a\u0627\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 0 \u0623\u0648 \u0623\u0643\u062a\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 100000 \u0623\u0648 \u0623\u0642\u0644.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "price_max",
+                                    "value": "300",
+                                    "description": "\u0623\u0639\u0644\u0649 \u0633\u0639\u0631 \u0641\u0631\u062f \u0628\u0627\u0644\u062c\u0646\u064a\u0647\u060c \u0648\u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0623\u0643\u0628\u0631 \u0645\u0646 \u0623\u0648 \u064a\u0633\u0627\u0648\u064a `price_min`. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 0 \u0623\u0648 \u0623\u0643\u062a\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 100000 \u0623\u0648 \u0623\u0642\u0644.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "rating_min",
+                                    "value": "4",
+                                    "description": "\u0623\u0642\u0644 \u062a\u0642\u064a\u064a\u0645 (3 \u0623\u0648 4 \u0623\u0648 4.5). \u0628\u064a\u062d\u0633\u0628 \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0627\u0644\u0644\u064a \u0644\u064a\u0647\u0627 3 \u062a\u0642\u064a\u064a\u0645\u0627\u062a \u0623\u0648 \u0623\u0643\u062a\u0631 \u0628\u0633. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 1 \u06485.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "open_now",
+                                    "value": "1",
+                                    "description": "\u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0627\u0644\u0645\u0641\u062a\u0648\u062d\u0629 \u062f\u0644\u0648\u0642\u062a\u064a \u0628\u062a\u0648\u0642\u064a\u062a \u0627\u0644\u0642\u0627\u0647\u0631\u0629 (`1`).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "recommended",
+                                    "description": "\u0627\u0644\u062a\u0631\u062a\u064a\u0628: `recommended` (\u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a) \u0623\u0648 `nearest` (\u0645\u062d\u062a\u0627\u062c `lat` \u0648`lng`) \u0623\u0648 `rating` \u0623\u0648 `newest`.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "lat",
+                                    "value": "30.03",
+                                    "description": "\u062e\u0637 \u0627\u0644\u0639\u0631\u0636. \u0628\u064a\u0631\u062c\u0651\u0639 `distance_km` \u0641\u064a \u0643\u0644 \u0643\u0627\u0631\u062a. \u0644\u0627\u0632\u0645 \u0645\u0639 `lng`. This field is required when lng is present. This field is required when sort is nearest. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 -90 \u064890.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "lng",
+                                    "value": "31.47",
+                                    "description": "\u062e\u0637 \u0627\u0644\u0637\u0648\u0644. \u0644\u0627\u0632\u0645 \u0645\u0639 `lat`. This field is required when lat is present. This field is required when sort is nearest. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 -180 \u0648180.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "\u0631\u0642\u0645 \u0627\u0644\u0635\u0641\u062d\u0629 (\u0645\u0646 1). value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 1 \u0623\u0648 \u0623\u0643\u062a\u0631.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20",
+                                    "description": "\u0639\u062f\u062f \u0627\u0644\u0646\u062a\u0627\u064a\u062c \u0641\u064a \u0627\u0644\u0635\u0641\u062d\u0629 (20\u060c \u0623\u0642\u0635\u0649 50). value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 1 \u0623\u0648 \u0623\u0643\u062a\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 50 \u0623\u0648 \u0623\u0642\u0644.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/places?area=new-cairo&categories%5B0%5D=architecto&attributes%5B0%5D=architecto&price_min=100&price_max=300&rating_min=4&open_now=1&sort=recommended&lat=30.03&lng=31.47&page=1&per_page=20"
                         },
                         "method": "GET",
                         "header": [
@@ -377,11 +644,8 @@
                                 "value": "ar"
                             }
                         ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\"area\":\"architecto\",\"categories\":[\"architecto\"],\"open_now\":false,\"sort\":\"nearest\",\"lat\":-89,\"lng\":-180,\"page\":66,\"per_page\":17}"
-                        },
-                        "description": "\u0628\u062a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u0628\u0633. \u0627\u0644\u0641\u0644\u0627\u062a\u0631 \u0627\u0644\u0643\u0627\u0645\u0644\u0629 \u0645\u0639 F5 (\u0623\u0633\u0628\u0648\u0639 4)\u060c \u0648\u0627\u0644\u0640 cache \u0645\u0639 \/home (\u0623\u0633\u0628\u0648\u0639 8).",
+                        "body": null,
+                        "description": "\u0628\u062a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u0628\u0633\u060c \u0628\u0627\u0644\u0641\u0644\u0627\u062a\u0631 (\u0627\u0644\u0645\u0646\u0637\u0642\u0629 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062e\u0635\u0627\u0626\u0635 \u0648\u0627\u0644\u0633\u0639\u0631 \u0648\u0627\u0644\u062a\u0642\u064a\u064a\u0645 \u0648 open_now) \u0645\u0646\nPlaceFilterRequest\u060c \u0648\u0627\u0644\u0640 cache \u0645\u0639 \/home (\u0623\u0633\u0628\u0648\u0639 8).",
                         "auth": {
                             "type": "noauth"
                         }
@@ -403,7 +667,7 @@
                                 }
                             ],
                             "code": 422,
-                            "body": "{\"message\":\"\\u0627\\u0644\\u0628\\u064a\\u0627\\u0646\\u0627\\u062a \\u0627\\u0644\\u0644\\u064a \\u062f\\u062e\\u0644\\u062a\\u0647\\u0627 \\u0645\\u0634 \\u0635\\u062d\\u064a\\u062d\\u0629.\",\"code\":\"VALIDATION_ERROR\",\"errors\":{\"area\":[\"\\u0627\\u0644\\u0645\\u0646\\u0637\\u0642\\u0629 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"],\"categories.0\":[\"\\u0627\\u0644\\u062a\\u0635\\u0646\\u064a\\u0641 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"]}}",
+                            "body": "{\"message\":\"\\u0627\\u0644\\u0628\\u064a\\u0627\\u0646\\u0627\\u062a \\u0627\\u0644\\u0644\\u064a \\u062f\\u062e\\u0644\\u062a\\u0647\\u0627 \\u0645\\u0634 \\u0635\\u062d\\u064a\\u062d\\u0629.\",\"code\":\"VALIDATION_ERROR\",\"errors\":{\"categories.0\":[\"\\u0627\\u0644\\u062a\\u0635\\u0646\\u064a\\u0641 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"],\"attributes.0\":[\"\\u0627\\u0644\\u062e\\u0627\\u0635\\u064a\\u0629 \\u0627\\u0644\\u0645\\u062e\\u062a\\u0627\\u0631 \\u0645\\u0634 \\u0645\\u0648\\u062c\\u0648\\u062f.\"]}}",
                             "name": ""
                         }
                     ]
@@ -464,6 +728,88 @@
                     ]
                 },
                 {
+                    "name": "Count places",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places\/count",
+                            "query": [
+                                {
+                                    "key": "area",
+                                    "value": "new-cairo",
+                                    "description": "slug \u0627\u0644\u0645\u0646\u0637\u0642\u0629 (\u0645\u0646 `GET \/areas`). Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "categories[0]",
+                                    "value": "architecto",
+                                    "description": "Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "attributes[0]",
+                                    "value": "architecto",
+                                    "description": "Must match an existing stored value.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "price_min",
+                                    "value": "100",
+                                    "description": "\u0623\u0642\u0644 \u0633\u0639\u0631 \u0641\u0631\u062f \u0628\u0627\u0644\u062c\u0646\u064a\u0647. \u0627\u0644\u0645\u0643\u0627\u0646 \u064a\u0638\u0647\u0631 \u0644\u0648 \u0646\u0637\u0627\u0642 \u0633\u0639\u0631\u0647 \u0628\u064a\u062a\u0642\u0627\u0637\u0639 \u0645\u0639 \u0627\u0644\u0646\u0637\u0627\u0642 \u0627\u0644\u0645\u062e\u062a\u0627\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 0 \u0623\u0648 \u0623\u0643\u062a\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 100000 \u0623\u0648 \u0623\u0642\u0644.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "price_max",
+                                    "value": "300",
+                                    "description": "\u0623\u0639\u0644\u0649 \u0633\u0639\u0631 \u0641\u0631\u062f \u0628\u0627\u0644\u062c\u0646\u064a\u0647\u060c \u0648\u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0623\u0643\u0628\u0631 \u0645\u0646 \u0623\u0648 \u064a\u0633\u0627\u0648\u064a `price_min`. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 0 \u0623\u0648 \u0623\u0643\u062a\u0631. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 100000 \u0623\u0648 \u0623\u0642\u0644.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "rating_min",
+                                    "value": "4",
+                                    "description": "\u0623\u0642\u0644 \u062a\u0642\u064a\u064a\u0645 (3 \u0623\u0648 4 \u0623\u0648 4.5). \u0628\u064a\u062d\u0633\u0628 \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0627\u0644\u0644\u064a \u0644\u064a\u0647\u0627 3 \u062a\u0642\u064a\u064a\u0645\u0627\u062a \u0623\u0648 \u0623\u0643\u062a\u0631 \u0628\u0633. value \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0628\u064a\u0646 1 \u06485.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "open_now",
+                                    "value": "1",
+                                    "description": "\u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0627\u0644\u0645\u0641\u062a\u0648\u062d\u0629 \u062f\u0644\u0648\u0642\u062a\u064a \u0628\u062a\u0648\u0642\u064a\u062a \u0627\u0644\u0642\u0627\u0647\u0631\u0629 (`1`).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/places\/count?area=new-cairo&categories%5B0%5D=architecto&attributes%5B0%5D=architecto&price_min=100&price_max=300&rating_min=4&open_now=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u0639\u062f\u062f \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0628\u0646\u0641\u0633 \u0641\u0644\u0627\u062a\u0631 `GET \/places` (\u0644\u0644\u0632\u0631\u0627\u0631 \u00ab\u0648\u0631\u0651\u064a\u0646\u064a 23 \u0645\u0643\u0627\u0646\u00bb \u0641\u064a \u0634\u0627\u0634\u0629 \u0627\u0644\u0641\u0644\u0627\u062a\u0631). \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u0628\u0633\u060c\n\u0648\u0645\u0646 \u063a\u064a\u0631 pagination. \u0628\u064a\u0642\u0628\u0644 \u0646\u0641\u0633 \u0627\u0644\u0640 query \u0628\u062a\u0627\u0639\u0629 \u0627\u0644\u0642\u0627\u0626\u0645\u0629 \u0648\u0628\u064a\u062a\u062c\u0627\u0647\u0644 \u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u0648\u0627\u0644\u0645\u0648\u0642\u0639 \u0648\u0627\u0644\u0635\u0641\u062d\u0629.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"count\": 23}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
                     "name": "Get place details",
                     "request": {
                         "url": {
@@ -509,7 +855,7 @@
                             }
                         ],
                         "body": null,
-                        "description": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0645\u0643\u0627\u0646. \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0643\u0627\u0646 (F7): \u0643\u0644 \u062d\u0642\u0648\u0644 \u0627\u0644\u0643\u0627\u0631\u062a + \u0627\u0644\u0648\u0635\u0641 \u0648\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062e\u0635\u0627\u0626\u0635 (\u0645\u062a\u062c\u0645\u0651\u0639\u0629) \u0648\u0627\u0644\u062a\u0648\u0627\u0635\u0644 \u0648\u0627\u0644\u0645\u0648\u0627\u0639\u064a\u062f\n\u0648\u0627\u0644\u0635\u0648\u0631 \u0648\u0627\u0644\u0645\u0646\u064a\u0648.\n\n- \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 (`status = active`) \u0648\u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b (`status = closed`) \u0628\u0633. \u063a\u064a\u0631 \u0643\u062f\u0647 (\u0645\u062e\u0641\u064a \u0623\u0648 \u0645\u0633\u0648\u062f\u0629 \u0623\u0648\n  \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0623\u0648 \u0645\u0631\u0641\u0648\u0636 \u0623\u0648 \u0645\u062d\u0630\u0648\u0641 \u0623\u0648 \u0645\u0634 \u0645\u0648\u062c\u0648\u062f) 404 `PLACE_NOT_AVAILABLE` \u0648\u0627\u062d\u062f\u0629 \u0645\u0646 \u063a\u064a\u0631 \u0645\u0627 \u062a\u0643\u0634\u0641 \u0627\u0644\u0633\u0628\u0628.\n- \u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b: `is_open_now` \u0648`hours.status_text` \u0628\u0640 `null` \u0648`hours.week` \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644 \u0628\u064a\u0639\u0631\u0636\n  \u0628\u0627\u0646\u0631 \u00ab\u0627\u0644\u0645\u0643\u0627\u0646 \u062f\u0647 \u0642\u0641\u0644 \u0646\u0647\u0627\u0626\u064a\u0627\u064b\u00bb \u0648\u0628\u064a\u062e\u0641\u064a \u0623\u0632\u0631\u0627\u0631 \u0627\u0644\u062a\u0648\u0627\u0635\u0644.\n- \u0627\u0644\u0640 slug \u0627\u0644\u0642\u062f\u064a\u0645 \u0628\u0639\u062f \u0645\u0627 \u064a\u062a\u063a\u064a\u0651\u0631 \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0643\u0627\u0646 \u0628\u0627\u0644\u0640 slug \u0627\u0644\u062c\u062f\u064a\u062f (\u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0645\u062a\u0634\u0627\u0631\u0643\u0629 \u062a\u0641\u0636\u0644 \u0634\u063a\u0627\u0644\u0629).\n- \u0627\u0644\u0623\u062c\u0632\u0627\u0621 \u0627\u0644\u0641\u0627\u0636\u064a\u0629: `description` \u0628\u0640 `null`\u060c \u0648`attributes` \u0648`photos` \u0648`menu_photos` \u0642\u0627\u064a\u0645\u0629 \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u062d\u0642\u0648\u0644\n  `contact` \u0628\u0640 `null`.\n- `distance_km` \u0628\u0640 `null` \u0645\u0646 \u063a\u064a\u0631 `lat` \u0648`lng`. `is_saved` \u062f\u0627\u064a\u0645\u0627\u064b `false` \u0644\u062d\u062f F9.",
+                        "description": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0645\u0643\u0627\u0646. \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0643\u0627\u0646 (F7): \u0643\u0644 \u062d\u0642\u0648\u0644 \u0627\u0644\u0643\u0627\u0631\u062a + \u0627\u0644\u0648\u0635\u0641 \u0648\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062e\u0635\u0627\u0626\u0635 (\u0645\u062a\u062c\u0645\u0651\u0639\u0629) \u0648\u0627\u0644\u062a\u0648\u0627\u0635\u0644 \u0648\u0627\u0644\u0645\u0648\u0627\u0639\u064a\u062f\n\u0648\u0627\u0644\u0635\u0648\u0631 \u0648\u0627\u0644\u0645\u0646\u064a\u0648.\n\n- \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 (`status = active`) \u0648\u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b (`status = closed`) \u0628\u0633. \u063a\u064a\u0631 \u0643\u062f\u0647 (\u0645\u062e\u0641\u064a \u0623\u0648 \u0645\u0633\u0648\u062f\u0629 \u0623\u0648\n  \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0623\u0648 \u0645\u0631\u0641\u0648\u0636 \u0623\u0648 \u0645\u062d\u0630\u0648\u0641 \u0623\u0648 \u0645\u0634 \u0645\u0648\u062c\u0648\u062f) 404 `PLACE_NOT_AVAILABLE` \u0648\u0627\u062d\u062f\u0629 \u0645\u0646 \u063a\u064a\u0631 \u0645\u0627 \u062a\u0643\u0634\u0641 \u0627\u0644\u0633\u0628\u0628.\n- \u0627\u0644\u0645\u063a\u0644\u0642 \u0646\u0647\u0627\u0626\u064a\u0627\u064b: `is_open_now` \u0648`hours.status_text` \u0628\u0640 `null` \u0648`hours.week` \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644 \u0628\u064a\u0639\u0631\u0636\n  \u0628\u0627\u0646\u0631 \u00ab\u0627\u0644\u0645\u0643\u0627\u0646 \u062f\u0647 \u0642\u0641\u0644 \u0646\u0647\u0627\u0626\u064a\u0627\u064b\u00bb \u0648\u0628\u064a\u062e\u0641\u064a \u0623\u0632\u0631\u0627\u0631 \u0627\u0644\u062a\u0648\u0627\u0635\u0644.\n- \u0627\u0644\u0640 slug \u0627\u0644\u0642\u062f\u064a\u0645 \u0628\u0639\u062f \u0645\u0627 \u064a\u062a\u063a\u064a\u0651\u0631 \u0628\u064a\u0631\u062c\u0651\u0639 \u0627\u0644\u0645\u0643\u0627\u0646 \u0628\u0627\u0644\u0640 slug \u0627\u0644\u062c\u062f\u064a\u062f (\u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0627\u0644\u0645\u062a\u0634\u0627\u0631\u0643\u0629 \u062a\u0641\u0636\u0644 \u0634\u063a\u0627\u0644\u0629).\n- \u0627\u0644\u0623\u062c\u0632\u0627\u0621 \u0627\u0644\u0641\u0627\u0636\u064a\u0629: `description` \u0628\u0640 `null`\u060c \u0648`attributes` \u0648`photos` \u0648`menu_photos` \u0642\u0627\u064a\u0645\u0629 \u0641\u0627\u0636\u064a\u0629\u060c \u0648\u062d\u0642\u0648\u0644\n  `contact` \u0628\u0640 `null`.\n- `distance_km` \u0628\u0640 `null` \u0645\u0646 \u063a\u064a\u0631 `lat` \u0648`lng`. `is_saved` \u062f\u0627\u064a\u0645\u0627\u064b `false` \u0644\u062d\u062f F9.\n- \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0643\u0627\u0646 \u0641\u064a cache \u0644\u0645\u062f\u0629 5 \u062f\u0642\u0627\u064a\u0642 \u0648\u0628\u062a\u062a\u0645\u0633\u062d \u0641\u0648\u0631\u0627\u064b \u0645\u0639 \u0623\u064a \u062a\u0639\u062f\u064a\u0644 \u0623\u0648 \u0625\u062e\u0641\u0627\u0621. `is_open_now` \u0648\u0627\u0644\u0645\u0648\u0627\u0639\u064a\u062f \u0648\u0627\u0644\u0644\u063a\u0629\n  \u0648`distance_km` \u0628\u062a\u062a\u062d\u0633\u0628 \u0645\u0639 \u0643\u0644 \u0637\u0644\u0628.",
                         "auth": {
                             "type": "noauth"
                         }
