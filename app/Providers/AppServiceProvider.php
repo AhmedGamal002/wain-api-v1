@@ -35,6 +35,17 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)
             ->by($request->ip().'|'.strtolower((string) $request->input('email'))));
 
+        // نسيت الباسورد: 5 محاولات في الدقيقة لكل IP + إيميل (SEC-01)، **لكل خطوة لوحدها** (forgot وverify وreset)،
+        // عشان المستخدم اللي بيعدّي الخطوات التلاتة بسرعة ومعاه غلطة أو اتنين ما يتحسبش على نفسه. وهو limiter
+        // لوحده عشان ما ياكلش من محاولات الدخول. الكود نفسه ليه 5 محاولات و«ابعت تاني» بعد 60 ثانية.
+        RateLimiter::for('password', fn (Request $request) => Limit::perMinute(5)
+            ->by('password|'.$request->path().'|'.$request->ip().'|'.strtolower(trim((string) $request->input('email')))));
+
+        // تأكيد الإيميل (resend وverify) للمستخدم المسجّل: 5 في الدقيقة لكل مستخدم ولكل خطوة، من غير ما
+        // يتشارك مع الدخول.
+        RateLimiter::for('email-code', fn (Request $request) => Limit::perMinute(5)
+            ->by('email-code|'.$request->path().'|'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+
         // التصنيفات والخصائص والمدن والمناطق ليها نفس الصلاحيات: Admin يعدّل والـ Moderator عرض فقط.
         foreach ([Category::class, Attribute::class, City::class, Area::class] as $model) {
             Gate::policy($model, CatalogPolicy::class);

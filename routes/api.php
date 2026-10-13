@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\V1\AttributeController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ConfigController;
+use App\Http\Controllers\Api\V1\EmailVerificationController;
+use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
@@ -28,9 +30,21 @@ Route::prefix('v1')->group(function () {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:auth');
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
 
+        // نسيت الباسورد: الإيميل ← الكود ← reset_token ← باسورد جديد. limiter لوحده (10 في الدقيقة لكل IP + إيميل)
+        // عشان ما ياكلش من محاولات الدخول.
+        Route::prefix('password')->middleware('throttle:password')->group(function () {
+            Route::post('forgot', [PasswordResetController::class, 'forgot']);
+            Route::post('verify', [PasswordResetController::class, 'verify']);
+            Route::post('reset', [PasswordResetController::class, 'reset']);
+        });
+
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
+
+            // تأكيد الإيميل: الكود بيتبعت لإيميل الحساب، و«ابعت تاني» بعد 60 ثانية
+            Route::post('email/resend', [EmailVerificationController::class, 'resend'])->middleware('throttle:email-code');
+            Route::post('email/verify', [EmailVerificationController::class, 'verify'])->middleware('throttle:email-code');
         });
     });
 });

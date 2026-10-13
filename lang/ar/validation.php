@@ -13,6 +13,7 @@ return [
         'file' => ':attribute لازم يكون من :min لـ :max كيلوبايت.',
     ],
     'confirmed' => ':attribute مش مطابق للتأكيد.',
+    'digits' => ':attribute لازم يكون :digits أرقام.',
     'email' => 'اكتب إيميل صحيح.',
     'exists' => ':attribute المختار مش موجود.',
     'gte' => [
@@ -52,6 +53,8 @@ return [
         'email' => 'الإيميل',
         'password' => 'الباسورد',
         'password_confirmation' => 'تأكيد الباسورد',
+        'code' => 'الكود',
+        'reset_token' => 'رمز إعادة التعيين',
         'terms_accepted' => 'الشروط والخصوصية',
         'area' => 'المنطقة',
         'categories' => 'التصنيفات',
