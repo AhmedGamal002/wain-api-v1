@@ -15,6 +15,25 @@ use InvalidArgumentException;
  */
 final class PlaceLocation
 {
+    // حدود مصر التقريبية: بتمسك أي إحداثية برّه مصر (رقم ناقص أو زيادة). ماتمسكش الطول والعرض المبدّلين،
+    // لإن مدى الاتنين متداخل (25 لـ 32) جوه مصر، فده بتراجعه العين على الخريطة (map picker في A1).
+    public const EGYPT_LAT_MIN = 22;
+
+    public const EGYPT_LAT_MAX = 32;
+
+    public const EGYPT_LNG_MIN = 24;
+
+    public const EGYPT_LNG_MAX = 37;
+
+    /**
+     * الإحداثية جوه حدود مصر التقريبية؟ شرط «المنطقة والموقع» في شروط النشر (03 القسم 4.3).
+     */
+    public static function isInsideEgypt(float $lat, float $lng): bool
+    {
+        return $lat >= self::EGYPT_LAT_MIN && $lat <= self::EGYPT_LAT_MAX
+            && $lng >= self::EGYPT_LNG_MIN && $lng <= self::EGYPT_LNG_MAX;
+    }
+
     /**
      * نص SQL لنقطة: `ST_GeomFromText('POINT(lng lat)')`.
      */

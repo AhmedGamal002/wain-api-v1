@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * في الـ API ومابيتغيرش بعد الإنشاء.
  *
  * `places_count` في `GET /areas` بيتحسب من الأماكن المنشورة وبيتخزّن في cache ساعة مع الباقي؛
- * `PlaceObserver` (أسبوع 4) هو اللي هيمسح `Area::CACHE_KEY` لما مكان يتنشر أو يتخفى.
+ * `ForgetPlaceDetailCache` (listener على `PlaceChanged`) بيمسح `Area::CACHE_KEY` لما مكان يتنشر أو يتخفى.
  */
 class Area extends Model
 {

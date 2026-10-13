@@ -105,7 +105,10 @@ final class OpeningHours
         return $dayIndex * self::MINUTES_PER_DAY + $local->hour * 60 + $local->minute;
     }
 
-    private static function toMinutes(string $time): ?int
+    /**
+     * `HH:MM` (من 00:00 لـ 24:00) بالدقايق من أول اليوم، أو null لو الصيغة غلط.
+     */
+    public static function toMinutes(string $time): ?int
     {
         if (! preg_match('/^(\d{1,2}):(\d{2})$/', $time, $m)) {
             return null;

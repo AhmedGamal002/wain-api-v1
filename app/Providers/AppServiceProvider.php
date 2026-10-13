@@ -6,7 +6,9 @@ use App\Models\Area;
 use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\City;
+use App\Models\Place;
 use App\Policies\CatalogPolicy;
+use App\Policies\PlacePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -37,5 +39,7 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Category::class, Attribute::class, City::class, Area::class] as $model) {
             Gate::policy($model, CatalogPolicy::class);
         }
+
+        Gate::policy(Place::class, PlacePolicy::class);
     }
 }

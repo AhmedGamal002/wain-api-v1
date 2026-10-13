@@ -2,25 +2,82 @@
 
 namespace App\Models;
 
+use App\Observers\PlaceObserver;
 use App\Support\OpenNow;
+use Database\Factories\PlaceFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * المكان (03 القسم 2). الموديل ده بيحتوي على اللي الـ API محتاجه لقراءة الأماكن (القوائم والتفاصيل).
- * الـ Observer والـ Policy وPlacePublishCheck وحالات الـ Dashboard بتتضاف مع A1 (أسبوع 4).
+ * المكان (03 القسم 2). الـ Observer (`PlaceObserver`) بيملى الحقول المشتقة (slug، location، price_range،
+ * tier_rank، published_at) وبيطلق `PlaceChanged`، والـ Policy (`PlacePolicy`) بتحكم بالدور، وشروط النشر
+ * في `PlacePublishCheck`.
  */
+#[ObservedBy(PlaceObserver::class)]
 class Place extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<PlaceFactory> */
+    use HasFactory, LogsActivity, SoftDeletes;
+
+    /** اسم سجل التغييرات (activitylog) للأماكن. */
+    public const LOG_NAME = 'places';
 
     /**
-     * كلمات مسارات `/places/{...}` الثابتة. ما تنفعش slug لمكان (مولّد الـ slug في A1 لازم يتخطاها)،
-     * وراوت `places/{slug}` بيستثنيها.
+     * الحقول اللي بتتسجل في السجل. المشتق (search_text، location، price_range، tier_rank) والمحسوب
+     * (rating_*) مش بيتسجلوا: بيتغيّروا تبعاً لغيرهم.
+     */
+    public const LOGGED_FIELDS = [
+        'slug', 'name_ar', 'name_en', 'search_aliases', 'description_ar', 'description_en',
+        'primary_category_id', 'city_id', 'area_id', 'address_ar', 'address_en', 'latitude', 'longitude',
+        'google_maps_url', 'phone', 'whatsapp', 'instagram', 'facebook_url', 'website', 'menu_url',
+        'price_min', 'price_max', 'opening_hours', 'ramadan_hours', 'cover_photo_id',
+        'status', 'status_reason', 'published_at', 'closed_at',
+        'listing_tier', 'tier_starts_at', 'tier_ends_at', 'verified_at', 'claimed_by', 'internal_notes',
+    ];
+
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_HIDDEN = 'hidden';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_CLOSED = 'closed';
+
+    /** الحالات بالاسم اللي بيظهر في اللوحة (03 القسم 2 و4.2). */
+    public const STATUS_LABELS = [
+        self::STATUS_DRAFT => 'مسودة',
+        self::STATUS_PENDING => 'قيد المراجعة',
+        self::STATUS_ACTIVE => 'منشور',
+        self::STATUS_HIDDEN => 'مخفي',
+        self::STATUS_REJECTED => 'مرفوض',
+        self::STATUS_CLOSED => 'مغلق نهائياً',
+    ];
+
+    /** `tier_rank` لكل باقة: للترتيب من غير CASE (1 premium، 2 featured، 3 free). */
+    public const TIER_RANKS = ['premium' => 1, 'featured' => 2, 'free' => 3];
+
+    /** @var array<string, mixed> نفس defaults الـ migration، عشان المكان اللي لسه متعمل يبقى زي اللي هيتحمّل. */
+    protected $attributes = [
+        'status' => self::STATUS_DRAFT,
+        'listing_tier' => 'free',
+        'tier_rank' => 3,
+    ];
+
+    /**
+     * كلمات مسارات `/places/{...}` الثابتة. ما تنفعش slug لمكان (`PlaceSlug` بيتخطاها)، وراوت
+     * `places/{slug}` بيستثنيها.
      */
     public const RESERVED_SLUGS = ['nearby', 'count', 'map'];
 
@@ -41,8 +98,53 @@ class Place extends Model
             'tier_rank' => 'integer',
             'published_at' => 'datetime',
             'verified_at' => 'datetime',
+            'tier_starts_at' => 'datetime',
+            'tier_ends_at' => 'datetime',
             'closed_at' => 'date',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName(self::LOG_NAME)
+            ->logOnly(self::LOGGED_FIELDS)
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * مفتاح الـ cache (file) لتفاصيل المكان، 5 دقايق. بيتمسح من `PlaceChanged` (ForgetPlaceDetailCache)
+     * بالـ slug الحالي والقديم.
+     */
+    public static function detailsCacheKey(string $slug): string
+    {
+        // الـ slug case-insensitive في الداتابيز (collation)، فالمفتاح lowercase عشان الاتنين يتمسحوا مع بعض
+        return 'places:'.mb_strtolower($slug);
+    }
+
+    /** @return BelongsTo<City, $this> */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function claimedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'claimed_by');
     }
 
     /** @return BelongsTo<Category, $this> */
@@ -135,6 +237,17 @@ class Place extends Model
                     $flag->selectRaw('CASE WHEN ? AND EXISTS (SELECT 1 FROM place_hours r WHERE r.place_id = places.id AND r.is_ramadan = 1) THEN 1 ELSE 0 END', [$now->ramadan ? 1 : 0]);
                 });
         });
+    }
+
+    /**
+     * البيانات اللي `PlacePublishCheck` بيقراها من علاقات: التصنيفات المختارة وغلاف المكان وعدد الخصائص.
+     * القائمة بتستخدمه عشان عمود «اكتمال البيانات» ما يعملش N+1.
+     *
+     * @param  Builder<Place>  $query
+     */
+    public function scopeWithPublishCheckData(Builder $query): void
+    {
+        $query->with(['categories:categories.id', 'coverPhoto:id,status'])->withCount('placeAttributes');
     }
 
     /**

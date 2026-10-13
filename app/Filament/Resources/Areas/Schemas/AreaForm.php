@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Areas\Schemas;
 
+use App\Support\PlaceLocation;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
@@ -12,15 +13,14 @@ use Illuminate\Validation\Rules\Unique;
 
 class AreaForm
 {
-    // حدود مصر التقريبية: بتمسك أي إحداثية برّه مصر (رقم ناقص أو زيادة). ماتمسكش الطول والعرض المبدّلين،
-    // لإن مدى الاتنين متداخل (25 لـ 32) جوه مصر، فده بتراجعه العين على الخريطة (map picker في A1).
-    public const LAT_MIN = 22;
+    // حدود مصر التقريبية (PlaceLocation): نفس حدود شرط «المنطقة والموقع» في نشر المكان.
+    public const LAT_MIN = PlaceLocation::EGYPT_LAT_MIN;
 
-    public const LAT_MAX = 32;
+    public const LAT_MAX = PlaceLocation::EGYPT_LAT_MAX;
 
-    public const LNG_MIN = 24;
+    public const LNG_MIN = PlaceLocation::EGYPT_LNG_MIN;
 
-    public const LNG_MAX = 37;
+    public const LNG_MAX = PlaceLocation::EGYPT_LNG_MAX;
 
     public static function configure(Schema $schema): Schema
     {
