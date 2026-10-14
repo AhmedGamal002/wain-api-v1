@@ -359,10 +359,11 @@ class PlaceDetailApiTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['count']);
 
-        // كلمة محجوزة لسه من غير مسار (map، F6 في أسبوع 7): مش slug، فـ NOT_FOUND مش PLACE_NOT_AVAILABLE
+        // map ليه مسار حقيقي (F6): بيروح للـ endpoint بتاعه (bbox إلزامي فيه) مش PLACE_NOT_AVAILABLE
         $this->getJson('/api/v1/places/map', self::AR)
-            ->assertNotFound()
-            ->assertJsonPath('code', 'NOT_FOUND');
+            ->assertStatus(422)
+            ->assertJsonPath('code', 'VALIDATION_ERROR')
+            ->assertJsonValidationErrors('bbox');
     }
 
     // ---- cache التفاصيل (03 القسم 5.5): 5 دقايق، بيتمسح مع أي تغيير ----
