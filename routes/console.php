@@ -16,3 +16,6 @@ Schedule::command('sanctum:prune-expired --hours=24')->dailyAt('03:40')->without
 // Search text (02 F4): rebuilt every night so it heals what the listeners cannot see (a place written with
 // DB::table, an import, a change made outside Eloquent), and the spelling vocabulary starts fresh.
 Schedule::command('places:rebuild-search')->dailyAt('03:50')->withoutOverlapping();
+
+// Search log (06 section 5): searches are user data, kept 90 days for the A9 reports.
+Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();

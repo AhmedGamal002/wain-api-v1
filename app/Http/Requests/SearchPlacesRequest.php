@@ -20,6 +20,8 @@ class SearchPlacesRequest extends IndexPlacesRequest
     {
         return [
             'q' => ['required', 'string', 'min:'.self::MIN_LENGTH, 'max:'.self::MAX_LENGTH],
+            // تسجيل العملية في search_logs (الموبايل بيبعتها لما المستخدم يدوس Enter أو يفتح نتيجة أو يثبت «مفيش نتائج»)
+            'log' => ['nullable', 'boolean'],
             ...parent::rules(),
         ];
     }
@@ -32,6 +34,11 @@ class SearchPlacesRequest extends IndexPlacesRequest
                     .'وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص '
                     .'والمنطقة والوصف.',
                 'example' => 'كافيه هادي',
+            ],
+            'log' => [
+                'description' => 'سجّل العملية دي في سجل البحث (للتقارير). الموبايل بيبعتها `1` بس لما المستخدم يدوس Enter أو يفتح نتيجة أو '
+                    .'تثبت شاشة «مفيش نتائج» لثانية، مش مع كل حرف.',
+                'example' => 0,
             ],
             ...parent::queryParameters(),
         ];
