@@ -160,6 +160,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places--slug-">
                                 <a href="#places-GETapi-v1-places--slug-">Get place details</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="places-POSTapi-v1-places--slug--events">
+                                <a href="#places-POSTapi-v1-places--slug--events">Record a place event</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-search">
                                 <a href="#places-GETapi-v1-search">Search places</a>
                             </li>
@@ -2366,7 +2369,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </p>
 
 <p>بترجّع المنشور بس، بالفلاتر (المنطقة والتصنيفات والخصائص والسعر والتقييم و open_now) من
-PlaceFilterRequest، والـ cache مع /home (أسبوع 8).</p>
+PlaceFilterRequest.</p>
+<p>ترتيب الـ ids وعدد النتايج بس هما اللي في cache لمدة 60 ثانية (<code>PlaceListCache</code>، بيتمسح مع أي تغيير في
+الأماكن)؛ الكارت بيتبني من الداتابيز كل طلب بـ <code>is_open_now</code> والمسافة واللغة.</p>
 
 <span id="example-requests-GETapi-v1-places">
 <blockquote>Example request:</blockquote>
@@ -2696,8 +2701,7 @@ Must be one of:
 <p>
 </p>
 
-<p>بيفلتر أولاً بمستطيل حوالين النقطة (MBRContains، بيستخدم الـ SPATIAL INDEX)، وبعدين بالمسافة الدقيقة.
-القائمة صغيرة (limit أقصى 30) فمفيش meta.</p>
+<p>القائمة صغيرة (limit أقصى 30) فمفيش meta. الاستعلام نفسه في <code>NearbyPlaces</code> (مشترك مع <code>GET /home</code>).</p>
 
 <span id="example-requests-GETapi-v1-places-nearby">
 <blockquote>Example request:</blockquote>
@@ -3836,6 +3840,239 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>خط طول المستخدم، لحساب <code>distance_km</code>. لازم مع <code>lat</code>. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180. Example: <code>31.47</code></p>
             </div>
                 </form>
+
+                    <h2 id="places-POSTapi-v1-places--slug--events">Record a place event</h2>
+
+<p>
+</p>
+
+<p>تسجيل حدث للمكان (ANL-02): مشاهدة الصفحة أو ضغطة على اتجاهات أو اتصال أو واتساب أو إنستجرام أو المنيو
+أو المشاركة. بتغذّي إحصائيات المكان (لوحة الأدمن والتقارير، وصاحب المكان بعد كده).</p>
+<ul>
+<li><strong>من غير دخول:</strong> الطلب بيتقبل من زائر. لو فيه token صالح بيتسجّل <code>user_id</code> كمان.</li>
+<li><strong><code>X-Device-Id</code> إلزامي</strong> (UUID): من غيره أو بشكل غلط 422. الـ id عشوائي بيتولّد من التطبيق، مش مربوط بأي
+بيانات شخصية، والموقع ما بيتبعتش مع الحدث. الأحداث الخام بتتمسح بعد 90 يوم والمتجمّع بيفضل.</li>
+<li><strong><code>view</code>:</strong> بيتحسب مرة واحدة لكل جهاز لكل مكان في الساعة، والموبايل بيبعته مرة لكل فتحة صفحة. الباقي
+كل ضغطة حدث.</li>
+<li><strong>الكتابة على الـ queue</strong>، فالرد 204 فوراً والحدث بيبان في الإحصائيات بعد دقيقة أو دقيقتين. الموبايل
+بيبعت من غير ما يستنّى ولا يعرض خطأ لو فشل.</li>
+<li>المكان المخفي أو المسودة أو المحذوف أو مش موجود: 404 <code>PLACE_NOT_AVAILABLE</code> زي صفحة المكان.</li>
+<li>الحد الأقصى 60 حدث في الدقيقة للجهاز أو المستخدم، وبره الحد العام للطلبات عشان التتبّع ما ياكلش من
+ميزانية التصفّح.</li>
+</ul>
+
+<span id="example-requests-POSTapi-v1-places--slug--events">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/places/el-mahatta-coffee/events" \
+    --header "X-Device-Id: 3f6c1c2e-8c1a-4b6f-9d55-2f5b8c0e7a11" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar" \
+    --data "{
+    \"type\": \"directions\",
+    \"device_id\": \"6ff8f7f6-1eb3-3525-be4a-3932c805afed\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/places/el-mahatta-coffee/events"
+);
+
+const headers = {
+    "X-Device-Id": "3f6c1c2e-8c1a-4b6f-9d55-2f5b8c0e7a11",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+let body = {
+    "type": "directions",
+    "device_id": "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-places--slug--events">
+            <blockquote>
+            <p>Example response (204, اتسجّل):</p>
+        </blockquote>
+                <pre>
+<code>Empty response</code>
+ </pre>
+            <blockquote>
+            <p>Example response (404, مخفي أو مسودة أو محذوف أو مش موجود):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;المكان مش متاح دلوقتي.&quot;,
+    &quot;code&quot;: &quot;PLACE_NOT_AVAILABLE&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422, من غير X-Device-Id أو نوع غلط):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;...&quot;,
+    &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+    &quot;errors&quot;: {
+        &quot;device_id&quot;: [
+            &quot;...&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-places--slug--events" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-places--slug--events"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-places--slug--events"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-places--slug--events" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-places--slug--events">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-places--slug--events" data-method="POST"
+      data-path="api/v1/places/{slug}/events"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-places--slug--events', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-places--slug--events"
+                    onclick="tryItOut('POSTapi-v1-places--slug--events');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-places--slug--events"
+                    onclick="cancelTryOut('POSTapi-v1-places--slug--events');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-places--slug--events"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/places/{slug}/events</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>X-Device-Id</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="X-Device-Id"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="3f6c1c2e-8c1a-4b6f-9d55-2f5b8c0e7a11"
+               data-component="header">
+    <br>
+<p>Example: <code>3f6c1c2e-8c1a-4b6f-9d55-2f5b8c0e7a11</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>slug</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="slug"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="el-mahatta-coffee"
+               data-component="url">
+    <br>
+<p>slug المكان. Example: <code>el-mahatta-coffee</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>type</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="type"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="directions"
+               data-component="body">
+    <br>
+<p>نوع الحدث: <code>view</code> (فتح الصفحة، مرة لكل فتحة)، <code>directions</code>، <code>call</code>، <code>whatsapp</code>، <code>instagram</code>، <code>menu</code>، <code>share</code>. <code>save</code> بيتسجل من السيرفر مع المفضلة فمش مقبول هنا. Example: <code>directions</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>view</code></li> <li><code>directions</code></li> <li><code>call</code></li> <li><code>whatsapp</code></li> <li><code>instagram</code></li> <li><code>menu</code></li> <li><code>share</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>device_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="device_id"                data-endpoint="POSTapi-v1-places--slug--events"
+               value="6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+               data-component="body">
+    <br>
+<p>Must be a valid UUID. Example: <code>6ff8f7f6-1eb3-3525-be4a-3932c805afed</code></p>
+        </div>
+        </form>
 
                     <h2 id="places-GETapi-v1-search">Search places</h2>
 
