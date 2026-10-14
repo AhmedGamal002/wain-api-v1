@@ -24,5 +24,10 @@ Schedule::command('backup:database')
     ->withoutOverlapping()
     ->when(fn () => filled(config('filesystems.disks.backups.bucket')));
 
+// Listing tiers (03 section 7.4): expired ones go back to free and the admins get a bell notice 7 days ahead.
+// Soft-deleted places are removed for good (with their photos) 30 days after the delete (03 "transitions").
+Schedule::command('places:expire-tiers')->dailyAt('03:00')->withoutOverlapping();
+Schedule::command('places:purge-deleted')->dailyAt('03:20')->withoutOverlapping();
+
 // Search log (06 section 5): searches are user data, kept 90 days for the A9 reports.
 Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();
