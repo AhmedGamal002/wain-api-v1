@@ -584,7 +584,10 @@ class PlaceFormTest extends TestCase
         $this->create(['phone' => '0225123456'])->call('create')->assertHasNoFormErrors();
         $this->assertSame('+20225123456', Place::query()->firstOrFail()->phone);
 
-        $this->create(['name_en' => 'Hotline Place', 'phone' => '16000'])->call('create')->assertHasNoFormErrors();
+        // اسم تاني بالاتنين: نفس الاسم على نفس الـ pin بيطلّع تحذير التكرار (PlaceDuplicateWarningTest)
+        $this->create(['name_ar' => 'مكان الخط الساخن', 'name_en' => 'Hotline Place', 'phone' => '16000'])
+            ->call('create')
+            ->assertHasNoFormErrors();
         $this->assertSame('16000', Place::query()->where('name_en', 'Hotline Place')->firstOrFail()->phone);
     }
 

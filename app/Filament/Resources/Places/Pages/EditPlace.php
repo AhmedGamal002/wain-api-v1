@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Places\Pages;
 
+use App\Filament\Resources\Places\Actions\PlaceActions;
 use App\Filament\Resources\Places\Pages\Concerns\HandlesPlaceSave;
+use App\Filament\Resources\Places\Pages\Concerns\ManagesPlacePhotos;
 use App\Filament\Resources\Places\PlaceResource;
 use App\Filament\Resources\Places\PlaceSaveIntent;
 use App\Filament\Resources\Places\Schemas\PlaceFormData;
@@ -19,12 +21,18 @@ use Filament\Resources\Pages\EditRecord;
 class EditPlace extends EditRecord
 {
     use HandlesPlaceSave;
+    use ManagesPlacePhotos;
 
     protected static string $resource = PlaceResource::class;
 
     protected function defaultSaveIntent(): PlaceSaveIntent
     {
         return $this->isDraftLike() ? PlaceSaveIntent::Draft : PlaceSaveIntent::Keep;
+    }
+
+    protected function resumeSave(): void
+    {
+        $this->save();
     }
 
     /** مسودة أو مرفوض: أي حفظ بيرجّعه مسودة (جدول الانتقالات في 03 القسم 2). */
@@ -57,6 +65,18 @@ class EditPlace extends EditRecord
     protected function getSavedNotificationTitle(): ?string
     {
         return $this->currentSaveIntent()->savedTitle();
+    }
+
+    /**
+     * إجراءات الحالة (نشر، إخفاء، رفض، قفل، باقة، حذف...) بنفس أزرار القائمة. بتتنفّذ على المكان المحفوظ،
+     * مش على اللي لسه مكتوب في الفورم: التعديل غير المحفوظ بيفضل زي ما هو.
+     */
+    protected function getHeaderActions(): array
+    {
+        return array_map(
+            fn (Action $action) => $action->record($this->getRecord()),
+            PlaceActions::headerActions(),
+        );
     }
 
     protected function getFormActions(): array

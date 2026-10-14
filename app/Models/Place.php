@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -68,6 +69,14 @@ class Place extends Model
     /** `tier_rank` لكل باقة: للترتيب من غير CASE (1 premium، 2 featured، 3 free). */
     public const TIER_RANKS = ['premium' => 1, 'featured' => 2, 'free' => 3];
 
+    /** المحذوف بيتسترجع خلال المدة دي، وبعدها job الحذف النهائي (أسبوع 7) بيمسحه هو وصوره. */
+    public const PURGE_AFTER_DAYS = 30;
+
+    /**
+     * ملاحظة بتتضاف لسجل التغييرات في أول حفظ بعد ما تتحط (رقم فاتورة الباقة مثلاً). مش عمود: مؤقتة.
+     */
+    public ?string $logNote = null;
+
     /** @var array<string, mixed> نفس defaults الـ migration، عشان المكان اللي لسه متعمل يبقى زي اللي هيتحمّل. */
     protected $attributes = [
         'status' => self::STATUS_DRAFT,
@@ -111,6 +120,16 @@ class Place extends Model
             ->logOnly(self::LOGGED_FIELDS)
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * بيضيف `logNote` (لو متحط) لسطر السجل كـ `properties.note`.
+     */
+    public function tapActivity(Activity $activity, string $eventName): void
+    {
+        if (filled($this->logNote)) {
+            $activity->properties = $activity->properties->put('note', $this->logNote);
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Filament\Resources\Places\Pages\Concerns\HandlesPlaceSave;
 use App\Filament\Resources\Places\PlaceResource;
 use App\Filament\Resources\Places\PlaceSaveIntent;
 use App\Filament\Resources\Places\Schemas\PlaceFormData;
+use App\Models\Place;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Arr;
 
@@ -29,9 +30,27 @@ class CreatePlace extends CreateRecord
     {
         $this->callHook('beforeFill');
 
-        $this->form->fill(PlaceFormData::forCreate());
+        $this->form->fill([...PlaceFormData::forCreate(), ...$this->duplicateSource()]);
 
         $this->callHook('afterFill');
+    }
+
+    /**
+     * «تكرار» من القائمة (`?duplicate={id}`): الحقول من المكان الأصلي. اللي مش بيقدر يشوفه (محذوف أو مفيش
+     * صلاحية) بيتجاهل بهدوء ويفتح فورم فاضي.
+     *
+     * @return array<string, mixed>
+     */
+    private function duplicateSource(): array
+    {
+        $id = request()->integer('duplicate');
+        $source = $id > 0 ? Place::query()->find($id) : null;
+
+        if ($source === null || ! auth()->user()?->can('view', $source)) {
+            return [];
+        }
+
+        return PlaceFormData::forDuplicate($source);
     }
 
     protected function beforeCreate(): void
@@ -69,10 +88,19 @@ class CreatePlace extends CreateRecord
         ];
     }
 
+    /** «حفظ وإضافة مكان تاني» لما التحذير وقّف الحفظ (الـ modal بيكمّل بنفس الزرار). */
+    public bool $pendingAnother = false;
+
+    protected function resumeSave(): void
+    {
+        $this->create($this->pendingAnother);
+    }
+
     // الأزرار بتنادي على نفس الميثود، فبنأكّد إن الزرار هو الـ intent
     public function create(bool $another = false): void
     {
         $this->saveIntent = PlaceSaveIntent::Draft;
+        $this->pendingAnother = $another;
 
         parent::create($another);
     }

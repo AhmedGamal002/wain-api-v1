@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Places\Schemas;
 
+use App\Filament\Resources\Places\Actions\PlaceActions;
+use App\Filament\Resources\Places\Actions\PlacePhotoActions;
 use App\Models\Area;
 use App\Models\Attribute;
 use App\Models\Category;
@@ -133,7 +135,8 @@ class PlaceForm
 
     /**
      * حالة الفورم الخام ← لقطة `PlacePublishCheck::check()`. بتشتغل على `$livewire->data` (قبل الحفظ)، فالـ
-     * checklist والتحقق وقت الحفظ بيقروا من نفس الدالة. الغلاف من المكان المحفوظ (الصور في أسبوع 6).
+     * checklist والتحقق وقت الحفظ بيقروا من نفس الدالة. الغلاف من المكان المحفوظ (الصور بتتحفظ لوحدها
+     * من تاب «الصور» عن طريق `PlacePhotos`، مش مع زرار الحفظ).
      *
      * @param  array<string, mixed>  $state
      * @return array<string, mixed>
@@ -567,11 +570,23 @@ class PlaceForm
 
     private static function photosTab(): Tab
     {
+        $saved = fn (?Place $record) => $record?->exists === true;
+
         return self::tab(self::TAB_PHOTOS, 'الصور', Heroicon::OutlinedPhoto)
             ->schema([
-                Text::make('الصور (الغلاف والمعرض والمنيو) بتتضاف في الأسبوع 6. صورة الغلاف شرط نشر، فالمكان مش هيتنشر قبلها.')
-                    ->color('gray'),
-            ]);
+                Actions::make([
+                    PlacePhotoActions::uploadCover(),
+                    PlacePhotoActions::uploadGallery(),
+                    PlacePhotoActions::uploadMenu(),
+                ])
+                    ->key('photo-actions')
+                    ->columnSpanFull()
+                    ->visible($saved),
+
+                // القائمة (الغلاف والمعرض والمنيو) بترتيب وحذف وغلاف: الميثودات في `ManagesPlacePhotos`
+                View::make('filament.places.photos')->columnSpanFull(),
+            ])
+            ->columns(1);
     }
 
     private static function adminTab(): Tab
@@ -581,6 +596,8 @@ class PlaceForm
                 View::make('filament.places.admin-summary')->columnSpanFull(),
 
                 Actions::make([
+                    PlaceActions::tier()->label('تغيير الباقة'),
+
                     Action::make('confirmData')
                         ->label('أكّدت البيانات النهارده')
                         ->icon(Heroicon::OutlinedCheckCircle)

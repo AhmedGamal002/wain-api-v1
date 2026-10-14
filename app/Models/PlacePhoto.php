@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -23,9 +24,19 @@ class PlacePhoto extends Model
         ];
     }
 
+    public const STATUS_PROCESSING = 'processing';
+
+    public const STATUS_READY = 'ready';
+
+    public const STATUS_FAILED = 'failed';
+
+    public const TYPE_GALLERY = 'gallery';
+
+    public const TYPE_MENU = 'menu';
+
     /**
      * رابط نسخة بمقاس (thumb أو medium أو large). الرابط المطلق (بيانات تجريبية) بيتمرّر زي ما هو،
-     * والمسار النسبي (R2 بعد أسبوع 9) بيتحوّل لرابط من الـ disk.
+     * والمسار النسبي بيتحوّل لرابط من disk الصور (`wain.photos.disk`: public دلوقتي، وR2 بعد أسبوع 9).
      */
     public function variantUrl(string $size): ?string
     {
@@ -39,12 +50,24 @@ class PlacePhoto extends Model
             return $value;
         }
 
-        return Storage::url($value);
+        return Storage::disk(config('wain.photos.disk'))->url($value);
     }
 
     public function isReady(): bool
     {
-        return $this->status === 'ready';
+        return $this->status === self::STATUS_READY;
+    }
+
+    /** @return BelongsTo<Place, $this> */
+    public function place(): BelongsTo
+    {
+        return $this->belongsTo(Place::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function uploader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 
     /**

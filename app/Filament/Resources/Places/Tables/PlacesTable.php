@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Places\Tables;
 
+use App\Filament\Resources\Places\Actions\PlaceActions;
 use App\Filament\Resources\Places\PlaceResource;
 use App\Models\Area;
 use App\Models\Category;
@@ -30,8 +31,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 /**
- * قايمة الأماكن (03 القسم 4.2): الأعمدة والفلاتر والبحث والصفحات. أزرار الصف والإجراءات الجماعية في أسبوع 6
- * (الإجراءات والـ modals)، وصفحة التعديل في أسبوع 5.
+ * قايمة الأماكن (03 القسم 4.2): الأعمدة والفلاتر والبحث والصفحات، وأزرار الصف والإجراءات الجماعية
+ * (`PlaceActions`، أسبوع 6).
  */
 class PlacesTable
 {
@@ -257,16 +258,16 @@ class PlacesTable
                     ->visible(fn () => auth()->user()?->hasRole('admin') ?? false),
             ])
             ->filtersFormColumns(2)
+            ->recordActions(PlaceActions::rowActions())
+            ->toolbarActions(PlaceActions::bulkActions())
             ->persistFiltersInSession()
             ->persistSortInSession()
             ->persistSearchInSession()
             ->defaultSort('updated_at', 'desc')
             ->paginated([25, 50, 100])
             ->defaultPaginationPageOption(25)
-            // الصف المحذوف ما ينفعش يتفتح للتعديل (صفحة العرض والاسترجاع في أسبوع 6)
-            ->recordUrl(fn (Place $record) => $record->trashed()
-                ? null
-                : PlaceResource::getUrl('edit', ['record' => $record]))
+            // الصف المحذوف بيتفتح في صفحة العرض (فيها «استرجاع»)، مش في التعديل
+            ->recordUrl(fn (Place $record) => PlaceResource::getUrl($record->trashed() ? 'view' : 'edit', ['record' => $record]))
             ->emptyStateHeading('مفيش أماكن لسه')
             ->emptyStateDescription('الأماكن اللي هتتضاف هتظهر هنا.')
             ->emptyStateIcon(Heroicon::OutlinedBuildingStorefront)

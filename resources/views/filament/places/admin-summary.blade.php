@@ -36,7 +36,7 @@
                     لـ {{ $record->tier_ends_at->timezone('Africa/Cairo')->format('Y-m-d') }}
                 </div>
             @endif
-            <div style="font-size: .75rem; opacity: .6;">تغيير الباقة من الأدمن (أسبوع 6)</div>
+            <div style="font-size: .75rem; opacity: .6;">زرار «تغيير الباقة» تحت (Admin بس)</div>
         </dd>
     </div>
 

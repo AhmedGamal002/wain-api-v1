@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Events\PlaceChanged;
+use App\Events\PlaceStatusChanged;
 use App\Models\Place;
 use App\Support\PlaceLocation;
 use App\Support\PlaceSlug;
@@ -96,6 +97,17 @@ class PlaceObserver
     {
         // `location` اتكتب كـ SQL expression، فبنشيله من الـ attributes عشان ما يتقراش بعد كده كقيمة
         $place->offsetUnset('location');
+
+        // تغيّر الحالة بيتبلّغ بيه لوحده (إشعارات الجرس)، من أي مسار: زرار أو فورم. `wasChanged` مش `isDirty`
+        // لإن الحفظ خلص. الـ original لسه القديم هنا (`saved` بيتطلق قبل `syncOriginal`).
+        if ($place->wasChanged('status')) {
+            PlaceStatusChanged::dispatch(
+                $place,
+                $place->getOriginal('status'),
+                (string) $place->status,
+                Auth::id(),
+            );
+        }
 
         PlaceChanged::dispatch($place);
     }

@@ -29,6 +29,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('Wain')
             ->login()
+            // جرس اللوحة (03 القسم 4.9): مكان اتبعت للمراجعة، اتنشر، اترفض، وفشل معالجة صورة
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -64,6 +64,32 @@ final class PlaceFormData
     }
 
     /**
+     * «تكرار» (03 القسم 4.2): مسودة جديدة من مكان موجود، من غير الصور والموقع والتليفون. بيتفتح بيها فورم
+     * الإضافة (مش بتتحفظ لوحدها: الموقع إلزامي للمسودة). المدينة بتفضل، والمنطقة بتتشال عشان تتقترح من الـ pin
+     * الجديد. الاسمين بيتنسخوا زي ما هما (الفرع بنفس الاسم)، وتحذير التكرار في 200م هو اللي بيمسك الغلط.
+     *
+     * @return array<string, mixed>
+     */
+    public static function forDuplicate(Place $source): array
+    {
+        $data = self::forFill($source->attributesToArray(), $source);
+
+        $keep = [
+            'name_ar', 'name_en', 'search_aliases', 'description_ar', 'description_en', 'primary_category_id',
+            'city_id', 'price_min', 'price_max', 'instagram', 'facebook_url', 'website', 'menu_url',
+            'opening_hours', 'ramadan_hours', 'has_ramadan_hours',
+        ];
+        foreach (Attribute::GROUPS as $group) {
+            $keep[] = 'attributes_'.$group;
+        }
+
+        return [
+            ...Arr::only($data, $keep),
+            'categories' => $source->categories()->pluck('categories.id')->all(),
+        ];
+    }
+
+    /**
      * ناتج `getState()` ← أعمدة المكان. الحقول اللي مش أعمدة (مجموعات الخصائص وزرار رمضان) بتتشال، والمواعيد
      * بترجع لشكل التخزين، ومواعيد رمضان بتتصفّر لو الزرار مقفول.
      *
