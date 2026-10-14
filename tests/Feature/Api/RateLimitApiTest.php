@@ -191,6 +191,51 @@ class RateLimitApiTest extends TestCase
         $this->assertGreaterThan(5, $checked);
     }
 
+    private function suggest(array $headers = []): TestResponse
+    {
+        $this->app['auth']->forgetGuards();
+
+        return $this->getJson('/api/v1/search/suggestions?q=%D8%AD%D8%AF', self::AR + $headers);
+    }
+
+    public function test_search_suggestions_have_their_own_wider_budget_and_do_not_use_the_general_one(): void
+    {
+        $this->limits(2, 4);
+        config(['wain.rate_limit.suggestions_guest' => 5, 'wain.rate_limit.suggestions_user' => 8]);
+
+        // أكتر من ميزانية الزائر العامة (2)، ومفيش منها بيتحسب هناك
+        for ($i = 0; $i < 5; $i++) {
+            $this->suggest()->assertOk();
+        }
+
+        $this->suggest()
+            ->assertStatus(429)
+            ->assertJsonPath('code', 'TOO_MANY_REQUESTS')
+            ->assertHeader('X-RateLimit-Limit', 5);
+
+        // باقي التطبيق لسه معاه ميزانيته كاملة: الكتابة الكتير ما تحجبش الرئيسية
+        $this->hit()->assertOk();
+        $this->hit()->assertOk();
+        $this->hit()->assertStatus(429);
+    }
+
+    public function test_a_signed_in_user_has_the_bigger_suggestions_budget(): void
+    {
+        $this->limits(100, 100);
+        config(['wain.rate_limit.suggestions_guest' => 2, 'wain.rate_limit.suggestions_user' => 4]);
+        $headers = $this->bearer($this->makeUser('user@example.com'));
+
+        for ($i = 0; $i < 4; $i++) {
+            $this->suggest($headers)->assertOk();
+        }
+        $this->suggest($headers)->assertStatus(429);
+
+        // الزائر من نفس الـ IP ميزانيته الصغيرة لسه كاملة
+        $this->suggest()->assertOk();
+        $this->suggest()->assertOk();
+        $this->suggest()->assertStatus(429);
+    }
+
     public function test_the_stricter_limiters_still_apply_on_top_of_the_general_one(): void
     {
         $this->limits(100, 100);
