@@ -60,6 +60,21 @@ return [
             'report' => false,
         ],
 
+        // Cloudflare R2 (S3 compatible): النسخ الاحتياطي لقاعدة البيانات (`backup:database`). bucket خاص منفصل
+        // عن bucket الصور (أسبوع 9). الـ endpoint `https://<account-id>.r2.cloudflarestorage.com` والـ region `auto`.
+        'backups' => [
+            'driver' => 's3',
+            'key' => env('BACKUP_R2_KEY'),
+            'secret' => env('BACKUP_R2_SECRET'),
+            'region' => 'auto',
+            'bucket' => env('BACKUP_R2_BUCKET'),
+            'endpoint' => env('BACKUP_R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*
