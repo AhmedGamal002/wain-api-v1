@@ -160,6 +160,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-search">
                                 <a href="#places-GETapi-v1-search">Search places</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="places-GETapi-v1-search-suggestions">
+                                <a href="#places-GETapi-v1-search-suggestions">Search suggestions</a>
+                            </li>
                                                                         </ul>
                             </ul>
             </div>
@@ -3899,6 +3902,186 @@ Must be one of:
                data-component="query">
     <br>
 <p>عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل. Example: <code>20</code></p>
+            </div>
+                </form>
+
+                    <h2 id="places-GETapi-v1-search-suggestions">Search suggestions</h2>
+
+<p>
+</p>
+
+<p>اقتراحات سريعة وهو بيكتب (typeahead): أحسن 6 أماكن منشورة لللي اتكتب لحد دلوقتي، بصف صغير لكل مكان (الاسم
+والتصنيف والمنطقة وصورة مصغّرة). الموبايل بيعرضها تحت حقل البحث، والضغط على اقتراح بيفتح المكان مباشرة، والنتايج
+الكاملة (كروت وفلاتر وترتيب) من <code>GET /search</code> لما المستخدم يدوس بحث.</p>
+<ul>
+<li><strong>نفس البحث:</strong> نفس التطبيع والمرادفات والتصحيح الإملائي والترتيب بتاع <code>GET /search</code> (بداية كلمة في الاسم
+قبل جوه الاسم قبل الباقي)، فالاقتراحات متتناقضش مع النتايج. <code>meta.corrected_query</code> بيرجع بالكلمة المصحّحة
+لو اتصحّحت.</li>
+<li><strong>من غير فلاتر ولا pagination ولا عدّاد:</strong> استعلام واحد صغير بدل استعلام النتايج كله، عشان يتبعت مع كل وقفة في
+الكتابة.</li>
+<li><strong>حد خاص بيه:</strong> مش بيتحسب على الحد العام للتطبيق (60 زائر / 120 مستخدم في الدقيقة)، وله حده الواسع
+(<code>WAIN_RATE_LIMIT_SUGGEST_GUEST</code>/<code>_USER</code>، 120 و240)، فكتابة كتير ما تحجبش الرئيسية ولا صفحة المكان.</li>
+<li>علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.</li>
+</ul>
+
+<span id="example-requests-GETapi-v1-search-suggestions">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/search/suggestions?q=%D8%AD%D8%AF%D9%8A" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/search/suggestions"
+);
+
+const params = {
+    "q": "حدي",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-search-suggestions">
+            <blockquote>
+            <p>Example response (200, اقتراحات):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 26,
+            &quot;slug&quot;: &quot;narges-garden&quot;,
+            &quot;name&quot;: &quot;حديقة النرجس&quot;,
+            &quot;category&quot;: {
+                &quot;name&quot;: &quot;حدائق ومتنزهات&quot;,
+                &quot;icon&quot;: &quot;🌳&quot;
+            },
+            &quot;area&quot;: &quot;التجمع الخامس&quot;,
+            &quot;thumb&quot;: null
+        }
+    ],
+    &quot;meta&quot;: {
+        &quot;corrected_query&quot;: null
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-search-suggestions" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-search-suggestions"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-search-suggestions"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-search-suggestions" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-search-suggestions">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-search-suggestions" data-method="GET"
+      data-path="api/v1/search/suggestions"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-search-suggestions', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-search-suggestions"
+                    onclick="tryItOut('GETapi-v1-search-suggestions');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-search-suggestions"
+                    onclick="cancelTryOut('GETapi-v1-search-suggestions');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-search-suggestions"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/search/suggestions</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-search-suggestions"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-search-suggestions"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-search-suggestions"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-v1-search-suggestions"
+               value="حدي"
+               data-component="query">
+    <br>
+<p>اللي المستخدم كتبه لحد دلوقتي (حتى لو كلمة ناقصة)، من حرفين لـ 60 حرف. نفس التطبيع والمرادفات والتصحيح بتاعة <code>GET /search</code>. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف. Example: <code>حدي</code></p>
             </div>
                 </form>
 
