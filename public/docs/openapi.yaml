@@ -1638,3 +1638,210 @@ paths:
         required: true
         schema:
           type: string
+  /api/v1/search:
+    get:
+      summary: 'Search places'
+      operationId: searchPlaces
+      description: "بحث في الأماكن المنشورة بنفس شكل كارت `GET /places` ونفس فلاتر F5 (المنطقة والتصنيفات والخصائص\nوالسعر والتقييم و`open_now`) والترتيب و`lat`/`lng` والـ pagination، وكلها بتتطبّق في نفس الاستعلام.\n\n- **التطبيع:** `أ إ آ` = `ا`، و`ة` = `ه`، و`ى` = `ي`، من غير تشكيل ولا «ال» التعريف.\n- **المرادفات:** كوفي = كافيه = cafe = coffee، وروف = roof = rooftop، وشيشة = shisha (قاموس في الـ repo).\n- **الفرانكو:** بيتطابق بالـ `search_aliases` اللي الأدمن بيضيفها للمكان وبقاموس المرادفات.\n- **الكلمات:** كل كلمة لازم تكون موجودة (AND). الاسم أول، بعده الـ alias، بعده الباقي.\n- **التصحيح الإملائي:** لو النتايج أقل من 3 بتتصحّح الكلمات الغلط، و`meta.corrected_query` بيرجع بالكلمة\n  اللي اتبحث بيها فعلاً (`null` لو ما اتصحّحش حاجة). الموبايل بيعرض «نتايج لـ …».\n- **الترتيب:** `sort=recommended` (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (`nearest`\n  و`rating` و`newest`) بترتيبها زي القائمة.\n- علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ."
+      parameters:
+        -
+          in: query
+          name: q
+          description: 'كلمة البحث، من حرفين لـ 60 حرف. بيتطبّع (أ إ آ = ا، ة = ه، ى = ي، من غير تشكيل) وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص والمنطقة والوصف. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف.'
+          example: 'كافيه هادي'
+          required: true
+          schema:
+            type: string
+            description: 'كلمة البحث، من حرفين لـ 60 حرف. بيتطبّع (أ إ آ = ا، ة = ه، ى = ي، من غير تشكيل) وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص والمنطقة والوصف. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف.'
+            example: 'كافيه هادي'
+        -
+          in: query
+          name: area
+          description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+          example: new-cairo
+          required: false
+          schema:
+            type: string
+            description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+            example: new-cairo
+            nullable: true
+        -
+          in: query
+          name: categories
+          description: 'Must match an existing stored value.'
+          example:
+            - architecto
+          required: false
+          schema:
+            type: array
+            description: 'Must match an existing stored value.'
+            example:
+              - architecto
+            items:
+              type: string
+        -
+          in: query
+          name: attributes
+          description: 'Must match an existing stored value.'
+          example:
+            - architecto
+          required: false
+          schema:
+            type: array
+            description: 'Must match an existing stored value.'
+            example:
+              - architecto
+            items:
+              type: string
+        -
+          in: query
+          name: price_min
+          description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+          example: 100
+          required: false
+          schema:
+            type: integer
+            description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+            example: 100
+            nullable: true
+        -
+          in: query
+          name: price_max
+          description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+          example: 300
+          required: false
+          schema:
+            type: integer
+            description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+            example: 300
+            nullable: true
+        -
+          in: query
+          name: rating_min
+          description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+          example: 4.0
+          required: false
+          schema:
+            type: number
+            description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+            example: 4.0
+            nullable: true
+        -
+          in: query
+          name: open_now
+          description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+            example: true
+            nullable: true
+        -
+          in: query
+          name: sort
+          description: 'الترتيب: `recommended` (الافتراضي) أو `nearest` (محتاج `lat` و`lng`) أو `rating` أو `newest`.'
+          example: recommended
+          required: false
+          schema:
+            type: string
+            description: 'الترتيب: `recommended` (الافتراضي) أو `nearest` (محتاج `lat` و`lng`) أو `rating` أو `newest`.'
+            example: recommended
+            enum:
+              - recommended
+              - nearest
+              - rating
+              - newest
+            nullable: true
+        -
+          in: query
+          name: lat
+          description: 'خط العرض. بيرجّع `distance_km` في كل كارت. لازم مع `lng`. This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90.'
+          example: 30.03
+          required: false
+          schema:
+            type: number
+            description: 'خط العرض. بيرجّع `distance_km` في كل كارت. لازم مع `lng`. This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90.'
+            example: 30.03
+            nullable: true
+        -
+          in: query
+          name: lng
+          description: 'خط الطول. لازم مع `lat`. This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180.'
+          example: 31.47
+          required: false
+          schema:
+            type: number
+            description: 'خط الطول. لازم مع `lat`. This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180.'
+            example: 31.47
+            nullable: true
+        -
+          in: query
+          name: page
+          description: 'رقم الصفحة (من 1). value لازم يكون 1 أو أكتر.'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'رقم الصفحة (من 1). value لازم يكون 1 أو أكتر.'
+            example: 1
+            nullable: true
+        -
+          in: query
+          name: per_page
+          description: 'عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل.'
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 'عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل.'
+            example: 20
+            nullable: true
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: نتايج
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data: []
+                  meta:
+                    current_page: 1
+                    last_page: 1
+                    per_page: 20
+                    total: 0
+                    corrected_query: null
+                properties:
+                  data:
+                    type: array
+                    example: []
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 0
+                      corrected_query:
+                        type: string
+                        example: null
+                        nullable: true
+      tags:
+        - Places
+      security: []

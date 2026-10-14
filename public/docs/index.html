@@ -157,6 +157,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places--slug-">
                                 <a href="#places-GETapi-v1-places--slug-">Get place details</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="places-GETapi-v1-search">
+                                <a href="#places-GETapi-v1-search">Search places</a>
+                            </li>
                                                                         </ul>
                             </ul>
             </div>
@@ -3526,6 +3529,350 @@ You can check the Dev Tools console for debugging information.</code></pre>
                data-component="query">
     <br>
 <p>خط طول المستخدم، لحساب <code>distance_km</code>. لازم مع <code>lat</code>. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180. Example: <code>31.47</code></p>
+            </div>
+                </form>
+
+                    <h2 id="places-GETapi-v1-search">Search places</h2>
+
+<p>
+</p>
+
+<p>بحث في الأماكن المنشورة بنفس شكل كارت <code>GET /places</code> ونفس فلاتر F5 (المنطقة والتصنيفات والخصائص
+والسعر والتقييم و<code>open_now</code>) والترتيب و<code>lat</code>/<code>lng</code> والـ pagination، وكلها بتتطبّق في نفس الاستعلام.</p>
+<ul>
+<li><strong>التطبيع:</strong> <code>أ إ آ</code> = <code>ا</code>، و<code>ة</code> = <code>ه</code>، و<code>ى</code> = <code>ي</code>، من غير تشكيل ولا «ال» التعريف.</li>
+<li><strong>المرادفات:</strong> كوفي = كافيه = cafe = coffee، وروف = roof = rooftop، وشيشة = shisha (قاموس في الـ repo).</li>
+<li><strong>الفرانكو:</strong> بيتطابق بالـ <code>search_aliases</code> اللي الأدمن بيضيفها للمكان وبقاموس المرادفات.</li>
+<li><strong>الكلمات:</strong> كل كلمة لازم تكون موجودة (AND). الاسم أول، بعده الـ alias، بعده الباقي.</li>
+<li><strong>التصحيح الإملائي:</strong> لو النتايج أقل من 3 بتتصحّح الكلمات الغلط، و<code>meta.corrected_query</code> بيرجع بالكلمة
+اللي اتبحث بيها فعلاً (<code>null</code> لو ما اتصحّحش حاجة). الموبايل بيعرض «نتايج لـ …».</li>
+<li><strong>الترتيب:</strong> <code>sort=recommended</code> (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (<code>nearest</code>
+و<code>rating</code> و<code>newest</code>) بترتيبها زي القائمة.</li>
+<li>علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.</li>
+</ul>
+
+<span id="example-requests-GETapi-v1-search">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/search?q=%D9%83%D8%A7%D9%81%D9%8A%D9%87+%D9%87%D8%A7%D8%AF%D9%8A&amp;area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1&amp;sort=recommended&amp;lat=30.03&amp;lng=31.47&amp;page=1&amp;per_page=20" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/search"
+);
+
+const params = {
+    "q": "كافيه هادي",
+    "area": "new-cairo",
+    "categories[0]": "architecto",
+    "attributes[0]": "architecto",
+    "price_min": "100",
+    "price_max": "300",
+    "rating_min": "4",
+    "open_now": "1",
+    "sort": "recommended",
+    "lat": "30.03",
+    "lng": "31.47",
+    "page": "1",
+    "per_page": "20",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-search">
+            <blockquote>
+            <p>Example response (200, نتايج):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [],
+    &quot;meta&quot;: {
+        &quot;current_page&quot;: 1,
+        &quot;last_page&quot;: 1,
+        &quot;per_page&quot;: 20,
+        &quot;total&quot;: 0,
+        &quot;corrected_query&quot;: null
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-search" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-search"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-search"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-search" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-search">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-search" data-method="GET"
+      data-path="api/v1/search"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-search', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-search"
+                    onclick="tryItOut('GETapi-v1-search');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-search"
+                    onclick="cancelTryOut('GETapi-v1-search');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-search"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/search</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-search"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-search"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-search"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-v1-search"
+               value="كافيه هادي"
+               data-component="query">
+    <br>
+<p>كلمة البحث، من حرفين لـ 60 حرف. بيتطبّع (أ إ آ = ا، ة = ه، ى = ي، من غير تشكيل) وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص والمنطقة والوصف. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف. Example: <code>كافيه هادي</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="area"                data-endpoint="GETapi-v1-search"
+               value="new-cairo"
+               data-component="query">
+    <br>
+<p>slug المنطقة (من <code>GET /areas</code>). Must match an existing stored value. Example: <code>new-cairo</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>categories</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="categories[0]"                data-endpoint="GETapi-v1-search"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="categories[1]"                data-endpoint="GETapi-v1-search"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="attributes[0]"                data-endpoint="GETapi-v1-search"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="attributes[1]"                data-endpoint="GETapi-v1-search"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_min</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_min"                data-endpoint="GETapi-v1-search"
+               value="100"
+               data-component="query">
+    <br>
+<p>أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>100</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_max</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_max"                data-endpoint="GETapi-v1-search"
+               value="300"
+               data-component="query">
+    <br>
+<p>أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي <code>price_min</code>. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>300</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>rating_min</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="rating_min"                data-endpoint="GETapi-v1-search"
+               value="4"
+               data-component="query">
+    <br>
+<p>أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5. Example: <code>4</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>open_now</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="GETapi-v1-search" style="display: none">
+            <input type="radio" name="open_now"
+                   value="1"
+                   data-endpoint="GETapi-v1-search"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-v1-search" style="display: none">
+            <input type="radio" name="open_now"
+                   value="0"
+                   data-endpoint="GETapi-v1-search"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>الأماكن المفتوحة دلوقتي بتوقيت القاهرة (<code>1</code>). Example: <code>true</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="sort"                data-endpoint="GETapi-v1-search"
+               value="recommended"
+               data-component="query">
+    <br>
+<p>الترتيب: <code>recommended</code> (الافتراضي) أو <code>nearest</code> (محتاج <code>lat</code> و<code>lng</code>) أو <code>rating</code> أو <code>newest</code>. Example: <code>recommended</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>recommended</code></li> <li><code>nearest</code></li> <li><code>rating</code></li> <li><code>newest</code></li></ul>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lat</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lat"                data-endpoint="GETapi-v1-search"
+               value="30.03"
+               data-component="query">
+    <br>
+<p>خط العرض. بيرجّع <code>distance_km</code> في كل كارت. لازم مع <code>lng</code>. This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90. Example: <code>30.03</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lng</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lng"                data-endpoint="GETapi-v1-search"
+               value="31.47"
+               data-component="query">
+    <br>
+<p>خط الطول. لازم مع <code>lat</code>. This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180. Example: <code>31.47</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="page"                data-endpoint="GETapi-v1-search"
+               value="1"
+               data-component="query">
+    <br>
+<p>رقم الصفحة (من 1). value لازم يكون 1 أو أكتر. Example: <code>1</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-v1-search"
+               value="20"
+               data-component="query">
+    <br>
+<p>عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل. Example: <code>20</code></p>
             </div>
                 </form>
 

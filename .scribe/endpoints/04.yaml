@@ -717,3 +717,217 @@ endpoints:
     controller: null
     method: null
     route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/search
+    metadata:
+      custom: []
+      groupName: Places
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Search places'
+      description: |-
+        بحث في الأماكن المنشورة بنفس شكل كارت `GET /places` ونفس فلاتر F5 (المنطقة والتصنيفات والخصائص
+        والسعر والتقييم و`open_now`) والترتيب و`lat`/`lng` والـ pagination، وكلها بتتطبّق في نفس الاستعلام.
+
+        - **التطبيع:** `أ إ آ` = `ا`، و`ة` = `ه`، و`ى` = `ي`، من غير تشكيل ولا «ال» التعريف.
+        - **المرادفات:** كوفي = كافيه = cafe = coffee، وروف = roof = rooftop، وشيشة = shisha (قاموس في الـ repo).
+        - **الفرانكو:** بيتطابق بالـ `search_aliases` اللي الأدمن بيضيفها للمكان وبقاموس المرادفات.
+        - **الكلمات:** كل كلمة لازم تكون موجودة (AND). الاسم أول، بعده الـ alias، بعده الباقي.
+        - **التصحيح الإملائي:** لو النتايج أقل من 3 بتتصحّح الكلمات الغلط، و`meta.corrected_query` بيرجع بالكلمة
+          اللي اتبحث بيها فعلاً (`null` لو ما اتصحّحش حاجة). الموبايل بيعرض «نتايج لـ …».
+        - **الترتيب:** `sort=recommended` (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (`nearest`
+          و`rating` و`newest`) بترتيبها زي القائمة.
+        - علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      q:
+        custom: []
+        name: q
+        description: 'كلمة البحث، من حرفين لـ 60 حرف. بيتطبّع (أ إ آ = ا، ة = ه، ى = ي، من غير تشكيل) وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص والمنطقة والوصف. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف.'
+        required: true
+        example: 'كافيه هادي'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      area:
+        custom: []
+        name: area
+        description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+        required: false
+        example: new-cairo
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      categories:
+        custom: []
+        name: categories
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      attributes:
+        custom: []
+        name: attributes
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_min:
+        custom: []
+        name: price_min
+        description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+        required: false
+        example: 100
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      price_max:
+        custom: []
+        name: price_max
+        description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+        required: false
+        example: 300
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      rating_min:
+        custom: []
+        name: rating_min
+        description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+        required: false
+        example: 4.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      open_now:
+        custom: []
+        name: open_now
+        description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'الترتيب: `recommended` (الافتراضي) أو `nearest` (محتاج `lat` و`lng`) أو `rating` أو `newest`.'
+        required: false
+        example: recommended
+        type: string
+        enumValues:
+          - recommended
+          - nearest
+          - rating
+          - newest
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      lat:
+        custom: []
+        name: lat
+        description: 'خط العرض. بيرجّع `distance_km` في كل كارت. لازم مع `lng`. This field is required when <code>lng</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -90 و90.'
+        required: false
+        example: 30.03
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      lng:
+        custom: []
+        name: lng
+        description: 'خط الطول. لازم مع `lat`. This field is required when <code>lat</code> is present. This field is required when <code>sort</code> is <code>nearest</code>. value لازم يكون بين -180 و180.'
+        required: false
+        example: 31.47
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'رقم الصفحة (من 1). value لازم يكون 1 أو أكتر.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'عدد النتايج في الصفحة (20، أقصى 50). value لازم يكون 1 أو أكتر. value لازم يكون 50 أو أقل.'
+        required: false
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanQueryParameters:
+      q: 'كافيه هادي'
+      area: new-cairo
+      categories:
+        - architecto
+      attributes:
+        - architecto
+      price_min: 100
+      price_max: 300
+      rating_min: 4.0
+      open_now: true
+      sort: recommended
+      lat: 30.03
+      lng: 31.47
+      page: 1
+      per_page: 20
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [], "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 0, "corrected_query": null}}'
+        headers: []
+        description: نتايج
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
