@@ -81,6 +81,10 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                // للتطوير على ويندوز مع MariaDB في Docker بس (`DB_EMULATE_PREPARES=true` في .env المحلي): الـ prepared
+                // statements الحقيقية بتاخد ~44ms لكل query (Nagle + delayed ACK على الـ port forward)، فطلب بـ 6
+                // queries بيستنّى 260ms. الاستضافة (socket/localhost) مش محتاجاه، فالافتراضي مقفول.
+                PDO::ATTR_EMULATE_PREPARES => env('DB_EMULATE_PREPARES', false),
             ]) : [],
         ],
 

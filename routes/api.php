@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\SearchSuggestionController;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,10 @@ Route::prefix('v1')->group(function () {
 
     // البحث (F4): نفس كارت وفلاتر GET /places + q. بيتطبّع ويتوسّع بالمرادفات ويتصحّح إملائياً (PlaceSearch).
     Route::get('search', [SearchController::class, 'index']);
+    // اقتراحات الكتابة (typeahead): استعلام صغير بيتبعت مع كل وقفة، فله limiter لوحده وأوسع (مش بيتحسب على `api`).
+    Route::get('search/suggestions', [SearchSuggestionController::class, 'index'])
+        ->middleware('throttle:search-suggestions')
+        ->name('search.suggestions');
 
     Route::prefix('auth')->group(function () {
         // 5 محاولات في الدقيقة لكل IP + إيميل (SEC-01)

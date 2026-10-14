@@ -144,6 +144,35 @@ class SearchApiTest extends TestCase
         );
     }
 
+    public function test_the_start_of_a_word_comes_before_the_middle_of_a_word(): void
+    {
+        $inside = $this->place('مطعم تركن');
+        $later = $this->place('مقهى ركن الشام');
+        $first = $this->place('ركن الهدوء');
+
+        // اسم بيبدأ بالكلمة، ثم كلمة بتبدأ بيها جوه الاسم، ثم الكلمة جوه كلمة تانية
+        $this->assertSame(
+            [$first->name_ar, $later->name_ar, $inside->name_ar],
+            $this->names($this->search('ركن')),
+        );
+    }
+
+    public function test_the_word_the_user_typed_comes_before_its_synonyms(): void
+    {
+        $synonym = $this->place('قهوة المحطة');
+        $typed = $this->place('نسمة كافيه');
+
+        $this->assertSame([$typed->name_ar, $synonym->name_ar], $this->names($this->search('كافيه')));
+    }
+
+    public function test_the_article_in_the_stored_name_still_counts_as_a_word_start(): void
+    {
+        $middle = $this->place('مطعم مبحر');
+        $article = $this->place('البحر الأزرق');
+
+        $this->assertSame([$article->name_ar, $middle->name_ar], $this->names($this->search('بحر')));
+    }
+
     public function test_only_published_places_appear(): void
     {
         $this->place('مكان منشور سلطان');

@@ -28,6 +28,12 @@ interface PlaceSearch
     public function constrain(Builder $places, SearchPlan $plan): void;
 
     /**
+     * هل المكان ده (جاي من استعلام اتضيّق بـ `constrain`) كل كلمة فيه هي بداية كلمة في اسمه أو الـ alias بتاعه؟
+     * اقتراحات الكتابة بتفضّل دول وبتشيل الباقي لو في منهم.
+     */
+    public function isPrefixMatch(Place $place, SearchPlan $plan): bool;
+
+    /**
      * خطة بكلمات مصحّحة إملائياً، أو null لو مفيش حاجة تتصحّح.
      */
     public function correct(SearchPlan $plan): ?SearchPlan;

@@ -42,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
         // (X-Device-Id) مع الـ IP: شبكات الموبايل بتحط ناس كتير ورا IP واحد فالـ IP لوحده كان هيحجب ناس
         // ملهمش دعوة؛ ومن غير الهيدر بيرجع للـ IP. الـ limiters اللي تحت ده بتتطبق فوقه على نفس الطلب.
         RateLimiter::for('api', function (Request $request) {
+            // اقتراحات الكتابة ليها limiter لوحدها (تحت): ما بتتحسبش هنا، وما بتاكلش من ميزانية باقي التطبيق
+            if ($request->routeIs('search.suggestions')) {
+                return Limit::none();
+            }
+
             $user = $request->user('sanctum');
 
             if ($user !== null) {
@@ -53,6 +58,22 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute((int) config('wain.rate_limit.guest'))
                 ->by('guest|'.$request->ip().'|'.$device);
+        });
+
+        // اقتراحات الكتابة (F4): طلب لكل وقفة في الكتابة، فلو اتحسبت على الحد العام (60) كلمتين بحث كانوا هيحجبوا
+        // الرئيسية وصفحة المكان لدقيقة. حدّها أوسع (120 زائر و240 مستخدم) ومنفصل، وبنفس هوية الحد العام.
+        RateLimiter::for('search-suggestions', function (Request $request) {
+            $user = $request->user('sanctum');
+
+            if ($user !== null) {
+                return Limit::perMinute((int) config('wain.rate_limit.suggestions_user'))
+                    ->by('suggestions|user|'.$user->getAuthIdentifier());
+            }
+
+            $device = substr(trim((string) $request->header('X-Device-Id')), 0, 64);
+
+            return Limit::perMinute((int) config('wain.rate_limit.suggestions_guest'))
+                ->by('suggestions|guest|'.$request->ip().'|'.$device);
         });
 
         // SEC-01: الدخول والتسجيل 5 محاولات في الدقيقة لكل IP + إيميل. الزيادة بترجع 429 TOO_MANY_REQUESTS

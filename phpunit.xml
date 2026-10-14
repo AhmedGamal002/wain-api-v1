@@ -35,6 +35,8 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="WAIN_RATE_LIMIT_GUEST" value="100000"/>
         <env name="WAIN_RATE_LIMIT_USER" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_SUGGEST_GUEST" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_SUGGEST_USER" value="100000"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

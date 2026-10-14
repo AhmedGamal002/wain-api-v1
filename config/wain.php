@@ -98,11 +98,16 @@ return [
     | limiters أضيق فوق ده (AppServiceProvider). الأرقام من `.env` عشان تتعدّل من غير نشر كود (مثلاً لو
     | شبكة موبايل كبيرة ورا IP واحد بدأت تتحجب)، والتستات بتعلّيها في phpunit.xml.
     |
+    | `suggestions_*`: اقتراحات الكتابة (`GET /search/suggestions`) بتتبعت مع كل وقفة في الكتابة، فليها حد
+    | منفصل وأوسع (120 و240) وبتخرج من الحد العام، عشان البحث ما يحجبش باقي التطبيق.
+    |
     */
 
     'rate_limit' => [
         'guest' => (int) env('WAIN_RATE_LIMIT_GUEST', 60),
         'user' => (int) env('WAIN_RATE_LIMIT_USER', 120),
+        'suggestions_guest' => (int) env('WAIN_RATE_LIMIT_SUGGEST_GUEST', 120),
+        'suggestions_user' => (int) env('WAIN_RATE_LIMIT_SUGGEST_USER', 240),
     ],
 
 ];

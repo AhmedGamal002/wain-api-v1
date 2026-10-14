@@ -1097,3 +1097,65 @@ endpoints:
     controller: null
     method: null
     route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/search/suggestions
+    metadata:
+      custom: []
+      groupName: Places
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Search suggestions'
+      description: |-
+        اقتراحات سريعة وهو بيكتب (typeahead): أحسن 6 أماكن منشورة لللي اتكتب لحد دلوقتي، بصف صغير لكل مكان (الاسم
+        والتصنيف والمنطقة وصورة مصغّرة). الموبايل بيعرضها تحت حقل البحث، والضغط على اقتراح بيفتح المكان مباشرة، والنتايج
+        الكاملة (كروت وفلاتر وترتيب) من `GET /search` لما المستخدم يدوس بحث.
+
+        - **نفس البحث:** نفس التطبيع والمرادفات والتصحيح الإملائي والترتيب بتاع `GET /search` (بداية كلمة في الاسم
+          قبل جوه الاسم قبل الباقي)، فالاقتراحات متتناقضش مع النتايج. `meta.corrected_query` بيرجع بالكلمة المصحّحة
+          لو اتصحّحت.
+        - **من غير فلاتر ولا pagination ولا عدّاد:** استعلام واحد صغير بدل استعلام النتايج كله، عشان يتبعت مع كل وقفة في
+          الكتابة.
+        - **حد خاص بيه:** مش بيتحسب على الحد العام للتطبيق (60 زائر / 120 مستخدم في الدقيقة)، وله حده الواسع
+          (`WAIN_RATE_LIMIT_SUGGEST_GUEST`/`_USER`، 120 و240)، فكتابة كتير ما تحجبش الرئيسية ولا صفحة المكان.
+        - علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      q:
+        custom: []
+        name: q
+        description: 'اللي المستخدم كتبه لحد دلوقتي (حتى لو كلمة ناقصة)، من حرفين لـ 60 حرف. نفس التطبيع والمرادفات والتصحيح بتاعة `GET /search`. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف.'
+        required: true
+        example: حدي
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      q: حدي
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 26, "slug": "narges-garden", "name": "حديقة النرجس", "category": {"name": "حدائق ومتنزهات", "icon": "🌳"}, "area": "التجمع الخامس", "thumb": null}], "meta": {"corrected_query": null}}'
+        headers: []
+        description: اقتراحات
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
