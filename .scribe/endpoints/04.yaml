@@ -742,6 +742,9 @@ endpoints:
         - **الترتيب:** `sort=recommended` (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (`nearest`
           و`rating` و`newest`) بترتيبها زي القائمة.
         - علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.
+        - **`log=1`:** بيسجّل العملية في سجل البحث (الكلمة مطبَّعة والمنطقة وعدد النتايج والمستخدم والجهاز) لتقارير
+          «أكتر بحث» و«بحث من غير نتائج». الموبايل بيبعتها لما المستخدم يدوس Enter أو يفتح نتيجة أو تثبت شاشة «مفيش
+          نتائج» لثانية بس. السجل بيتمسح بعد 90 يوم.
       authenticated: false
       deprecated: false
     headers:
@@ -761,6 +764,17 @@ endpoints:
         enumValues: []
         exampleWasSpecified: false
         nullable: false
+        deprecated: false
+      log:
+        custom: []
+        name: log
+        description: 'سجّل العملية دي في سجل البحث (للتقارير). الموبايل بيبعتها `1` بس لما المستخدم يدوس Enter أو يفتح نتيجة أو تثبت شاشة «مفيش نتائج» لثانية، مش مع كل حرف.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
         deprecated: false
       area:
         custom: []
@@ -902,6 +916,7 @@ endpoints:
         deprecated: false
     cleanQueryParameters:
       q: 'كافيه هادي'
+      log: false
       area: new-cairo
       categories:
         - architecto

@@ -23,3 +23,6 @@ Schedule::command('backup:database')
     ->dailyAt('03:10')
     ->withoutOverlapping()
     ->when(fn () => filled(config('filesystems.disks.backups.bucket')));
+
+// Search log (06 section 5): searches are user data, kept 90 days for the A9 reports.
+Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();

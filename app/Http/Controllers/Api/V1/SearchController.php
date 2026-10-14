@@ -10,6 +10,7 @@ use App\Support\OpenNow;
 use App\Support\PlaceListOrder;
 use App\Support\PlaceLocation;
 use App\Support\Search\PlaceSearch;
+use App\Support\Search\SearchLogger;
 use App\Support\Search\SearchPlan;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
@@ -48,6 +49,9 @@ class SearchController extends Controller
      * - **الترتيب:** `sort=recommended` (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (`nearest`
      *   و`rating` و`newest`) بترتيبها زي القائمة.
      * - علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.
+     * - **`log=1`:** بيسجّل العملية في سجل البحث (الكلمة مطبَّعة والمنطقة وعدد النتايج والمستخدم والجهاز) لتقارير
+     *   «أكتر بحث» و«بحث من غير نتائج». الموبايل بيبعتها لما المستخدم يدوس Enter أو يفتح نتيجة أو تثبت شاشة «مفيش
+     *   نتائج» لثانية بس. السجل بيتمسح بعد 90 يوم.
      *
      * @response 200 scenario="نتايج" {"data": [], "meta": {"current_page": 1, "last_page": 1, "per_page": 20, "total": 0, "corrected_query": null}}
      */
@@ -78,6 +82,17 @@ class SearchController extends Controller
                     $correctedQuery = $fixed->text();
                 }
             }
+        }
+
+        if ($request->boolean('log')) {
+            // اللي المستخدم شافه فعلاً: عدد النتايج بعد التصحيح لو اتقبل، والكلمة زي ما كتبها (مطبَّعة)
+            SearchLogger::record(
+                $plan->query,
+                $page->total(),
+                $request->validated('area'),
+                $request->user('sanctum')?->getAuthIdentifier(),
+                $request->header('X-Device-Id'),
+            );
         }
 
         return $this->respond($request, $page, $correctedQuery);

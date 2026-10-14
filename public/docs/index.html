@@ -3549,6 +3549,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <li><strong>الترتيب:</strong> <code>sort=recommended</code> (الافتراضي) بيرتّب بالتطابق الأول ثم بالترتيب المقترح، والباقي (<code>nearest</code>
 و<code>rating</code> و<code>newest</code>) بترتيبها زي القائمة.</li>
 <li>علامات الترقيم بس (أو كلمة من غير حروف) بترجّع قايمة فاضية مش خطأ.</li>
+<li><strong><code>log=1</code>:</strong> بيسجّل العملية في سجل البحث (الكلمة مطبَّعة والمنطقة وعدد النتايج والمستخدم والجهاز) لتقارير
+«أكتر بحث» و«بحث من غير نتائج». الموبايل بيبعتها لما المستخدم يدوس Enter أو يفتح نتيجة أو تثبت شاشة «مفيش
+نتائج» لثانية بس. السجل بيتمسح بعد 90 يوم.</li>
 </ul>
 
 <span id="example-requests-GETapi-v1-search">
@@ -3557,7 +3560,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/search?q=%D9%83%D8%A7%D9%81%D9%8A%D9%87+%D9%87%D8%A7%D8%AF%D9%8A&amp;area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1&amp;sort=recommended&amp;lat=30.03&amp;lng=31.47&amp;page=1&amp;per_page=20" \
+    --get "http://localhost/api/v1/search?q=%D9%83%D8%A7%D9%81%D9%8A%D9%87+%D9%87%D8%A7%D8%AF%D9%8A&amp;log=&amp;area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1&amp;sort=recommended&amp;lat=30.03&amp;lng=31.47&amp;page=1&amp;per_page=20" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --header "Accept-Language: ar"</code></pre></div>
@@ -3570,6 +3573,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 const params = {
     "q": "كافيه هادي",
+    "log": "0",
     "area": "new-cairo",
     "categories[0]": "architecto",
     "attributes[0]": "architecto",
@@ -3713,6 +3717,28 @@ You can check the Dev Tools console for debugging information.</code></pre>
                data-component="query">
     <br>
 <p>كلمة البحث، من حرفين لـ 60 حرف. بيتطبّع (أ إ آ = ا، ة = ه، ى = ي، من غير تشكيل) وبيتوسّع بالمرادفات (كوفي = كافيه = coffee)، وبيدوّر في الاسمين والـ aliases والتصنيف والخصائص والمنطقة والوصف. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف. Example: <code>كافيه هادي</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>log</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="GETapi-v1-search" style="display: none">
+            <input type="radio" name="log"
+                   value="1"
+                   data-endpoint="GETapi-v1-search"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-v1-search" style="display: none">
+            <input type="radio" name="log"
+                   value="0"
+                   data-endpoint="GETapi-v1-search"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>سجّل العملية دي في سجل البحث (للتقارير). الموبايل بيبعتها <code>1</code> بس لما المستخدم يدوس Enter أو يفتح نتيجة أو تثبت شاشة «مفيش نتائج» لثانية، مش مع كل حرف. Example: <code>false</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
