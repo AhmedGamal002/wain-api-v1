@@ -131,7 +131,8 @@ final class PlaceTransitions
     }
 
     /**
-     * تغيير الباقة (للمنشور بس). `free` بيصفّر التواريخ، والمدفوعة بتطلب التاريخين و«إلى» بعد «من».
+     * تغيير الباقة (للمنشور بس). `free` بيصفّر التواريخ، والمدفوعة بتطلب التاريخين و«إلى» بعد «من» و«من» مش بعد
+     * النهارده (الباقة بتتفعّل فوراً، ومفيش تفعيل مجدول).
      * `$note` (رقم الفاتورة) بيتسجّل في سجل التغييرات مش في عمود.
      */
     public function setTier(Place $place, User $actor, string $tier, ?CarbonInterface $from = null, ?CarbonInterface $to = null, ?string $note = null): Place
@@ -151,6 +152,12 @@ final class PlaceTransitions
             }
             if ($to->toDateString() <= $from->toDateString()) {
                 throw new PlaceTransitionException('نهاية الباقة لازم تبقى بعد بدايتها');
+            }
+
+            // الباقة بتتفعّل فوراً، فبداية في المستقبل كانت هتتفعّل قبل ميعادها (ومفيش تفعيل مجدول). بتتسجّل يوم
+            // بدايتها أو بعده (بداية في الماضي مسموحة: فاتورة اتأخر تسجيلها).
+            if ($from->toDateString() > now(self::tz())->toDateString()) {
+                throw new PlaceTransitionException('الباقة بتتفعّل فوراً، فسجّلها يوم بدايتها. تاريخ «من» لازم يكون النهارده أو قبل كده');
             }
 
             // التاريخين يوم كامل بتوقيت القاهرة، والتخزين UTC

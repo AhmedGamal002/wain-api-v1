@@ -237,6 +237,9 @@ final class PlaceActions
                 DatePicker::make('from')
                     ->label('من')
                     ->native(false)
+                    // الباقة بتتفعّل فوراً: «من» النهارده أو قبل كده (PlaceTransitions::setTier بيرفض غير كده)
+                    ->maxDate(fn () => now(self::CAIRO)->toDateString())
+                    ->helperText('الباقة بتشتغل أول ما تحفظ، فسجّلها يوم بدايتها.')
                     ->required(fn (Get $get) => $get('tier') !== 'free')
                     ->visible(fn (Get $get) => $get('tier') !== 'free'),
                 DatePicker::make('to')

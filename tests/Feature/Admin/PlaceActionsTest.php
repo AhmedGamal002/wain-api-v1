@@ -254,8 +254,8 @@ class PlaceActionsTest extends TestCase
         $this->list()->loadTable()
             ->callAction(TestAction::make('tier')->table($place), [
                 'tier' => 'premium',
-                'from' => '2026-12-01',
-                'to' => '2026-12-31',
+                'from' => now('Africa/Cairo')->toDateString(),
+                'to' => now('Africa/Cairo')->addMonth()->toDateString(),
                 'note' => 'INV-7',
             ])
             ->assertHasNoActionErrors();
@@ -263,6 +263,22 @@ class PlaceActionsTest extends TestCase
         $place->refresh();
         $this->assertSame('premium', $place->listing_tier);
         $this->assertSame(1, $place->tier_rank);
+    }
+
+    public function test_tier_modal_refuses_a_start_date_after_today(): void
+    {
+        $this->asAdmin();
+        $place = Place::factory()->published()->create();
+
+        $this->list()->loadTable()
+            ->callAction(TestAction::make('tier')->table($place), [
+                'tier' => 'premium',
+                'from' => now('Africa/Cairo')->addDays(3)->toDateString(),
+                'to' => now('Africa/Cairo')->addMonth()->toDateString(),
+            ])
+            ->assertHasActionErrors(['from']);
+
+        $this->assertSame('free', $place->refresh()->listing_tier);
     }
 
     public function test_tier_modal_needs_dates_for_a_paid_tier(): void

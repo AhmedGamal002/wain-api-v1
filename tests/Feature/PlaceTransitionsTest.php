@@ -198,8 +198,17 @@ class PlaceTransitionsTest extends TestCase
         $this->assertNull($place->closed_at);
     }
 
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
+
     public function test_set_tier_stores_cairo_days_in_utc_and_syncs_tier_rank(): void
     {
+        // اليوم هو يوم بداية الباقة (الباقة بتتسجّل يوم بدايتها)
+        Carbon::setTestNow(Carbon::parse('2026-11-22 12:00', 'Africa/Cairo'));
         $place = Place::factory()->published()->create();
 
         $this->transitions->setTier(
@@ -224,6 +233,7 @@ class PlaceTransitionsTest extends TestCase
 
     public function test_set_tier_validates_dates_and_free_clears_them(): void
     {
+        Carbon::setTestNow(Carbon::parse('2026-12-01 12:00', 'Africa/Cairo'));
         $place = Place::factory()->published()->create();
 
         try {
@@ -246,6 +256,32 @@ class PlaceTransitionsTest extends TestCase
         $this->assertNull($place->tier_starts_at);
         $this->assertNull($place->tier_ends_at);
         $this->assertSame(3, $place->tier_rank);
+    }
+
+    public function test_set_tier_rejects_a_start_date_after_today_and_accepts_today_and_the_past(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-01 03:00', 'Africa/Cairo'));
+        $place = Place::factory()->published()->create();
+
+        // بكرة بالقاهرة: الباقة كانت هتتفعّل فوراً قبل ميعادها
+        try {
+            $this->transitions->setTier($place, $this->admin, 'premium', Carbon::parse('2026-11-02', 'Africa/Cairo'), Carbon::parse('2026-11-30', 'Africa/Cairo'));
+            $this->fail('بداية في المستقبل');
+        } catch (PlaceTransitionException $e) {
+            $this->assertStringContainsString('يوم بدايتها', $e->getMessage());
+        }
+
+        $place->refresh();
+        $this->assertSame('free', $place->listing_tier);
+        $this->assertNull($place->tier_starts_at);
+
+        // النهارده (بعد منتصف الليل بتوقيت القاهرة، لسه 31 أكتوبر بـ UTC) مسموح
+        $this->transitions->setTier($place, $this->admin, 'featured', Carbon::parse('2026-11-01', 'Africa/Cairo'), Carbon::parse('2026-11-30', 'Africa/Cairo'));
+        $this->assertSame('featured', $place->refresh()->listing_tier);
+
+        // والماضي مسموح (فاتورة اتأخر تسجيلها)
+        $this->transitions->setTier($place->refresh(), $this->admin, 'premium', Carbon::parse('2026-10-20', 'Africa/Cairo'), Carbon::parse('2026-11-20', 'Africa/Cairo'));
+        $this->assertSame('premium', $place->refresh()->listing_tier);
     }
 
     public function test_moderator_cannot_set_tier_hide_close_or_delete(): void
