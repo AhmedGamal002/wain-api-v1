@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -140,6 +141,21 @@ class Place extends Model
     {
         // الـ slug case-insensitive في الداتابيز (collation)، فالمفتاح lowercase عشان الاتنين يتمسحوا مع بعض
         return 'places:'.mb_strtolower($slug);
+    }
+
+    /**
+     * id المكان اللي صفحته بتتفتح (منشور أو مغلق نهائياً، `scopeViewable`) بالـ slug أو بـ slug قديم، أو null.
+     * استعلام بسيط من غير علاقات لـ endpoints الكتابة (الأحداث) اللي مش محتاجة التفاصيل.
+     */
+    public static function viewableIdForSlug(string $slug): ?int
+    {
+        $id = static::query()->viewable()->where('places.slug', $slug)->value('places.id')
+            ?? static::query()->viewable()->whereIn(
+                'places.id',
+                DB::table('place_slug_redirects')->where('old_slug', $slug)->select('place_id'),
+            )->value('places.id');
+
+        return $id === null ? null : (int) $id;
     }
 
     /** @return BelongsTo<City, $this> */

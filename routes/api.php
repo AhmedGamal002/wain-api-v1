@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
+use App\Http\Controllers\Api\V1\PlaceEventController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SearchSuggestionController;
 use App\Models\Place;
@@ -30,6 +31,12 @@ Route::prefix('v1')->group(function () {
     // الـ slug ما يطابقش كلمة محجوزة (Place::RESERVED_SLUGS)، فـ /places/count ما يتفسّرش على إنه مكان.
     Route::get('places/{slug}', [PlaceController::class, 'show'])
         ->where('slug', '(?!(?:'.implode('|', Place::RESERVED_SLUGS).')$)[^/]+');
+
+    // أحداث الموبايل (ANL-02، 03 القسم 5.5): 204 فوراً والكتابة على الـ queue. limiter لوحده (60 في الدقيقة) وبره
+    // الحد العام (AppServiceProvider) عشان فتح صفحة وضغطات أزرارها ما ياكلوش من ميزانية التصفّح.
+    Route::post('places/{slug}/events', [PlaceEventController::class, 'store'])
+        ->middleware('throttle:events')
+        ->name('places.events');
 
     // البحث (F4): نفس كارت وفلاتر GET /places + q. بيتطبّع ويتوسّع بالمرادفات ويتصحّح إملائياً (PlaceSearch).
     Route::get('search', [SearchController::class, 'index']);

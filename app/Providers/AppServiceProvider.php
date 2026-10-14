@@ -42,8 +42,8 @@ class AppServiceProvider extends ServiceProvider
         // (X-Device-Id) مع الـ IP: شبكات الموبايل بتحط ناس كتير ورا IP واحد فالـ IP لوحده كان هيحجب ناس
         // ملهمش دعوة؛ ومن غير الهيدر بيرجع للـ IP. الـ limiters اللي تحت ده بتتطبق فوقه على نفس الطلب.
         RateLimiter::for('api', function (Request $request) {
-            // اقتراحات الكتابة ليها limiter لوحدها (تحت): ما بتتحسبش هنا، وما بتاكلش من ميزانية باقي التطبيق
-            if ($request->routeIs('search.suggestions')) {
+            // اقتراحات الكتابة والأحداث ليها limiters لوحدها (تحت): ما بتتحسبش هنا، وما بتاكلش من ميزانية باقي التطبيق
+            if ($request->routeIs('search.suggestions', 'places.events')) {
                 return Limit::none();
             }
 
@@ -74,6 +74,22 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute((int) config('wain.rate_limit.suggestions_guest'))
                 ->by('suggestions|guest|'.$request->ip().'|'.$device);
+        });
+
+        // أحداث الموبايل (ANL-02): 60 في الدقيقة (03 القسم 5.5) للمستخدم المسجّل أو للجهاز + الـ IP. فتح صفحة وكل
+        // ضغطة زرار حدث، فالحد أوسع بكتير من الاستخدام الطبيعي، وبيحمي الجدول من تطبيق بيلفّ أو سكريبت.
+        RateLimiter::for('events', function (Request $request) {
+            $user = $request->user('sanctum');
+
+            if ($user !== null) {
+                return Limit::perMinute((int) config('wain.rate_limit.events'))
+                    ->by('events|user|'.$user->getAuthIdentifier());
+            }
+
+            $device = substr(trim((string) $request->header('X-Device-Id')), 0, 64);
+
+            return Limit::perMinute((int) config('wain.rate_limit.events'))
+                ->by('events|guest|'.$request->ip().'|'.$device);
         });
 
         // SEC-01: الدخول والتسجيل 5 محاولات في الدقيقة لكل IP + إيميل. الزيادة بترجع 429 TOO_MANY_REQUESTS

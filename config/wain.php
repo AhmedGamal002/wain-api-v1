@@ -108,6 +108,8 @@ return [
         'user' => (int) env('WAIN_RATE_LIMIT_USER', 120),
         'suggestions_guest' => (int) env('WAIN_RATE_LIMIT_SUGGEST_GUEST', 120),
         'suggestions_user' => (int) env('WAIN_RATE_LIMIT_SUGGEST_USER', 240),
+        // أحداث الموبايل (`POST /places/{slug}/events`): 60 في الدقيقة، وبرضه بره الحد العام
+        'events' => (int) env('WAIN_RATE_LIMIT_EVENTS', 60),
     ],
 
 ];
