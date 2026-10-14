@@ -9,6 +9,10 @@ use App\Models\City;
 use App\Models\Place;
 use App\Policies\CatalogPolicy;
 use App\Policies\PlacePolicy;
+use App\Support\Search\CatalogSearchRefresh;
+use App\Support\Search\DatabasePlaceSearch;
+use App\Support\Search\PlaceSearch;
+use App\Support\Search\SynonymDictionary;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -22,7 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // البحث (F4): الـ API بيتكلّم مع الـ interface بس. الـ driver الحالي على الداتابيز، ولو الاستضافة
+        // اتغيّرت لـ VPS يتبدّل هنا بـ Meilisearch من غير تغيير في الـ endpoint.
+        $this->app->singleton(SynonymDictionary::class, fn () => SynonymDictionary::shared());
+        $this->app->bind(PlaceSearch::class, DatabasePlaceSearch::class);
     }
 
     /**
@@ -63,6 +70,11 @@ class AppServiceProvider extends ServiceProvider
         // يتشارك مع الدخول.
         RateLimiter::for('email-code', fn (Request $request) => Limit::perMinute(5)
             ->by('email-code|'.$request->path().'|'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+
+        // اسم تصنيف أو خاصية أو منطقة اتغيّر: `search_text` الأماكن اللي تحته بيتحدّث في نفس الحفظ (F4).
+        foreach ([Category::class, Attribute::class, Area::class] as $model) {
+            $model::saved(CatalogSearchRefresh::handle(...));
+        }
 
         // التصنيفات والخصائص والمدن والمناطق ليها نفس الصلاحيات: Admin يعدّل والـ Moderator عرض فقط.
         foreach ([Category::class, Attribute::class, City::class, Area::class] as $model) {

@@ -13,8 +13,8 @@ use App\Http\Resources\PlaceDetailResource;
 use App\Models\Place;
 use App\Support\OpenNow;
 use App\Support\PlaceDetailsCache;
+use App\Support\PlaceListOrder;
 use App\Support\PlaceLocation;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -47,7 +47,7 @@ class PlaceController extends Controller
             $query->selectRaw(PlaceLocation::distanceMetersSql($lat, $lng).' as distance_m');
         }
 
-        $this->applySort($query, $request);
+        PlaceListOrder::apply($query, $request->sort());
 
         $page = $query->paginate($request->perPage());
 
@@ -155,40 +155,5 @@ class PlaceController extends Controller
         return response()->json([
             'data' => (new PlaceDetailResource($place))->resolve($request),
         ]);
-    }
-
-    /**
-     * @param  Builder<Place>  $query
-     */
-    private function applySort(Builder $query, IndexPlacesRequest $request): void
-    {
-        match ($request->sort()) {
-            'nearest' => $query->orderBy('distance_m'),
-            'rating' => $query->orderByDesc('rating_avg')->orderByDesc('rating_count'),
-            'newest' => $query->orderByDesc('published_at'),
-            default => $this->applyRecommended($query),
-        };
-
-        // ترتيب ثابت يمنع تكرار أو ضياع عنصر بين صفحتين
-        $query->orderByDesc('places.id');
-    }
-
-    /**
-     * الترتيب المقترح (03 القسم 7.3): الباقة (premium ثم featured ثم free)، جوه المدفوعة ترتيب
-     * بيتبدّل كل يوم بتوقيت القاهرة، وجوه المجاني اللي له 3 تقييمات أو أكتر الأول بالتقييم، والتعادل
-     * بالأحدث نشراً.
-     *
-     * @param  Builder<Place>  $query
-     */
-    private function applyRecommended(Builder $query): void
-    {
-        $today = now('Africa/Cairo')->toDateString();
-
-        $query
-            ->orderBy('tier_rank')
-            ->orderByRaw("CASE WHEN tier_rank < 3 THEN MD5(CONCAT(places.id, '|', ?)) END", [$today])
-            ->orderByRaw('(rating_count >= 3) DESC')
-            ->orderByDesc('rating_avg')
-            ->orderByDesc('published_at');
     }
 }

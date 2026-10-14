@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ConfigController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
+use App\Http\Controllers\Api\V1\SearchController;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,9 @@ Route::prefix('v1')->group(function () {
     // الـ slug ما يطابقش كلمة محجوزة (Place::RESERVED_SLUGS)، فـ /places/count ما يتفسّرش على إنه مكان.
     Route::get('places/{slug}', [PlaceController::class, 'show'])
         ->where('slug', '(?!(?:'.implode('|', Place::RESERVED_SLUGS).')$)[^/]+');
+
+    // البحث (F4): نفس كارت وفلاتر GET /places + q. بيتطبّع ويتوسّع بالمرادفات ويتصحّح إملائياً (PlaceSearch).
+    Route::get('search', [SearchController::class, 'index']);
 
     Route::prefix('auth')->group(function () {
         // 5 محاولات في الدقيقة لكل IP + إيميل (SEC-01)

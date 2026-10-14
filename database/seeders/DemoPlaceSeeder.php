@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Support\PlaceHoursBuilder;
 use App\Support\PlaceLocation;
 use App\Support\PriceRange;
+use App\Support\Search\PlaceSearchText;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -24,8 +25,8 @@ use RuntimeException;
  * الصور روابط placeholder من picsum.photos بدل ملفات على R2 (ما فيش معالجة صور لحد أسبوع 9)،
  * فالـ resource بتاع الـ API لازم يمرّر الرابط المطلق زي ما هو.
  *
- * بيستخدم DB::table (مفيش Place model لسه)، فـ search_text بيتبني بعدين من الـ listener بتاع معلوم،
- * و place_hours بيتبني هنا بـ PlaceHoursBuilder. إعادة التشغيل بتتخطى الأماكن الموجودة (بالـ slug).
+ * بيستخدم DB::table (بيتخطى الـ Observer والـ listeners)، فـ place_hours بيتبني هنا بـ PlaceHoursBuilder
+ * و search_text بـ PlaceSearchText في آخر الـ seeder. إعادة التشغيل بتتخطى الأماكن الموجودة (بالـ slug).
  */
 class DemoPlaceSeeder extends Seeder
 {
@@ -54,6 +55,9 @@ class DemoPlaceSeeder extends Seeder
 
             $this->createPlace($index + 1, $place, $categories, $attributes, $cityId, $areaId, $userId);
         }
+
+        // نص البحث (الـ listener ما بيشتغلش مع DB::table)
+        PlaceSearchText::rebuildAll();
     }
 
     private function demoUserId(): int
