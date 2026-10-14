@@ -423,6 +423,157 @@ endpoints:
     custom: []
     httpMethods:
       - GET
+    uri: api/v1/places/map
+    metadata:
+      custom: []
+      groupName: Places
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Map pins'
+      description: |-
+        pins الخريطة (F6): المنشور جوه مستطيل `bbox` بنفس فلاتر `GET /places`، لحد 200 مرتبين بالترتيب المقترح
+        (premium ثم featured ثم الباقي)، فلو الجزء الظاهر فيه أكتر من 200 بيطلع المدفوع الأول.
+
+        - كل pin: `id` و`slug` و`latitude` و`longitude` و`category_slug` (اللون من `GET /categories`) و`listing_tier`
+          (premium بيتعرض أكبر). الكارت بيتحمّل لما المستخدم يدوس على pin من `GET /places/{slug}`.
+        - من غير `meta` (زي `nearby`): لو الرد 200 pin بالظبط يبقى غالباً فيه أكتر في المستطيل ده، والموبايل يقترح التقريب.
+        - ما فيش ترتيب ولا pagination ولا موقع: الخريطة بتتحرك والمستخدم بيدوس «ابحث في المنطقة دي».
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      area:
+        custom: []
+        name: area
+        description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+        required: false
+        example: new-cairo
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      categories:
+        custom: []
+        name: categories
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      attributes:
+        custom: []
+        name: attributes
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_min:
+        custom: []
+        name: price_min
+        description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+        required: false
+        example: 100
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      price_max:
+        custom: []
+        name: price_max
+        description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+        required: false
+        example: 300
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      rating_min:
+        custom: []
+        name: rating_min
+        description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+        required: false
+        example: 4.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      open_now:
+        custom: []
+        name: open_now
+        description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      bbox:
+        custom: []
+        name: bbox
+        description: 'حدود الجزء الظاهر من الخريطة: `minLng,minLat,maxLng,maxLat` (الطول ثم العرض، الجنوب الغربي ثم الشمال الشرقي). الطول والعرض بنقطة عشرية، والأصغر قبل الأكبر. البحث عبر خط التاريخ (180) مش مدعوم.'
+        required: true
+        example: '31.40,29.95,31.55,30.10'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      area: new-cairo
+      categories:
+        - architecto
+      attributes:
+        - architecto
+      price_min: 100
+      price_max: 300
+      rating_min: 4.0
+      open_now: true
+      bbox: '31.40,29.95,31.55,30.10'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 152, "slug": "cilantro-new-cairo", "latitude": 30.0283, "longitude": 31.4913, "category_slug": "cafes", "listing_tier": "premium"}]}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"message": "حدود الخريطة لازم تبقى ...", "code": "VALIDATION_ERROR", "errors": {"bbox": ["..."]}}'
+        headers: []
+        description: 'bbox ناقص أو غلط'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
     uri: 'api/v1/places/{slug}'
     metadata:
       custom: []

@@ -154,6 +154,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places-count">
                                 <a href="#places-GETapi-v1-places-count">Count places</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="places-GETapi-v1-places-map">
+                                <a href="#places-GETapi-v1-places-map">Map pins</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="places-GETapi-v1-places--slug-">
                                 <a href="#places-GETapi-v1-places--slug-">Get place details</a>
                             </li>
@@ -3125,6 +3128,295 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </label>
     <br>
 <p>الأماكن المفتوحة دلوقتي بتوقيت القاهرة (<code>1</code>). Example: <code>true</code></p>
+            </div>
+                </form>
+
+                    <h2 id="places-GETapi-v1-places-map">Map pins</h2>
+
+<p>
+</p>
+
+<p>pins الخريطة (F6): المنشور جوه مستطيل <code>bbox</code> بنفس فلاتر <code>GET /places</code>، لحد 200 مرتبين بالترتيب المقترح
+(premium ثم featured ثم الباقي)، فلو الجزء الظاهر فيه أكتر من 200 بيطلع المدفوع الأول.</p>
+<ul>
+<li>كل pin: <code>id</code> و<code>slug</code> و<code>latitude</code> و<code>longitude</code> و<code>category_slug</code> (اللون من <code>GET /categories</code>) و<code>listing_tier</code>
+(premium بيتعرض أكبر). الكارت بيتحمّل لما المستخدم يدوس على pin من <code>GET /places/{slug}</code>.</li>
+<li>من غير <code>meta</code> (زي <code>nearby</code>): لو الرد 200 pin بالظبط يبقى غالباً فيه أكتر في المستطيل ده، والموبايل يقترح التقريب.</li>
+<li>ما فيش ترتيب ولا pagination ولا موقع: الخريطة بتتحرك والمستخدم بيدوس «ابحث في المنطقة دي».</li>
+</ul>
+
+<span id="example-requests-GETapi-v1-places-map">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/places/map?area=new-cairo&amp;categories[]=architecto&amp;attributes[]=architecto&amp;price_min=100&amp;price_max=300&amp;rating_min=4&amp;open_now=1&amp;bbox=31.40%2C29.95%2C31.55%2C30.10" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/places/map"
+);
+
+const params = {
+    "area": "new-cairo",
+    "categories[0]": "architecto",
+    "attributes[0]": "architecto",
+    "price_min": "100",
+    "price_max": "300",
+    "rating_min": "4",
+    "open_now": "1",
+    "bbox": "31.40,29.95,31.55,30.10",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-places-map">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 152,
+            &quot;slug&quot;: &quot;cilantro-new-cairo&quot;,
+            &quot;latitude&quot;: 30.0283,
+            &quot;longitude&quot;: 31.4913,
+            &quot;category_slug&quot;: &quot;cafes&quot;,
+            &quot;listing_tier&quot;: &quot;premium&quot;
+        }
+    ]
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422, bbox ناقص أو غلط):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;حدود الخريطة لازم تبقى ...&quot;,
+    &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+    &quot;errors&quot;: {
+        &quot;bbox&quot;: [
+            &quot;...&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-places-map" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-places-map"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-places-map"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-places-map" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-places-map">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-places-map" data-method="GET"
+      data-path="api/v1/places/map"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-places-map', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-places-map"
+                    onclick="tryItOut('GETapi-v1-places-map');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-places-map"
+                    onclick="cancelTryOut('GETapi-v1-places-map');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-places-map"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/places/map</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-places-map"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-places-map"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-places-map"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="area"                data-endpoint="GETapi-v1-places-map"
+               value="new-cairo"
+               data-component="query">
+    <br>
+<p>slug المنطقة (من <code>GET /areas</code>). Must match an existing stored value. Example: <code>new-cairo</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>categories</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="categories[0]"                data-endpoint="GETapi-v1-places-map"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="categories[1]"                data-endpoint="GETapi-v1-places-map"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="attributes[0]"                data-endpoint="GETapi-v1-places-map"
+               data-component="query">
+        <input type="text" style="display: none"
+               name="attributes[1]"                data-endpoint="GETapi-v1-places-map"
+               data-component="query">
+    <br>
+<p>Must match an existing stored value.</p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_min</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_min"                data-endpoint="GETapi-v1-places-map"
+               value="100"
+               data-component="query">
+    <br>
+<p>أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>100</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>price_max</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="price_max"                data-endpoint="GETapi-v1-places-map"
+               value="300"
+               data-component="query">
+    <br>
+<p>أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي <code>price_min</code>. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل. Example: <code>300</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>rating_min</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="rating_min"                data-endpoint="GETapi-v1-places-map"
+               value="4"
+               data-component="query">
+    <br>
+<p>أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5. Example: <code>4</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>open_now</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="GETapi-v1-places-map" style="display: none">
+            <input type="radio" name="open_now"
+                   value="1"
+                   data-endpoint="GETapi-v1-places-map"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-v1-places-map" style="display: none">
+            <input type="radio" name="open_now"
+                   value="0"
+                   data-endpoint="GETapi-v1-places-map"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>الأماكن المفتوحة دلوقتي بتوقيت القاهرة (<code>1</code>). Example: <code>true</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>bbox</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="bbox"                data-endpoint="GETapi-v1-places-map"
+               value="31.40,29.95,31.55,30.10"
+               data-component="query">
+    <br>
+<p>حدود الجزء الظاهر من الخريطة: <code>minLng,minLat,maxLng,maxLat</code> (الطول ثم العرض، الجنوب الغربي ثم الشمال الشرقي). الطول والعرض بنقطة عشرية، والأصغر قبل الأكبر. البحث عبر خط التاريخ (180) مش مدعوم. Example: <code>31.40,29.95,31.55,30.10</code></p>
             </div>
                 </form>
 

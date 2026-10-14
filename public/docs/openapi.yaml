@@ -1076,6 +1076,191 @@ paths:
       tags:
         - Places
       security: []
+  /api/v1/places/map:
+    get:
+      summary: 'Map pins'
+      operationId: mapPins
+      description: "pins الخريطة (F6): المنشور جوه مستطيل `bbox` بنفس فلاتر `GET /places`، لحد 200 مرتبين بالترتيب المقترح\n(premium ثم featured ثم الباقي)، فلو الجزء الظاهر فيه أكتر من 200 بيطلع المدفوع الأول.\n\n- كل pin: `id` و`slug` و`latitude` و`longitude` و`category_slug` (اللون من `GET /categories`) و`listing_tier`\n  (premium بيتعرض أكبر). الكارت بيتحمّل لما المستخدم يدوس على pin من `GET /places/{slug}`.\n- من غير `meta` (زي `nearby`): لو الرد 200 pin بالظبط يبقى غالباً فيه أكتر في المستطيل ده، والموبايل يقترح التقريب.\n- ما فيش ترتيب ولا pagination ولا موقع: الخريطة بتتحرك والمستخدم بيدوس «ابحث في المنطقة دي»."
+      parameters:
+        -
+          in: query
+          name: area
+          description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+          example: new-cairo
+          required: false
+          schema:
+            type: string
+            description: 'slug المنطقة (من `GET /areas`). Must match an existing stored value.'
+            example: new-cairo
+            nullable: true
+        -
+          in: query
+          name: categories
+          description: 'Must match an existing stored value.'
+          example:
+            - architecto
+          required: false
+          schema:
+            type: array
+            description: 'Must match an existing stored value.'
+            example:
+              - architecto
+            items:
+              type: string
+        -
+          in: query
+          name: attributes
+          description: 'Must match an existing stored value.'
+          example:
+            - architecto
+          required: false
+          schema:
+            type: array
+            description: 'Must match an existing stored value.'
+            example:
+              - architecto
+            items:
+              type: string
+        -
+          in: query
+          name: price_min
+          description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+          example: 100
+          required: false
+          schema:
+            type: integer
+            description: 'أقل سعر فرد بالجنيه. المكان يظهر لو نطاق سعره بيتقاطع مع النطاق المختار. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+            example: 100
+            nullable: true
+        -
+          in: query
+          name: price_max
+          description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+          example: 300
+          required: false
+          schema:
+            type: integer
+            description: 'أعلى سعر فرد بالجنيه، ولازم يكون أكبر من أو يساوي `price_min`. value لازم يكون 0 أو أكتر. value لازم يكون 100000 أو أقل.'
+            example: 300
+            nullable: true
+        -
+          in: query
+          name: rating_min
+          description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+          example: 4.0
+          required: false
+          schema:
+            type: number
+            description: 'أقل تقييم (3 أو 4 أو 4.5). بيحسب الأماكن اللي ليها 3 تقييمات أو أكتر بس. value لازم يكون بين 1 و5.'
+            example: 4.0
+            nullable: true
+        -
+          in: query
+          name: open_now
+          description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: 'الأماكن المفتوحة دلوقتي بتوقيت القاهرة (`1`).'
+            example: true
+            nullable: true
+        -
+          in: query
+          name: bbox
+          description: 'حدود الجزء الظاهر من الخريطة: `minLng,minLat,maxLng,maxLat` (الطول ثم العرض، الجنوب الغربي ثم الشمال الشرقي). الطول والعرض بنقطة عشرية، والأصغر قبل الأكبر. البحث عبر خط التاريخ (180) مش مدعوم.'
+          example: '31.40,29.95,31.55,30.10'
+          required: true
+          schema:
+            type: string
+            description: 'حدود الجزء الظاهر من الخريطة: `minLng,minLat,maxLng,maxLat` (الطول ثم العرض، الجنوب الغربي ثم الشمال الشرقي). الطول والعرض بنقطة عشرية، والأصغر قبل الأكبر. البحث عبر خط التاريخ (180) مش مدعوم.'
+            example: '31.40,29.95,31.55,30.10'
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 152
+                      slug: cilantro-new-cairo
+                      latitude: 30.0283
+                      longitude: 31.4913
+                      category_slug: cafes
+                      listing_tier: premium
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 152
+                        slug: cilantro-new-cairo
+                        latitude: 30.0283
+                        longitude: 31.4913
+                        category_slug: cafes
+                        listing_tier: premium
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 152
+                        slug:
+                          type: string
+                          example: cilantro-new-cairo
+                        latitude:
+                          type: number
+                          example: 30.0283
+                        longitude:
+                          type: number
+                          example: 31.4913
+                        category_slug:
+                          type: string
+                          example: cafes
+                        listing_tier:
+                          type: string
+                          example: premium
+        422:
+          description: 'bbox ناقص أو غلط'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'حدود الخريطة لازم تبقى ...'
+                  code: VALIDATION_ERROR
+                  errors:
+                    bbox:
+                      - ...
+                properties:
+                  message:
+                    type: string
+                    example: 'حدود الخريطة لازم تبقى ...'
+                  code:
+                    type: string
+                    example: VALIDATION_ERROR
+                  errors:
+                    type: object
+                    properties:
+                      bbox:
+                        type: array
+                        example:
+                          - ...
+                        items:
+                          type: string
+      tags:
+        - Places
+      security: []
   '/api/v1/places/{slug}':
     get:
       summary: 'Get place details'
