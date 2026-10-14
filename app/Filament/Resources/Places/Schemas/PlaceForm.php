@@ -11,6 +11,7 @@ use App\Models\City;
 use App\Models\Place;
 use App\Support\AreaSuggestion;
 use App\Support\GoogleMapsUrl;
+use App\Support\InstagramHandle;
 use App\Support\OpeningHours;
 use App\Support\OpeningHoursForm;
 use App\Support\PhoneNumber;
@@ -505,7 +506,7 @@ class PlaceForm
                     ->rules([
                         fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
                             $handle = self::instagramHandle(is_string($value) ? $value : null);
-                            if ($handle !== null && preg_match('/^[A-Za-z0-9._]{1,30}$/', $handle) !== 1) {
+                            if ($handle !== null && ! InstagramHandle::isValid($handle)) {
                                 $fail('اسم الحساب حروف وأرقام ونقطة و_ بس، لحد 30');
                             }
                         },
@@ -820,18 +821,7 @@ class PlaceForm
      */
     private static function instagramHandle(?string $value): ?string
     {
-        $value = trim((string) $value);
-        if ($value === '') {
-            return null;
-        }
-
-        if (preg_match('~instagram\.com/([^/?#\s]+)~i', $value, $match) === 1) {
-            $value = $match[1];
-        }
-
-        $value = ltrim($value, '@');
-
-        return $value === '' ? null : $value;
+        return InstagramHandle::from($value);
     }
 
     /**

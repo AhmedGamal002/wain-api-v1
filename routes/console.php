@@ -37,6 +37,9 @@ Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();
 Schedule::command('places:aggregate-stats')->dailyAt('03:25')->withoutOverlapping();
 Schedule::command('events:prune')->dailyAt('03:45')->withoutOverlapping();
 
+// CSV imports (A10): previews nobody confirmed and finished results are dropped after 30 days.
+Schedule::command('places:prune-imports')->dailyAt('03:47')->withoutOverlapping();
+
 // File cache (06 section 5): the file store never deletes an expired entry until someone reads it, and the places list
 // keys carry a version that changes with every edit, so the old ones would pile up on disk.
 Schedule::command('cache:prune-expired')->dailyAt('03:55')->withoutOverlapping();

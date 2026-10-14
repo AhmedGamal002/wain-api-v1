@@ -53,7 +53,7 @@ final class PlaceDuplicates
         }
 
         return $rows
-            ->filter(fn (Place $place) => $this->similar($names, [
+            ->filter(fn (Place $place) => self::similar($names, [
                 SearchNormalizer::normalize($place->name_ar),
                 SearchNormalizer::normalize($place->name_en),
             ]))
@@ -69,10 +69,25 @@ final class PlaceDuplicates
     }
 
     /**
+     * اسمين مكانين شبه بعض؟ نفس قاعدة `near` من غير الداتابيز، لمقارنة صفوف ملف الـ CSV ببعضها (A10).
+     */
+    public static function sameName(?string $nameArA, ?string $nameEnA, ?string $nameArB, ?string $nameEnB): bool
+    {
+        $names = fn (?string $ar, ?string $en) => array_values(array_filter([
+            SearchNormalizer::normalize($ar),
+            SearchNormalizer::normalize($en),
+        ], fn (string $name) => $name !== ''));
+
+        $mine = $names($nameArA, $nameEnA);
+
+        return $mine !== [] && self::similar($mine, $names($nameArB, $nameEnB));
+    }
+
+    /**
      * @param  list<string>  $mine
      * @param  list<string>  $theirs
      */
-    private function similar(array $mine, array $theirs): bool
+    private static function similar(array $mine, array $theirs): bool
     {
         foreach ($mine as $a) {
             foreach ($theirs as $b) {

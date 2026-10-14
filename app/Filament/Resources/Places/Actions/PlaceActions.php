@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Places\Actions;
 use App\Filament\Resources\Places\PlaceResource;
 use App\Models\Place;
 use App\Models\User;
+use App\Support\PlaceCsvExporter;
 use App\Support\PlaceTransitionException;
 use App\Support\PlaceTransitions;
 use Closure;
@@ -107,9 +108,30 @@ final class PlaceActions
                 self::bulkPublish(),
                 self::bulkHide(),
                 self::bulkVerify(),
+                self::bulkExport(),
                 self::bulkDelete(),
             ])->visible(fn () => self::user()?->hasRole('admin') ?? false),
         ];
+    }
+
+    /**
+     * تصدير CSV للمحدد (A10): نفس الـ exporter بتاع زرار «تصدير CSV» في الهيدر، بنفس أعمدة القالب وبترتيب القايمة.
+     */
+    public static function bulkExport(): BulkAction
+    {
+        return BulkAction::make('exportCsv')
+            ->label('تصدير CSV')
+            ->icon(Heroicon::OutlinedArrowDownTray)
+            ->color('gray')
+            ->deselectRecordsAfterCompletion()
+            ->action(function (Collection $records) {
+                $ids = $records->modelKeys();
+
+                return PlaceCsvExporter::download(
+                    Place::query()->withTrashed()->whereKey($ids)->orderByRaw('FIELD(places.id, '.implode(',', array_map('intval', $ids)).')'),
+                    'places-selected-'.now('Africa/Cairo')->format('Y-m-d').'.csv',
+                );
+            });
     }
 
     // ───────────────────────── الإجراءات ─────────────────────────

@@ -4,9 +4,12 @@ namespace App\Filament\Resources\Places\Pages;
 
 use App\Filament\Resources\Places\PlaceResource;
 use App\Models\Place;
+use App\Support\PlaceCsvExporter;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListPlaces extends ListRecords
@@ -17,6 +20,23 @@ class ListPlaces extends ListRecords
     {
         return [
             CreateAction::make()->label('مكان جديد'),
+
+            // A10: استيراد من شيت، وتصدير الأماكن بنفس الفلاتر والبحث والتابز المختارين
+            Action::make('import')
+                ->label('استيراد CSV')
+                ->icon(Heroicon::OutlinedArrowUpTray)
+                ->color('gray')
+                ->url(PlaceResource::getUrl('import'))
+                ->visible(fn () => auth()->user()?->can('create', Place::class) ?? false),
+
+            Action::make('export')
+                ->label('تصدير CSV')
+                ->icon(Heroicon::OutlinedArrowDownTray)
+                ->color('gray')
+                ->action(fn () => PlaceCsvExporter::download(
+                    $this->getTableQueryForExport(),
+                    'places-'.now('Africa/Cairo')->format('Y-m-d').'.csv',
+                )),
         ];
     }
 

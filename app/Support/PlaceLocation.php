@@ -35,6 +35,20 @@ final class PlaceLocation
     }
 
     /**
+     * المسافة بالمتر بين نقطتين في PHP (haversine) من غير الداتابيز: لمقارنة سطور ملف الـ CSV ببعضها وبمركز المنطقة.
+     * الأماكن المحفوظة بتتقاس بـ `distanceMetersSql` (نفس الكرة، فالفرق أقل من متر على مسافات المدينة).
+     */
+    public static function haversineMeters(float $latA, float $lngA, float $latB, float $lngB): float
+    {
+        $dLat = deg2rad($latB - $latA);
+        $dLng = deg2rad($lngB - $lngA);
+
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($latA)) * cos(deg2rad($latB)) * sin($dLng / 2) ** 2;
+
+        return 2 * 6371000.0 * asin(min(1.0, sqrt($a)));
+    }
+
+    /**
      * نص SQL لنقطة: `ST_GeomFromText('POINT(lng lat)')`.
      */
     public static function pointSql(float $lat, float $lng): string

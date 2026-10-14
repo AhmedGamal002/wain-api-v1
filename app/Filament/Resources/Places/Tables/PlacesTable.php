@@ -277,6 +277,12 @@ class PlacesTable
                     ->icon(Heroicon::OutlinedPlus)
                     ->url(PlaceResource::getUrl('create'))
                     ->visible(fn () => auth()->user()?->can('create', Place::class) ?? false),
+                Action::make('import')
+                    ->label('استيراد CSV')
+                    ->icon(Heroicon::OutlinedArrowUpTray)
+                    ->color('gray')
+                    ->url(PlaceResource::getUrl('import'))
+                    ->visible(fn () => auth()->user()?->can('create', Place::class) ?? false),
             ]);
     }
 

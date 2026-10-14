@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Places;
 
 use App\Filament\Resources\Places\Pages\CreatePlace;
 use App\Filament\Resources\Places\Pages\EditPlace;
+use App\Filament\Resources\Places\Pages\ImportPlaces;
 use App\Filament\Resources\Places\Pages\ListPlaces;
 use App\Filament\Resources\Places\Pages\ViewPlace;
 use App\Filament\Resources\Places\RelationManagers\ActivitiesRelationManager;
@@ -71,6 +72,8 @@ class PlaceResource extends Resource
         return [
             'index' => ListPlaces::route('/'),
             'create' => CreatePlace::route('/create'),
+            // قبل `view` عشان `/import` ما يتفسّرش على إنه {record}
+            'import' => ImportPlaces::route('/import'),
             'view' => ViewPlace::route('/{record}'),
             'edit' => EditPlace::route('/{record}/edit'),
         ];
