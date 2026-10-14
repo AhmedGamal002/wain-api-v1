@@ -6,10 +6,12 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CountPlacesRequest;
 use App\Http\Requests\IndexPlacesRequest;
+use App\Http\Requests\MapPlacesRequest;
 use App\Http\Requests\NearbyPlacesRequest;
 use App\Http\Requests\ShowPlaceRequest;
 use App\Http\Resources\PlaceCardResource;
 use App\Http\Resources\PlaceDetailResource;
+use App\Http\Resources\PlacePinResource;
 use App\Models\Place;
 use App\Support\OpenNow;
 use App\Support\PlaceDetailsCache;
@@ -107,6 +109,42 @@ class PlaceController extends Controller
 
         return response()->json([
             'data' => PlaceCardResource::collection($places)->resolve($request),
+        ]);
+    }
+
+    /**
+     * Map pins
+     *
+     * pins الخريطة (F6): المنشور جوه مستطيل `bbox` بنفس فلاتر `GET /places`، لحد 200 مرتبين بالترتيب المقترح
+     * (premium ثم featured ثم الباقي)، فلو الجزء الظاهر فيه أكتر من 200 بيطلع المدفوع الأول.
+     *
+     * - كل pin: `id` و`slug` و`latitude` و`longitude` و`category_slug` (اللون من `GET /categories`) و`listing_tier`
+     *   (premium بيتعرض أكبر). الكارت بيتحمّل لما المستخدم يدوس على pin من `GET /places/{slug}`.
+     * - من غير `meta` (زي `nearby`): لو الرد 200 pin بالظبط يبقى غالباً فيه أكتر في المستطيل ده، والموبايل يقترح التقريب.
+     * - ما فيش ترتيب ولا pagination ولا موقع: الخريطة بتتحرك والمستخدم بيدوس «ابحث في المنطقة دي».
+     *
+     * @response 200 {"data": [{"id": 152, "slug": "cilantro-new-cairo", "latitude": 30.0283, "longitude": 31.4913, "category_slug": "cafes", "listing_tier": "premium"}]}
+     * @response 422 scenario="bbox ناقص أو غلط" {"message": "حدود الخريطة لازم تبقى ...", "code": "VALIDATION_ERROR", "errors": {"bbox": ["..."]}}
+     */
+    public function map(MapPlacesRequest $request): JsonResponse
+    {
+        [$minLng, $minLat, $maxLng, $maxLat] = $request->bbox();
+
+        $query = Place::query()
+            ->published()
+            ->with('primaryCategory:id,slug')
+            ->select(['places.id', 'places.slug', 'places.latitude', 'places.longitude', 'places.primary_category_id', 'places.listing_tier'])
+            // المستطيل الأول: بيستخدم الـ SPATIAL INDEX، والفلاتر بعده بتشتغل على النتيجة الصغيرة
+            ->whereRaw(PlaceLocation::rectangleSql($minLat, $minLng, $maxLat, $maxLng));
+
+        $request->applyFilters($query, OpenNow::at());
+
+        PlaceListOrder::apply($query, 'recommended');
+
+        $places = $query->limit(MapPlacesRequest::LIMIT)->get();
+
+        return response()->json([
+            'data' => PlacePinResource::collection($places)->resolve($request),
         ]);
     }
 

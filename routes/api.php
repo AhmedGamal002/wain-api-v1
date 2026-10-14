@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function () {
     Route::get('places', [PlaceController::class, 'index']);
     Route::get('places/nearby', [PlaceController::class, 'nearby']);
     Route::get('places/count', [PlaceController::class, 'count']);
+    Route::get('places/map', [PlaceController::class, 'map']);
     // {slug} بعد المسارات الثابتة (nearby وcount وmap)، والـ where بيحمي لو اتضاف مسار ثابت بعده بالغلط:
     // الـ slug ما يطابقش كلمة محجوزة (Place::RESERVED_SLUGS)، فـ /places/count ما يتفسّرش على إنه مكان.
     Route::get('places/{slug}', [PlaceController::class, 'show'])

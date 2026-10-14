@@ -72,15 +72,29 @@ final class PlaceLocation
     {
         self::assertValid($lat, $lng);
 
-        $wrapped = DB::connection()->getQueryGrammar()->wrap($column);
         $latDelta = $radiusKm / 110.574;
         // عند القطبين cos بيقرّب من صفر، فبنحدّه عشان المستطيل ما يبقاش لانهائي
         $lngDelta = $radiusKm / (111.320 * max(cos(deg2rad($lat)), 0.01));
 
-        $minLat = max($lat - $latDelta, -90.0);
-        $maxLat = min($lat + $latDelta, 90.0);
-        $minLng = max($lng - $lngDelta, -180.0);
-        $maxLng = min($lng + $lngDelta, 180.0);
+        return self::rectangleSql(
+            max($lat - $latDelta, -90.0),
+            max($lng - $lngDelta, -180.0),
+            min($lat + $latDelta, 90.0),
+            min($lng + $lngDelta, 180.0),
+            $column,
+        );
+    }
+
+    /**
+     * شرط مستطيل بزوايا (الأدنى والأقصى للعرض والطول): `MBRContains(POLYGON, location)`. نفس الـ SPATIAL INDEX
+     * بتاع `boundingBoxSql`، ومنه بتتبني حدود الخريطة (`GET /places/map`).
+     */
+    public static function rectangleSql(float $minLat, float $minLng, float $maxLat, float $maxLng, string $column = 'location'): string
+    {
+        self::assertValid($minLat, $minLng);
+        self::assertValid($maxLat, $maxLng);
+
+        $wrapped = DB::connection()->getQueryGrammar()->wrap($column);
 
         $ring = implode(', ', [
             self::format($minLng).' '.self::format($minLat),
