@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
  * لما مكان يتنشر أو يتخفى أو يتحذف أو يتنقل لمنطقة تانية.
  *
  * بيشتغل مباشرة (مش queue): الإخفاء لازم يبان في أقل من دقيقة (03 القسم 8 «الـ API»). cache القوائم
- * (`places:version`) تبع معلوم (أسبوع 8) وبيشترك في نفس الـ event.
+ * (`places:version`) في `BumpPlaceListVersion` على نفس الـ event.
  */
 class ForgetPlaceDetailCache
 {

@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Support\PlaceDetailsCache;
+use App\Support\PlaceListCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -71,6 +72,9 @@ trait IsCatalogItem
 
         // تفاصيل المكان المخزّنة فيها أسماء التصنيفات والخصائص والمنطقة: بتتعامل كـ stale
         PlaceDetailsCache::catalogChanged();
+
+        // وقوايم الأماكن المخزّنة (الفلترة بالتصنيف والخاصية والمنطقة بتتغيّر بتعديل المرجعية)
+        PlaceListCache::bump();
     }
 
     public function getActivitylogOptions(): LogOptions

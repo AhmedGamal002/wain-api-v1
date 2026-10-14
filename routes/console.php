@@ -31,3 +31,7 @@ Schedule::command('places:purge-deleted')->dailyAt('03:20')->withoutOverlapping(
 
 // Search log (06 section 5): searches are user data, kept 90 days for the A9 reports.
 Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();
+
+// File cache (06 section 5): the file store never deletes an expired entry until someone reads it, and the places list
+// keys carry a version that changes with every edit, so the old ones would pile up on disk.
+Schedule::command('cache:prune-expired')->dailyAt('03:55')->withoutOverlapping();

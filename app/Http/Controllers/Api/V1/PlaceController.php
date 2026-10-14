@@ -13,10 +13,13 @@ use App\Http\Resources\PlaceCardResource;
 use App\Http\Resources\PlaceDetailResource;
 use App\Http\Resources\PlacePinResource;
 use App\Models\Place;
+use App\Support\NearbyPlaces;
 use App\Support\OpenNow;
 use App\Support\PlaceDetailsCache;
+use App\Support\PlaceListCache;
 use App\Support\PlaceListOrder;
 use App\Support\PlaceLocation;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +31,10 @@ class PlaceController extends Controller
     /**
      * GET /places — القائمة بكروت المكان مع pagination (06 القسم 1: `data` و`meta` من 4 حقول).
      * بترجّع المنشور بس، بالفلاتر (المنطقة والتصنيفات والخصائص والسعر والتقييم و open_now) من
-     * PlaceFilterRequest، والـ cache مع /home (أسبوع 8).
+     * PlaceFilterRequest.
+     *
+     * ترتيب الـ ids وعدد النتايج بس هما اللي في cache لمدة 60 ثانية (`PlaceListCache`، بيتمسح مع أي تغيير في
+     * الأماكن)؛ الكارت بيتبني من الداتابيز كل طلب بـ `is_open_now` والمسافة واللغة.
      */
     public function index(IndexPlacesRequest $request): JsonResponse
     {
@@ -36,32 +42,77 @@ class PlaceController extends Controller
         $now = OpenNow::at();
         $request->attributes->set(PlaceCardResource::OPEN_NOW_ATTRIBUTE, $now);
 
-        $query = Place::query()
-            ->published()
-            ->with(['primaryCategory', 'area', 'coverPhoto'])
-            ->select('places.*');
+        $listing = PlaceListCache::remember($request, fn () => $this->listing($request, $now));
+
+        return response()->json([
+            'data' => PlaceCardResource::collection($this->cards($request, $listing['ids']))->resolve($request),
+            'meta' => $listing['meta'],
+        ]);
+    }
+
+    /**
+     * الصفحة المطلوبة: ترتيب الـ ids وعدّاد الـ pagination، من غير تحميل الكروت.
+     *
+     * @return array{ids: list<int>, meta: array<string, int>}
+     */
+    private function listing(IndexPlacesRequest $request, OpenNow $now): array
+    {
+        $query = Place::query()->published()->select('places.id');
 
         $request->applyFilters($query, $now);
 
-        if ($request->hasLocation()) {
-            $lat = (float) $request->validated('lat');
-            $lng = (float) $request->validated('lng');
-            $query->selectRaw(PlaceLocation::distanceMetersSql($lat, $lng).' as distance_m');
+        // المسافة محتاجة هنا بس لما الترتيب نفسه بالأقرب؛ عرضها في الكارت من `cards`
+        if ($request->sort() === 'nearest' && $request->hasLocation()) {
+            $query->selectRaw(PlaceLocation::distanceMetersSql(
+                (float) $request->validated('lat'),
+                (float) $request->validated('lng'),
+            ).' as distance_m');
         }
 
         PlaceListOrder::apply($query, $request->sort());
 
         $page = $query->paginate($request->perPage());
 
-        return response()->json([
-            'data' => PlaceCardResource::collection($page->getCollection())->resolve($request),
+        return [
+            'ids' => $page->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->all(),
             'meta' => [
                 'current_page' => $page->currentPage(),
                 'last_page' => $page->lastPage(),
                 'per_page' => $page->perPage(),
                 'total' => $page->total(),
             ],
-        ]);
+        ];
+    }
+
+    /**
+     * كروت الـ ids دي بنفس ترتيبها. المكان اللي اتخفى أو اتحذف من وقت ما الـ ids اتخزنت بيطلع من القايمة
+     * (الصفحة ممكن تبقى أقصر بمكان لحد ما الـ cache ينتهي).
+     *
+     * @param  list<int>  $ids
+     * @return Collection<int, Place>
+     */
+    private function cards(IndexPlacesRequest $request, array $ids): Collection
+    {
+        if ($ids === []) {
+            return new Collection;
+        }
+
+        $query = Place::query()
+            ->published()
+            ->with(['primaryCategory', 'area', 'coverPhoto'])
+            ->select('places.*')
+            ->whereIn('places.id', $ids);
+
+        if ($request->hasLocation()) {
+            $query->selectRaw(PlaceLocation::distanceMetersSql(
+                (float) $request->validated('lat'),
+                (float) $request->validated('lng'),
+            ).' as distance_m');
+        }
+
+        $byId = $query->get()->keyBy('id');
+
+        return new Collection(array_values(array_filter(array_map(fn (int $id) => $byId->get($id), $ids))));
     }
 
     /**
@@ -84,28 +135,13 @@ class PlaceController extends Controller
     /**
      * GET /places/nearby — «قريب منك»: المنشور جوه نصف القطر مرتب بالأقرب (03 القسم 7.5).
      *
-     * بيفلتر أولاً بمستطيل حوالين النقطة (MBRContains، بيستخدم الـ SPATIAL INDEX)، وبعدين بالمسافة الدقيقة.
-     * القائمة صغيرة (limit أقصى 30) فمفيش meta.
+     * القائمة صغيرة (limit أقصى 30) فمفيش meta. الاستعلام نفسه في `NearbyPlaces` (مشترك مع `GET /home`).
      */
     public function nearby(NearbyPlacesRequest $request): JsonResponse
     {
         $request->attributes->set(PlaceCardResource::OPEN_NOW_ATTRIBUTE, OpenNow::at());
 
-        $lat = $request->lat();
-        $lng = $request->lng();
-        $distance = PlaceLocation::distanceMetersSql($lat, $lng);
-
-        $places = Place::query()
-            ->published()
-            ->with(['primaryCategory', 'area', 'coverPhoto'])
-            ->select('places.*')
-            ->selectRaw($distance.' as distance_m')
-            ->whereRaw(PlaceLocation::boundingBoxSql($lat, $lng, $request->radiusKm()))
-            ->whereRaw($distance.' <= ?', [$request->radiusKm() * 1000])
-            ->orderBy('distance_m')
-            ->orderBy('places.id')
-            ->limit($request->limit())
-            ->get();
+        $places = NearbyPlaces::find($request->lat(), $request->lng(), $request->radiusKm(), $request->limit());
 
         return response()->json([
             'data' => PlaceCardResource::collection($places)->resolve($request),

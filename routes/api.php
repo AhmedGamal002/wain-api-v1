@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ConfigController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
+use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\SearchController;
@@ -19,6 +20,8 @@ Route::prefix('v1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('attributes', [AttributeController::class, 'index']);
     Route::get('areas', [AreaController::class, 'index']);
+    // الرئيسية في request واحد (F3): المجموعات (فاضية لحد P6) و«قريب منك»
+    Route::get('home', [HomeController::class, 'index']);
     Route::get('places', [PlaceController::class, 'index']);
     Route::get('places/nearby', [PlaceController::class, 'nearby']);
     Route::get('places/count', [PlaceController::class, 'count']);
