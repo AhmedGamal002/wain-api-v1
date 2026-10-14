@@ -25,6 +25,9 @@ tags:
   -
     name: Places
     description: ''
+  -
+    name: Home
+    description: ''
 components:
   securitySchemes:
     default:
@@ -2134,4 +2137,73 @@ paths:
                         nullable: true
       tags:
         - Places
+      security: []
+  /api/v1/home:
+    get:
+      summary: Home
+      operationId: home
+      description: "الرئيسية في request واحد (F3): المجموعات المنتقاة للمنطقة و«قريب منك». التصنيفات والفلاتر وقايمة «كل\nالأماكن» مش هنا: شريط التصنيفات من `GET /categories` والقايمة من `GET /places` بالتحميل المستمر.\n\n- **`collections`:** المجموعات الظاهرة للمنطقة (A5). بعد الإطلاق (P6)، فبترجع قايمة فاضية لحد ما A5\n  يتعمل، والموبايل بيخفي الجزء ده لو فاضي.\n- **`nearby`:** لحد 10 أماكن منشورة جوه 30 كم من `lat`/`lng` بالأقرب أول، بنفس كارت `GET /places` ومعاه\n  `distance_km`. قايمة فاضية من غير `lat`/`lng` (الموبايل بيخفي «قريب منك» بالكامل لو الموقع مش متاح).\n- `is_saved` و`distance_km` و`is_open_now` بتتحسب مع كل طلب (مش في cache).\n- `area` لازم تكون منطقة فعّالة؛ غير كده 422 والموبايل بيطلب اختيار منطقة تاني."
+      parameters:
+        -
+          in: query
+          name: area
+          description: 'slug المنطقة اللي المستخدم اختارها (من `GET /areas`). Must match an existing stored value.'
+          example: new-cairo
+          required: true
+          schema:
+            type: string
+            description: 'slug المنطقة اللي المستخدم اختارها (من `GET /areas`). Must match an existing stored value.'
+            example: new-cairo
+        -
+          in: query
+          name: lat
+          description: 'خط العرض. من غيره (ومن غير `lng`) `nearby` بيرجع قايمة فاضية. This field is required when <code>lng</code> is present. value لازم يكون بين -90 و90.'
+          example: 30.03
+          required: false
+          schema:
+            type: number
+            description: 'خط العرض. من غيره (ومن غير `lng`) `nearby` بيرجع قايمة فاضية. This field is required when <code>lng</code> is present. value لازم يكون بين -90 و90.'
+            example: 30.03
+            nullable: true
+        -
+          in: query
+          name: lng
+          description: 'خط الطول. لازم مع `lat`. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180.'
+          example: 31.47
+          required: false
+          schema:
+            type: number
+            description: 'خط الطول. لازم مع `lat`. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180.'
+            example: 31.47
+            nullable: true
+        -
+          in: header
+          name: Accept-Language
+          description: ''
+          example: ar
+          schema:
+            type: string
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    collections: []
+                    nearby: []
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        example: []
+                      nearby:
+                        type: array
+                        example: []
+      tags:
+        - Home
       security: []

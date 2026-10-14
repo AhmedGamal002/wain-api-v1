@@ -168,6 +168,16 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-home" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="home">
+                    <a href="#home">Home</a>
+                </li>
+                                    <ul id="tocify-subheader-home" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="home-GETapi-v1-home">
+                                <a href="#home-GETapi-v1-home">Home</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
             </div>
 
     <ul class="toc-footer" id="toc-footer">
@@ -4374,6 +4384,201 @@ You can check the Dev Tools console for debugging information.</code></pre>
                data-component="query">
     <br>
 <p>اللي المستخدم كتبه لحد دلوقتي (حتى لو كلمة ناقصة)، من حرفين لـ 60 حرف. نفس التطبيع والمرادفات والتصحيح بتاعة <code>GET /search</code>. value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 60 حرف. Example: <code>حدي</code></p>
+            </div>
+                </form>
+
+                <h1 id="home">Home</h1>
+
+    
+
+                                <h2 id="home-GETapi-v1-home">Home</h2>
+
+<p>
+</p>
+
+<p>الرئيسية في request واحد (F3): المجموعات المنتقاة للمنطقة و«قريب منك». التصنيفات والفلاتر وقايمة «كل
+الأماكن» مش هنا: شريط التصنيفات من <code>GET /categories</code> والقايمة من <code>GET /places</code> بالتحميل المستمر.</p>
+<ul>
+<li><strong><code>collections</code>:</strong> المجموعات الظاهرة للمنطقة (A5). بعد الإطلاق (P6)، فبترجع قايمة فاضية لحد ما A5
+يتعمل، والموبايل بيخفي الجزء ده لو فاضي.</li>
+<li><strong><code>nearby</code>:</strong> لحد 10 أماكن منشورة جوه 30 كم من <code>lat</code>/<code>lng</code> بالأقرب أول، بنفس كارت <code>GET /places</code> ومعاه
+<code>distance_km</code>. قايمة فاضية من غير <code>lat</code>/<code>lng</code> (الموبايل بيخفي «قريب منك» بالكامل لو الموقع مش متاح).</li>
+<li><code>is_saved</code> و<code>distance_km</code> و<code>is_open_now</code> بتتحسب مع كل طلب (مش في cache).</li>
+<li><code>area</code> لازم تكون منطقة فعّالة؛ غير كده 422 والموبايل بيطلب اختيار منطقة تاني.</li>
+</ul>
+
+<span id="example-requests-GETapi-v1-home">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/home?area=new-cairo&amp;lat=30.03&amp;lng=31.47" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --header "Accept-Language: ar"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/home"
+);
+
+const params = {
+    "area": "new-cairo",
+    "lat": "30.03",
+    "lng": "31.47",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Accept-Language": "ar",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-home">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;collections&quot;: [],
+        &quot;nearby&quot;: []
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-home" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-home"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-home"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-home" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-home">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-home" data-method="GET"
+      data-path="api/v1/home"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-home', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-home"
+                    onclick="tryItOut('GETapi-v1-home');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-home"
+                    onclick="cancelTryOut('GETapi-v1-home');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-home"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/home</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-home"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-home"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept-Language</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept-Language"                data-endpoint="GETapi-v1-home"
+               value="ar"
+               data-component="header">
+    <br>
+<p>Example: <code>ar</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>area</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="area"                data-endpoint="GETapi-v1-home"
+               value="new-cairo"
+               data-component="query">
+    <br>
+<p>slug المنطقة اللي المستخدم اختارها (من <code>GET /areas</code>). Must match an existing stored value. Example: <code>new-cairo</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lat</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lat"                data-endpoint="GETapi-v1-home"
+               value="30.03"
+               data-component="query">
+    <br>
+<p>خط العرض. من غيره (ومن غير <code>lng</code>) <code>nearby</code> بيرجع قايمة فاضية. This field is required when <code>lng</code> is present. value لازم يكون بين -90 و90. Example: <code>30.03</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>lng</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lng"                data-endpoint="GETapi-v1-home"
+               value="31.47"
+               data-component="query">
+    <br>
+<p>خط الطول. لازم مع <code>lat</code>. This field is required when <code>lat</code> is present. value لازم يكون بين -180 و180. Example: <code>31.47</code></p>
             </div>
                 </form>
 
