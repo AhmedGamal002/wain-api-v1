@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ApiErrorRenderer;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\SetApiLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SetApiLocale::class);
+
+        // المستخدم الموقوف على الـ API (A7): بعد auth:sanctum على أي route مسجّل
+        $middleware->alias(['active' => EnsureAccountIsActive::class]);
 
         // الحد العام للطلبات على كل routes/api.php (limiter `api` في AppServiceProvider)
         $middleware->throttleApi('api');

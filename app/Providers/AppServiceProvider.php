@@ -7,8 +7,10 @@ use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Place;
+use App\Models\User;
 use App\Policies\CatalogPolicy;
 use App\Policies\PlacePolicy;
+use App\Policies\UserPolicy;
 use App\Support\Search\CatalogSearchRefresh;
 use App\Support\Search\DatabasePlaceSearch;
 use App\Support\Search\PlaceSearch;
@@ -149,6 +151,10 @@ class AppServiceProvider extends ServiceProvider
             ]));
         });
 
+        // رابط دعوة الفريق (A7): صفحة الفورم وزرار القبول. الـ token عشوائي 64 حرف فالتخمين مش بيحصل، والحد لمنع
+        // الطرق على الرابط وعلى فورم الباسورد.
+        RateLimiter::for('team-invitation', fn (Request $request) => Limit::perMinute(10)->by('team-invitation|'.$request->ip()));
+
         // تأكيد الإيميل (resend وverify) للمستخدم المسجّل: 5 في الدقيقة لكل مستخدم ولكل خطوة، من غير ما
         // يتشارك مع الدخول.
         RateLimiter::for('email-code', fn (Request $request) => Limit::perMinute(5)
@@ -165,6 +171,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::policy(Place::class, PlacePolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 
     /**

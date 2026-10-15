@@ -58,7 +58,8 @@ Route::prefix('v1')->group(function () {
             Route::post('reset', [PasswordResetController::class, 'reset']);
         });
 
-        Route::middleware('auth:sanctum')->group(function () {
+        // `active`: موقوف = 403 ACCOUNT_SUSPENDED (A7)، بعد auth:sanctum
+        Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
 
