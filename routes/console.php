@@ -8,6 +8,14 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// The queue (06 section 4, FRD "Cache and queues"): the shared host cannot keep a worker alive (no Supervisor), so
+// the same minute cron that runs the scheduler starts one that drains what is waiting and stops before the next
+// minute (--max-time=55). Photos, rating recalculation and place events wait here: without this line nothing on
+// the host would ever run them. withoutOverlapping keeps a slow batch from being started twice.
+Schedule::command('queue:work --stop-when-empty --max-time=55 --tries=2')
+    ->everyMinute()
+    ->withoutOverlapping();
+
 // Daily clean-up (06 section 4). The cron on the host runs `schedule:run` every minute.
 // Expired and used password reset / email verification codes, and Sanctum tokens past their 30 days.
 Schedule::command('auth:prune-codes')->dailyAt('03:30')->withoutOverlapping();
