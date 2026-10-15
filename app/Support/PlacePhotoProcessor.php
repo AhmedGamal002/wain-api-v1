@@ -84,7 +84,12 @@ final class PlacePhotoProcessor
             }
 
             $path = "places/{$photo->place_id}/{$photo->id}-{$name}.webp";
-            $disk->put($path, $data);
+
+            // الـ disks العادية (`public`) بترجّع false ساكتة لو الكتابة فشلت (R2 بيرمي لوحده: throw=true)
+            if ($disk->put($path, $data) === false) {
+                throw new RuntimeException("فشلت كتابة النسخة {$name} على disk الصور");
+            }
+
             $variants[$name] = $path;
         }
 

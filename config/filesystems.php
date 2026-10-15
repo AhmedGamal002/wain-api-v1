@@ -75,6 +75,39 @@ return [
             'report' => false,
         ],
 
+        // صور الأماكن على R2 (أسبوع 9، 03 القسم 4.5). `photos` هي النسخ (thumb وmedium وlarge)، وbucket عام
+        // (r2.dev أو دومين مخصّص في `PLACE_PHOTOS_R2_URL`). `photo_originals` الأصل، وbucket خاص من غير رابط.
+        // مفيش `visibility` عن قصد: R2 ما بيعرفش ACL، والعام عام من إعداد الـ bucket نفسه. `throw` لازم يبقى true:
+        // بدونه `put()` بيرجّع false ساكت والصورة بتبقى «جاهزة» وملفها مش موجود. مفاتيح الأصل بتاخد مفاتيح النسخ
+        // لو مفيش غيرها (token واحد على الـ bucketين). تفعيلهم بـ `PLACE_PHOTOS_DISK=photos` و
+        // `PLACE_PHOTOS_ORIGINAL_DISK=photo_originals` ثم `php artisan photos:migrate`.
+        'photos' => [
+            'driver' => 's3',
+            'key' => env('PLACE_PHOTOS_R2_KEY'),
+            'secret' => env('PLACE_PHOTOS_R2_SECRET'),
+            'region' => 'auto',
+            'bucket' => env('PLACE_PHOTOS_R2_BUCKET'),
+            'endpoint' => env('PLACE_PHOTOS_R2_ENDPOINT'),
+            'url' => env('PLACE_PHOTOS_R2_URL'),
+            'use_path_style_endpoint' => true,
+            // مسار النسخة فيه id الصورة فمش بيتغيّر لنفس المحتوى: شهر في الـ CDN وعلى الجهاز
+            'options' => ['CacheControl' => 'public, max-age=2592000'],
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'photo_originals' => [
+            'driver' => 's3',
+            'key' => env('PLACE_ORIGINALS_R2_KEY', env('PLACE_PHOTOS_R2_KEY')),
+            'secret' => env('PLACE_ORIGINALS_R2_SECRET', env('PLACE_PHOTOS_R2_SECRET')),
+            'region' => 'auto',
+            'bucket' => env('PLACE_ORIGINALS_R2_BUCKET'),
+            'endpoint' => env('PLACE_ORIGINALS_R2_ENDPOINT', env('PLACE_PHOTOS_R2_ENDPOINT')),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*
