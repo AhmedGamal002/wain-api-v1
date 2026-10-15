@@ -6,10 +6,12 @@ use App\Mail\AuthCodeMail;
 use App\Models\AuthCode;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Testing\TestResponse;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -106,6 +108,59 @@ class AuthCodesApiTest extends TestCase
         Mail::assertNothingSent();
         $this->assertDatabaseCount('auth_codes', 0);
         $this->assertNotNull($known->id);
+    }
+
+    public function test_forgot_resend_in_is_identical_for_a_known_and_an_unknown_email_at_every_moment(): void
+    {
+        // resend_in كان بيتنازل للمسجّل وبيفضل 60 لغير المسجّل: استعلامين ورا بعض كانوا بيكشفوا مين عنده حساب
+        $this->freezeTime();
+        $this->makeUser();
+
+        $this->assertSame(
+            $this->forgot('user@example.com')->assertOk()->json(),
+            $this->forgot('nobody@example.com')->assertOk()->json(),
+        );
+
+        $this->travel(20)->seconds();
+
+        $known = $this->forgot('user@example.com')->assertOk()->json();
+        $unknown = $this->forgot('nobody@example.com')->assertOk()->json();
+
+        $this->assertSame(['data' => ['resend_in' => 40]], $known);
+        $this->assertSame($known, $unknown);
+
+        $this->travel(41)->seconds();
+
+        $this->assertSame(['data' => ['resend_in' => 60]], $this->forgot('user@example.com')->json());
+        $this->assertSame(['data' => ['resend_in' => 60]], $this->forgot('nobody@example.com')->json());
+
+        // ومع كده الإرسال حصل للمسجّل بس: مرتين (أول طلب وبعد الـ 60 ثانية)
+        Mail::assertSent(AuthCodeMail::class, 2);
+    }
+
+    public function test_forgot_sends_the_code_after_the_response_and_a_mail_failure_does_not_change_the_answer(): void
+    {
+        $this->makeUser();
+        $this->withoutExceptionHandling();
+
+        Mail::shouldReceive('to')->andThrow(new RuntimeException('smtp is down'));
+
+        // الرد نفسه (مش 500) حتى لو الإرسال فشل: فشل الـ SMTP للمسجّل كان هيكشفه بخطأ
+        $this->forgot()->assertOk()->assertExactJson(['data' => ['resend_in' => 60]]);
+    }
+
+    public function test_forgot_never_sends_a_second_code_inside_60_seconds_even_if_the_cache_was_cleared(): void
+    {
+        $this->makeUser();
+
+        $this->forgot()->assertOk();
+        Mail::assertSent(AuthCodeMail::class, 1);
+
+        // النافذة اتمسحت (cache:clear) والجدول لسه فيه آخر إرسال
+        Cache::flush();
+        $this->forgot()->assertOk()->assertExactJson(['data' => ['resend_in' => 60]]);
+
+        Mail::assertSent(AuthCodeMail::class, 1);
     }
 
     public function test_forgot_does_not_send_to_a_suspended_account_but_answers_the_same(): void

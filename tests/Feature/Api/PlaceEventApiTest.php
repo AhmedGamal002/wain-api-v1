@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -274,5 +275,44 @@ class PlaceEventApiTest extends TestCase
         $this->getJson('/api/v1/categories', ['Accept-Language' => 'ar', 'X-Device-Id' => self::DEVICE])->assertOk();
         $this->getJson('/api/v1/categories', ['Accept-Language' => 'ar', 'X-Device-Id' => self::DEVICE])->assertOk();
         $this->getJson('/api/v1/categories', ['Accept-Language' => 'ar', 'X-Device-Id' => self::DEVICE])->assertStatus(429);
+    }
+
+    public function test_a_fresh_uuid_per_request_does_not_escape_the_ip_ceiling(): void
+    {
+        Queue::fake();
+        $place = $this->place();
+        config(['wain.rate_limit.events' => 60, 'wain.rate_limit.events_ip' => 3]);
+
+        // UUID أي قيمة: من غير سقف الـ IP تغييره في كل طلب بيزوّر الإحصائيات
+        for ($i = 0; $i < 3; $i++) {
+            $this->record($place->slug, ['type' => 'directions'], (string) Str::uuid())->assertNoContent();
+        }
+
+        $this->record($place->slug, ['type' => 'directions'], (string) Str::uuid())
+            ->assertStatus(429)
+            ->assertJsonPath('code', 'TOO_MANY_REQUESTS');
+
+        // اللي اترفض ما اتحطّش في الـ queue
+        Queue::assertPushed(RecordPlaceEvent::class, 3);
+    }
+
+    public function test_the_events_ip_ceiling_counts_signed_in_users_too_but_each_keeps_a_budget(): void
+    {
+        Queue::fake();
+        $place = $this->place();
+        config(['wain.rate_limit.events' => 2, 'wain.rate_limit.events_ip' => 3]);
+
+        $user = (new User(['name' => 'مستخدم', 'email' => 'user@example.com', 'password' => 'oldpass123']));
+        $user->save();
+        $bearer = ['Authorization' => 'Bearer '.$user->createToken('mobile')->plainTextToken];
+
+        $this->record($place->slug, ['type' => 'call'], self::DEVICE, $bearer)->assertNoContent();
+        $this->record($place->slug, ['type' => 'call'], self::DEVICE, $bearer)->assertNoContent();
+        // ميزانية المستخدم (2) خلصت قبل سقف الـ IP (3)
+        $this->record($place->slug, ['type' => 'call'], self::DEVICE, $bearer)->assertStatus(429);
+
+        // زائر من نفس الـ IP: باقي من سقف الـ IP حدث واحد بس
+        $this->record($place->slug, ['type' => 'call'], self::OTHER_DEVICE)->assertNoContent();
+        $this->record($place->slug, ['type' => 'call'], self::OTHER_DEVICE)->assertStatus(429);
     }
 }

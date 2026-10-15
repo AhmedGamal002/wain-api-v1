@@ -236,6 +236,86 @@ class RateLimitApiTest extends TestCase
         $this->suggest()->assertStatus(429);
     }
 
+    public function test_changing_the_device_id_does_not_escape_the_ip_ceiling(): void
+    {
+        // X-Device-Id بيجي من العميل: لو ميزانية الجهاز هي الوحيدة، كل قيمة جديدة = ميزانية جديدة من غير حد
+        $this->limits(100, 100);
+        config(['wain.rate_limit.guest_ip' => 3]);
+
+        foreach (['a', 'b', 'c'] as $device) {
+            $this->hit(['X-Device-Id' => "device-{$device}"], '10.0.0.5')->assertOk();
+        }
+
+        $this->hit(['X-Device-Id' => 'device-d'], '10.0.0.5')
+            ->assertStatus(429)
+            ->assertJsonPath('code', 'TOO_MANY_REQUESTS')
+            ->assertHeader('X-RateLimit-Limit', 3);
+
+        // IP تاني ما اتأثرش، والمستخدم المسجّل من نفس الـ IP كمان (ميزانيته بالـ user id مش بالـ IP)
+        $this->hit(['X-Device-Id' => 'device-e'], '10.0.0.6')->assertOk();
+        $this->hit($this->bearer($this->makeUser('user@example.com')), '10.0.0.5')->assertOk();
+    }
+
+    public function test_the_ip_ceiling_is_not_burned_by_requests_the_device_budget_refused(): void
+    {
+        $this->limits(2, 4);
+        config(['wain.rate_limit.guest_ip' => 4]);
+
+        $this->hit(['X-Device-Id' => 'device-a'], '10.0.0.5')->assertOk();
+        $this->hit(['X-Device-Id' => 'device-a'], '10.0.0.5')->assertOk();
+        for ($i = 0; $i < 6; $i++) {
+            $this->hit(['X-Device-Id' => 'device-a'], '10.0.0.5')->assertStatus(429);
+        }
+
+        // الجهاز المحجوب ما أكلش من سقف الـ IP: جهاز تاني ورا نفس الـ IP (CGNAT) لسه معاه ميزانيته
+        $this->hit(['X-Device-Id' => 'device-b'], '10.0.0.5')->assertOk();
+        $this->hit(['X-Device-Id' => 'device-b'], '10.0.0.5')->assertOk();
+        $this->hit(['X-Device-Id' => 'device-c'], '10.0.0.5')->assertStatus(429);
+    }
+
+    public function test_the_device_budget_still_decides_the_rate_limit_headers(): void
+    {
+        $this->limits(60, 120);
+        config(['wain.rate_limit.guest_ip' => 600]);
+
+        $this->hit(['X-Device-Id' => 'device-a'], '10.0.0.5')
+            ->assertOk()
+            ->assertHeader('X-RateLimit-Limit', 60);
+    }
+
+    public function test_the_ip_ceiling_comes_back_after_a_minute(): void
+    {
+        $this->limits(100, 100);
+        config(['wain.rate_limit.guest_ip' => 2]);
+
+        $this->hit(['X-Device-Id' => 'device-a'], '10.0.0.5')->assertOk();
+        $this->hit(['X-Device-Id' => 'device-b'], '10.0.0.5')->assertOk();
+        $this->hit(['X-Device-Id' => 'device-c'], '10.0.0.5')->assertStatus(429);
+
+        $this->travel(61)->seconds();
+
+        $this->hit(['X-Device-Id' => 'device-d'], '10.0.0.5')->assertOk();
+    }
+
+    public function test_suggestions_have_an_ip_ceiling_too(): void
+    {
+        $this->limits(100, 100);
+        config([
+            'wain.rate_limit.suggestions_guest' => 100,
+            'wain.rate_limit.suggestions_user' => 100,
+            'wain.rate_limit.suggestions_ip' => 3,
+        ]);
+
+        foreach (['a', 'b', 'c'] as $device) {
+            $this->suggest(['X-Device-Id' => "device-{$device}"])->assertOk();
+        }
+
+        $this->suggest(['X-Device-Id' => 'device-d'])->assertStatus(429)->assertJsonPath('code', 'TOO_MANY_REQUESTS');
+
+        // باقي التطبيق ما اتأثرش (الاقتراحات خارج الحد العام)
+        $this->hit(['X-Device-Id' => 'device-e'])->assertOk();
+    }
+
     public function test_the_stricter_limiters_still_apply_on_top_of_the_general_one(): void
     {
         $this->limits(100, 100);

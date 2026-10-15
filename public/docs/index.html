@@ -585,10 +585,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </p>
 
 <p>بيبعت كود 6 أرقام للإيميل (صالح 15 دقيقة، و5 محاولات). <strong>الرد واحد دايماً</strong> سواء الإيميل مسجّل أو لأ،
-عشان ما نكشفش مين عنده حساب. وهو نفسه «ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر إرسال بيرجّع نفس
-الرد من غير ما يبعت كود جديد، و<code>resend_in</code> هو الباقي بالثواني. الكود الجديد بيلغي القديم.</p>
+عشان ما نكشفش مين عنده حساب (نفس الشكل ونفس <code>resend_in</code> في كل مرة، والإرسال بعد ما الرد يتبعت). وهو نفسه
+«ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر طلب بيرجّع نفس الرد من غير ما يبعت كود جديد، و<code>resend_in</code> هو
+الباقي بالثواني. الكود الجديد بيلغي القديم.</p>
 <p>5 محاولات في الدقيقة لكل IP + إيميل، ولكل خطوة من الـ 3 (forgot وverify وreset) ميزانيتها لوحدها
-(<code>429 TOO_MANY_REQUESTS</code> ومعاه هيدر <code>Retry-After</code>).</p>
+(<code>429 TOO_MANY_REQUESTS</code> ومعاه هيدر <code>Retry-After</code>)، وفوقها سقف أوسع على الـ IP كله وعلى الإيميل من أي IP.</p>
 
 <span id="example-requests-POSTapi-v1-auth-password-forgot">
 <blockquote>Example request:</blockquote>
@@ -3858,7 +3859,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
 بيبعت من غير ما يستنّى ولا يعرض خطأ لو فشل.</li>
 <li>المكان المخفي أو المسودة أو المحذوف أو مش موجود: 404 <code>PLACE_NOT_AVAILABLE</code> زي صفحة المكان.</li>
 <li>الحد الأقصى 60 حدث في الدقيقة للجهاز أو المستخدم، وبره الحد العام للطلبات عشان التتبّع ما ياكلش من
-ميزانية التصفّح.</li>
+ميزانية التصفّح. وفوقه سقف أوسع على الـ IP كله (600 في الدقيقة)، فتغيير الـ <code>X-Device-Id</code> في كل طلب
+مش بيفتح ميزانية جديدة (<code>429 TOO_MANY_REQUESTS</code>).</li>
 </ul>
 
 <span id="example-requests-POSTapi-v1-places--slug--events">

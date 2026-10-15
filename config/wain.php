@@ -102,15 +102,37 @@ return [
     | `suggestions_*`: اقتراحات الكتابة (`GET /search/suggestions`) بتتبعت مع كل وقفة في الكتابة، فليها حد
     | منفصل وأوسع (120 و240) وبتخرج من الحد العام، عشان البحث ما يحجبش باقي التطبيق.
     |
+    | `*_ip`: سقف على الـ IP لوحده، فوق حد الجهاز. `X-Device-Id` بيجي من العميل، فمن غير السقف ده تغيير الهيدر
+    | بيفتح ميزانية جديدة كل مرة (سحب الأماكن، وإغراق الأحداث، وتضخيم ملفات الـ cache). السقف أوسع بكتير من
+    | الاستخدام الطبيعي لجهاز واحد عشان شبكات الموبايل (CGNAT) اللي بتحط ناس كتير ورا IP واحد ما تتحجبش، وهو
+    | بيتظبط من `.env` بعد ما نشوف أرقام 429 الفعلية على الـ staging.
+    |
+    | `auth_*`: الدخول والتسجيل ونسيت الباسورد. الحد الأساسي 5 في الدقيقة لكل (IP + إيميل) متثبّت في
+    | AppServiceProvider؛ وده فوقه: سقف على الـ IP (في الدقيقة وفي الساعة) عشان إيميلات كتير من IP واحد
+    | ما تعدّيش من غير حد (credential stuffing وتسجيل جماعي)، وسقف على الإيميل من أي IP (هجوم موزّع على
+    | حساب واحد). الخطوات التلاتة بتاعة نسيت الباسورد كل واحدة بميزانيتها. **الدخول بيعدّ المحاولات
+    | الفاشلة بس** (الناجح ما بياكلش من أي سقف، فناس كتير بيدخلوا صح من نفس الواي فاي ما يتحجبوش)،
+    | والتسجيل بيتعدّ كله لإنه اللي بيعمل حسابات.
+    |
+    | الأرقام الافتراضية (الـ `*_ip` و`auth_*`) واسعة عشان الواي فاي المشترك وشبكات الموبايل. لو ظهر 429 على ناس
+    | عادية على الـ staging ارفعها من `.env`، ولو ظهر bots واضحة نزّلها.
+    |
     */
 
     'rate_limit' => [
         'guest' => (int) env('WAIN_RATE_LIMIT_GUEST', 60),
         'user' => (int) env('WAIN_RATE_LIMIT_USER', 120),
+        'guest_ip' => (int) env('WAIN_RATE_LIMIT_GUEST_IP', 1500),
         'suggestions_guest' => (int) env('WAIN_RATE_LIMIT_SUGGEST_GUEST', 120),
         'suggestions_user' => (int) env('WAIN_RATE_LIMIT_SUGGEST_USER', 240),
-        // أحداث الموبايل (`POST /places/{slug}/events`): 60 في الدقيقة، وبرضه بره الحد العام
+        'suggestions_ip' => (int) env('WAIN_RATE_LIMIT_SUGGEST_IP', 600),
+        // أحداث الموبايل (`POST /places/{slug}/events`): 60 في الدقيقة للجهاز، وبرضه بره الحد العام.
+        // `events_ip` للـ IP كله (زائر أو مسجّل): الـ UUID أي قيمة، فمن غيره الأحداث بتتزوّر بتغييره.
         'events' => (int) env('WAIN_RATE_LIMIT_EVENTS', 60),
+        'events_ip' => (int) env('WAIN_RATE_LIMIT_EVENTS_IP', 600),
+        'auth_ip_minute' => (int) env('WAIN_RATE_LIMIT_AUTH_IP_MINUTE', 60),
+        'auth_ip_hour' => (int) env('WAIN_RATE_LIMIT_AUTH_IP_HOUR', 600),
+        'auth_email' => (int) env('WAIN_RATE_LIMIT_AUTH_EMAIL', 10),
     ],
 
 ];

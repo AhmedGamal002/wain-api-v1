@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Mail\AuthCodeMail;
 use App\Models\AuthCode;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -47,6 +48,32 @@ class AuthCodeService
         $elapsed = (int) abs(now()->diffInSeconds($lastSent, false));
 
         return max(0, self::RESEND_AFTER_SECONDS - $elapsed);
+    }
+
+    /**
+     * نافذة «ابعت الكود» لنسيت الباسورد، **لأي إيميل** (مسجّل أو لأ). بترجّع 0 لو الإرسال مسموح دلوقتي (وبتفتح
+     * النافذة)، وغير كده الثواني اللي فاضلة.
+     *
+     * بتتحسب من cache مش من `auth_codes`: الجدول فيه صف للمسجّل بس، فلو الرد اتحسب منه كان `resend_in` بيتنازل
+     * للمسجّل وبيفضل 60 لغير المسجّل، واستعلامين ورا بعض بيكشفوا مين عنده حساب.
+     */
+    public function claimForgotWindow(string $email): int
+    {
+        $key = 'auth:forgot-window:'.hash('sha256', $email);
+        $now = now()->getTimestamp();
+        $sentAt = Cache::get($key);
+
+        if (is_int($sentAt)) {
+            $elapsed = $now - $sentAt;
+
+            if ($elapsed >= 0 && $elapsed < self::RESEND_AFTER_SECONDS) {
+                return self::RESEND_AFTER_SECONDS - $elapsed;
+            }
+        }
+
+        Cache::put($key, $now, now()->addSeconds(self::RESEND_AFTER_SECONDS));
+
+        return 0;
     }
 
     /**

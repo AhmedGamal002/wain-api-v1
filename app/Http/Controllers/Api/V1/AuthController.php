@@ -11,8 +11,10 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * F2 الأساسي (06 القسم 3): register وlogin وlogout وme. نسيت الباسورد وتأكيد الإيميل وGoogle/Apple
@@ -52,8 +54,12 @@ class AuthController extends Controller
     {
         $user = User::query()->where('email', $request->validated('email'))->first();
 
+        // الـ hash بيتفحص دايماً (على hash وهمي لو الإيميل مش موجود أو الحساب من غير باسورد): من غير كده الإيميل
+        // الغلط بيرد في 3ms والموجود في ~200ms (bcrypt)، والفرق ده بيكشف مين عنده حساب
+        $matches = Hash::check($request->validated('password'), $user?->password ?? $this->decoyHash());
+
         // حسابات Google/Apple من غير باسورد (password = null) ما بتدخلش بالباسورد
-        if ($user === null || $user->password === null || ! Hash::check($request->validated('password'), $user->password)) {
+        if ($user === null || $user->password === null || ! $matches) {
             throw new ApiException(401, 'INVALID_CREDENTIALS');
         }
 
@@ -86,6 +92,21 @@ class AuthController extends Controller
     public function me(Request $request): UserResource
     {
         return new UserResource($request->user());
+    }
+
+    /**
+     * hash لباسورد عشوائي بنفس تكلفة الـ hashing الحالية (الـ driver والـ rounds في المفتاح، فتغيير
+     * `BCRYPT_ROUNDS` بيتولّد من جديد). بيتولّد مرة واحدة ويتخزّن، مش مع كل طلب.
+     */
+    private function decoyHash(): string
+    {
+        $rounds = (string) config('hashing.bcrypt.rounds');
+        $driver = (string) config('hashing.driver');
+
+        return Cache::rememberForever(
+            "auth:decoy-hash:{$driver}:{$rounds}",
+            fn () => Hash::make(Str::random(40)),
+        );
     }
 
     private function tokenResponse(Request $request, User $user, int $status = 200): JsonResponse

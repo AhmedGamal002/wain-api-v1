@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\AuthCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Throwable;
 
 /**
  * نسيت الباسورد (02 F2): الإيميل ← كود 6 أرقام ← `reset_token` ← باسورد جديد.
@@ -25,33 +26,55 @@ class PasswordResetController extends Controller
      * Forgot password: send a code
      *
      * بيبعت كود 6 أرقام للإيميل (صالح 15 دقيقة، و5 محاولات). **الرد واحد دايماً** سواء الإيميل مسجّل أو لأ،
-     * عشان ما نكشفش مين عنده حساب. وهو نفسه «ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر إرسال بيرجّع نفس
-     * الرد من غير ما يبعت كود جديد، و`resend_in` هو الباقي بالثواني. الكود الجديد بيلغي القديم.
+     * عشان ما نكشفش مين عنده حساب (نفس الشكل ونفس `resend_in` في كل مرة، والإرسال بعد ما الرد يتبعت). وهو نفسه
+     * «ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر طلب بيرجّع نفس الرد من غير ما يبعت كود جديد، و`resend_in` هو
+     * الباقي بالثواني. الكود الجديد بيلغي القديم.
      *
      * 5 محاولات في الدقيقة لكل IP + إيميل، ولكل خطوة من الـ 3 (forgot وverify وreset) ميزانيتها لوحدها
-     * (`429 TOO_MANY_REQUESTS` ومعاه هيدر `Retry-After`).
+     * (`429 TOO_MANY_REQUESTS` ومعاه هيدر `Retry-After`)، وفوقها سقف أوسع على الـ IP كله وعلى الإيميل من أي IP.
      *
      * @response 200 {"data": {"resend_in": 60}}
      */
     public function forgot(ForgotPasswordRequest $request): JsonResponse
     {
         $email = $request->validated('email');
-        $type = AuthCode::TYPE_PASSWORD_RESET;
 
-        $wait = $this->codes->resendIn($type, $email);
+        // النافذة بتتحسب لكل إيميل (مسجّل أو لأ) من نفس المكان، فالرد ما بيكشفش مين عنده حساب
+        $wait = $this->codes->claimForgotWindow($email);
 
         if ($wait === 0) {
             $user = User::query()->where('email', $email)->first();
 
             // الحسابات الموقوفة ما بتاخدش كود، والمحذوفة مش موجودة أصلاً. الرد نفسه في كل الحالات.
             if ($user !== null && $user->status === 'active') {
-                $this->codes->issueAndSend($type, $email, $user, $user->locale ?? app()->getLocale());
+                $locale = $user->locale ?? app()->getLocale();
+
+                // بعد ما الرد يتبعت: عمل الـ hash والإرسال (وبطء الـ SMTP أو فشله) ما يظهرش في زمن الرد ولا في
+                // شكله، وإلا الإيميل المسجّل كان هيرد أبطأ (أو 500) من غير المسجّل
+                app()->terminating(fn () => $this->issueCode($email, $user, $locale));
             }
 
             $wait = AuthCodeService::RESEND_AFTER_SECONDS;
         }
 
         return response()->json(['data' => ['resend_in' => $wait]]);
+    }
+
+    /**
+     * إرسال الكود بعد الرد. الفشل بيتسجّل بس: الرد خلاص اتبعت، والمستخدم بيعمل «ابعت تاني».
+     */
+    private function issueCode(string $email, User $user, string $locale): void
+    {
+        $type = AuthCode::TYPE_PASSWORD_RESET;
+
+        try {
+            // لو الـ cache اتمسح والنافذة اتفتحت تاني، الجدول بيمنع كود جديد جوه الـ 60 ثانية
+            if ($this->codes->resendIn($type, $email) === 0) {
+                $this->codes->issueAndSend($type, $email, $user, $locale);
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 
     /**

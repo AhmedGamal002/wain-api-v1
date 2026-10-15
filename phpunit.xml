@@ -38,6 +38,12 @@
         <env name="WAIN_RATE_LIMIT_SUGGEST_GUEST" value="100000"/>
         <env name="WAIN_RATE_LIMIT_SUGGEST_USER" value="100000"/>
         <env name="WAIN_RATE_LIMIT_EVENTS" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_GUEST_IP" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_SUGGEST_IP" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_EVENTS_IP" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_AUTH_IP_MINUTE" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_AUTH_IP_HOUR" value="100000"/>
+        <env name="WAIN_RATE_LIMIT_AUTH_EMAIL" value="100000"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
