@@ -14,9 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * جدول المستخدمين (A7): الاسم والإيميل وطريقة التسجيل والدور والحالة وتاريخ التسجيل. الحالة: نشط · موقوف · محذوف
- * (المحذوف = soft delete بعد طلب حذف الحساب، فالـ resource بيشيل الـ scope بتاعه عشان يظهر).
- *
- * «عدد التقييمات» بيتضاف مع جدول التقييمات (أسبوع 11).
+ * (المحذوف = soft delete بعد طلب حذف الحساب، فالـ resource بيشيل الـ scope بتاعه عشان يظهر) وعدد تقييماته بكل
+ * حالاتها (F8).
  */
 class UsersTable
 {
@@ -87,6 +86,13 @@ class UsersTable
                     ->tooltip(fn (User $record) => $record->isSuspended() && ! $record->trashed()
                         ? 'السبب: '.($record->suspended_reason ?? '—')
                         : null),
+
+                TextColumn::make('reviews_count')
+                    ->label('التقييمات')
+                    ->counts('reviews')
+                    ->numeric()
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')

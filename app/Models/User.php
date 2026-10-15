@@ -60,6 +60,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(SocialAccount::class);
     }
 
+    /**
+     * تقييمات المستخدم بكل حالاتها (شاشة المستخدمين A7 بتعرض عددهم).
+     *
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';

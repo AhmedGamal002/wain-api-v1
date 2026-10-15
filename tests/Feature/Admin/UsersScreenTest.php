@@ -6,6 +6,7 @@ use App\Filament\Resources\TeamInvitations\Pages\ListTeamInvitations;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Mail\TeamInvitationMail;
+use App\Models\Review;
 use App\Models\SocialAccount;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -159,6 +160,21 @@ class UsersScreenTest extends TestCase
             ->filterTable('role', 'none')
             ->assertCanSeeTableRecords([$plain])
             ->assertCanNotSeeTableRecords([$mod]);
+    }
+
+    public function test_the_list_shows_how_many_reviews_each_user_wrote(): void
+    {
+        $this->asAdmin();
+
+        $writer = User::factory()->create();
+        $quiet = User::factory()->create();
+
+        Review::factory()->count(2)->create(['user_id' => $writer->id]);
+        Review::factory()->rejected()->create(['user_id' => $writer->id]);
+
+        $this->list()
+            ->assertTableColumnStateSet('reviews_count', 3, record: $writer)
+            ->assertTableColumnStateSet('reviews_count', 0, record: $quiet);
     }
 
     public function test_the_list_is_searchable_by_name_and_email(): void
