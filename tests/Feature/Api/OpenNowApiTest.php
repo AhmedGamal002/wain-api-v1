@@ -121,6 +121,19 @@ class OpenNowApiTest extends TestCase
         $this->assertFalse($this->inOpenNowFilter());
     }
 
+    public function test_a_24_hour_place_is_open_around_the_clock_in_the_card_and_the_filter(): void
+    {
+        $this->setHours(array_fill_keys(['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'], ['state' => '24h']));
+
+        // 2026-10-12 هو الاتنين (+3 صيفي): نص الليل، الضهر، وآخر دقيقة في الجمعة وأول دقيقة في السبت (بداية الأسبوع)
+        foreach (['2026-10-12 00:00:00', '2026-10-12 09:00:00', '2026-10-16 20:59:00', '2026-10-16 21:01:00'] as $utc) {
+            $this->at($utc);
+
+            $this->assertTrue($this->cardOpen(), $utc);
+            $this->assertTrue($this->inOpenNowFilter(), $utc);
+        }
+    }
+
     public function test_cairo_time_decides_the_weekday_not_utc(): void
     {
         // الجمعة 13:00 لـ 01:00 والسبت مقفول

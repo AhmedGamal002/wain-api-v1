@@ -9,11 +9,14 @@ Backend لتطبيق وين: Laravel 13 + Filament 5 (لوحة الأدمن) + S
 docker compose up -d mariadb          # MariaDB 11.8 على 3307 (wain_db + wain_test)
 php artisan migrate:fresh --seed
 php artisan test                      # على MariaDB wain_test، مش SQLite
+php -d xdebug.mode=off vendor/bin/phpunit tests/Performance   # معيار الأداء (5000 مكان، ~30 ثانية)
 vendor/bin/pint                       # Pint لازم يعدّي قبل أي PR
 php artisan scribe:generate           # توثيق الـ API (public/docs) بيتحدّث مع كل PR بيغيّر الـ API
 ```
 
 الـ CI (`.github/workflows/ci.yml`) بيشغّل Pint والتستات على MariaDB 11.8 لكل push وPR على `dev` و`main`.
+
+**`tests/Performance`** مش في `phpunit.xml` (بيتشغّل بالمسار بس): بيبني 5000 مكان وبيقيس p95 لـ `GET /places` (بترتيباتها وفلاترها) و`/places/count` و`/nearby` و`/map` و`/home` بطلبات باردة، ويفشل لو أي واحد عدّى 300ms، وبيعمل `EXPLAIN` على استعلام `nearby` الفعلي ويتأكد إنه بياخد الـ spatial index. بيستخدم `DatabaseMigrations` مش `RefreshDatabase` عشان `ANALYZE TABLE` بيعمل commit ضمني جوه transaction. أرقام آخر قياس في `09-Acceptance-Review-W10.md` (أقصى p95 48ms). `/search` بيتقاس جواه للمعلومية بس.
 
 ## قواعد مش بديهية
 
