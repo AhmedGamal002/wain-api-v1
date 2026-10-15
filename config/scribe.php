@@ -7,6 +7,13 @@ use Knuckles\Scribe\Extracting\Strategies;
 use function Knuckles\Scribe\Config\configureStrategy;
 use function Knuckles\Scribe\Config\removeStrategies;
 
+// Scribe في `require-dev`، فعلى الاستضافة (`composer install --no-dev`) الكلاسات اللي فوق مش موجودة. الملف ده
+// بيتحمّل مع باقي `config/` في `package:discover`، فمن غير الـ guard ده الـ composer install بيقع. من غير الباكدج
+// مفيش حاجة بتقرا الإعداد، فرجوع [] آمن.
+if (! class_exists(Defaults::class)) {
+    return [];
+}
+
 // Only the most common configs are shown. See the https://scribe.knuckles.wtf/laravel/reference/config for all.
 
 return [
