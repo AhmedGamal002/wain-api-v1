@@ -55,7 +55,7 @@ class PlaceDetailApiTest extends TestCase
             'is_open_now', 'distance_km', 'latitude', 'longitude', 'is_saved',
             // التفاصيل (03 القسم 5.3)
             'status', 'description', 'address', 'categories', 'attributes', 'contact', 'hours', 'photos',
-            'menu_photos', 'closed_at', 'verified_at', 'is_claimed', 'share_url', 'latest_reviews',
+            'menu_photos', 'closed_at', 'verified_at', 'is_claimed', 'share_url', 'latest_reviews', 'rating_distribution',
         ], array_keys($json));
 
         $this->assertSame(self::FULL, $json['slug']);
