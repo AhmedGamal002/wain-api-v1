@@ -8,14 +8,18 @@ use App\Models\User;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * جدول المستخدمين (A7): الاسم والإيميل وطريقة التسجيل والدور والحالة وتاريخ التسجيل. الحالة: نشط · موقوف · محذوف
- * (المحذوف = soft delete بعد طلب حذف الحساب، فالـ resource بيشيل الـ scope بتاعه عشان يظهر) وعدد تقييماته بكل
- * حالاتها (F8).
+ * جدول «مستخدمو التطبيق» (A7): الناس اللي سجّلوا من التطبيق، من غير فريق اللوحة (دول في «الفريق»،
+ * `TeamTable`). الاسم والإيميل وطريقة التسجيل والحالة (نشط · موقوف · محذوف) وعدد تقييماته (F8) وتاريخ التسجيل.
+ * المحذوف = soft delete بعد طلب حذف الحساب، فالـ resource بيشيل الـ scope بتاعه عشان يظهر.
+ *
+ * الإجراءات: إيقاف وإلغاء إيقاف بسبب، و«إضافة للفريق» (بيدّيه دور أدمن أو مشرف، فيطلع من هنا ويظهر في «الفريق»).
+ * الدوال العامة تحت (`statusOf` و`registrationMethods` و`roleLabels`) مشتركة مع `TeamTable`.
  */
 class UsersTable
 {
@@ -25,7 +29,7 @@ class UsersTable
 
     public const STATUS_DELETED = 'deleted';
 
-    private const ROLE_LABELS = [
+    public const ROLE_LABELS = [
         'admin' => 'أدمن',
         'moderator' => 'مشرف',
         'owner' => 'صاحب مكان',
@@ -58,34 +62,15 @@ class UsersTable
                     ->badge()
                     ->color('gray'),
 
-                TextColumn::make('role')
-                    ->label('الدور')
-                    ->state(fn (User $record) => self::roleLabels($record))
+                // صاحب مكان بس بيبان هنا (دور فريق مش ممكن يكون في الجدول ده)
+                TextColumn::make('owner')
+                    ->label('النوع')
+                    ->state(fn (User $record) => $record->roles->contains('name', 'owner') ? [self::ROLE_LABELS['owner']] : [])
                     ->badge()
-                    ->color(fn (string $state) => match ($state) {
-                        self::ROLE_LABELS['admin'] => 'danger',
-                        self::ROLE_LABELS['moderator'] => 'warning',
-                        self::ROLE_LABELS['owner'] => 'info',
-                        default => Color::Gray,
-                    }),
+                    ->color('info')
+                    ->placeholder('—'),
 
-                TextColumn::make('status')
-                    ->label('الحالة')
-                    ->state(fn (User $record) => self::statusOf($record))
-                    ->formatStateUsing(fn (string $state) => match ($state) {
-                        self::STATUS_SUSPENDED => 'موقوف',
-                        self::STATUS_DELETED => 'محذوف',
-                        default => 'نشط',
-                    })
-                    ->badge()
-                    ->color(fn (string $state) => match ($state) {
-                        self::STATUS_SUSPENDED => 'danger',
-                        self::STATUS_DELETED => Color::Gray,
-                        default => 'success',
-                    })
-                    ->tooltip(fn (User $record) => $record->isSuspended() && ! $record->trashed()
-                        ? 'السبب: '.($record->suspended_reason ?? '—')
-                        : null),
+                self::statusColumn(),
 
                 TextColumn::make('reviews_count')
                     ->label('التقييمات')
@@ -108,14 +93,10 @@ class UsersTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('role')
-                    ->label('الدور')
-                    ->options(['none' => 'مستخدم عادي', ...self::ROLE_LABELS])
-                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
-                        null, '' => $query,
-                        'none' => $query->whereDoesntHave('roles'),
-                        default => $query->whereHas('roles', fn (Builder $roles) => $roles->where('name', $data['value'])),
-                    }),
+                Filter::make('owners')
+                    ->label('أصحاب الأماكن بس')
+                    ->toggle()
+                    ->query(fn (Builder $query) => $query->whereHas('roles', fn (Builder $roles) => $roles->where('name', 'owner'))),
 
                 SelectFilter::make('registration')
                     ->label('طريقة التسجيل')
@@ -130,9 +111,33 @@ class UsersTable
                 ActionGroup::make([
                     UserActions::suspend(),
                     UserActions::unsuspend(),
-                    UserActions::changeRole(),
+                    UserActions::promote(),
                 ]),
             ]);
+    }
+
+    /**
+     * عمود الحالة (نشط · موقوف · محذوف) بلونه وسبب الإيقاف في الـ tooltip. مشترك مع جدول الفريق.
+     */
+    public static function statusColumn(): TextColumn
+    {
+        return TextColumn::make('status')
+            ->label('الحالة')
+            ->state(fn (User $record) => self::statusOf($record))
+            ->formatStateUsing(fn (string $state) => match ($state) {
+                self::STATUS_SUSPENDED => 'موقوف',
+                self::STATUS_DELETED => 'محذوف',
+                default => 'نشط',
+            })
+            ->badge()
+            ->color(fn (string $state) => match ($state) {
+                self::STATUS_SUSPENDED => 'danger',
+                self::STATUS_DELETED => Color::Gray,
+                default => 'success',
+            })
+            ->tooltip(fn (User $record) => $record->isSuspended() && ! $record->trashed()
+                ? 'السبب: '.($record->suspended_reason ?? '—')
+                : null);
     }
 
     /**

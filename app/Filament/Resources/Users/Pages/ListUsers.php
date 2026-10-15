@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Filament\Resources\Users\Actions\UserActions;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Resources\Pages\ListRecords;
@@ -14,28 +13,17 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            UserActions::invite(),
-        ];
-    }
-
     /**
-     * تابز الحالة فوق الجدول، كل تاب بعدده: الكل · الفريق · موقوف · محذوف.
+     * تابز الحالة فوق الجدول، كل تاب بعدده: الكل · موقوف · محذوف (مستخدمو التطبيق بس، من غير الفريق).
      *
      * @return array<string, Tab>
      */
     public function getTabs(): array
     {
-        $users = fn () => User::query()->withoutGlobalScopes([SoftDeletingScope::class]);
+        $users = fn () => User::query()->withoutGlobalScopes([SoftDeletingScope::class])->appUsers();
 
         return [
             'all' => Tab::make('الكل')->badge($users()->count()),
-
-            'team' => Tab::make('الفريق')
-                ->badge($users()->whereNull('deleted_at')->role(['admin', 'moderator'])->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('users.deleted_at')->role(['admin', 'moderator'])),
 
             'suspended' => Tab::make('موقوف')
                 ->badge($users()->whereNull('deleted_at')->where('status', 'suspended')->count())

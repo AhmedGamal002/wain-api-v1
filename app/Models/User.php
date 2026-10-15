@@ -7,6 +7,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,6 +22,9 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
+
+    /** أدوار فريق اللوحة. أي دور تاني (owner) بيفضل مستخدم تطبيق. */
+    public const TEAM_ROLES = ['admin', 'moderator'];
 
     /**
      * نفس الـ defaults اللي في الـ migration، عشان الموديل اللي لسه متعمل (من غير refresh)
@@ -68,6 +72,26 @@ class User extends Authenticatable implements FilamentUser
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    /**
+     * فريق اللوحة: اللي دوره أدمن أو مشرف (حتى لو محذوف). شاشة «الفريق» بتعرض دول بس.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeTeam(Builder $query): void
+    {
+        $query->whereHas('roles', fn (Builder $roles) => $roles->whereIn('name', self::TEAM_ROLES));
+    }
+
+    /**
+     * مستخدمي التطبيق: كل اللي مالوش دور فريق (صاحب المكان منهم). شاشة «مستخدمو التطبيق» بتعرض دول بس.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeAppUsers(Builder $query): void
+    {
+        $query->whereDoesntHave('roles', fn (Builder $roles) => $roles->whereIn('name', self::TEAM_ROLES));
     }
 
     public function isSuspended(): bool

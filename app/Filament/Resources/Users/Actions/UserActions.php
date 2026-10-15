@@ -87,13 +87,13 @@ final class UserActions
             ->icon(Heroicon::OutlinedShieldCheck)
             ->color('gray')
             ->modalHeading('تغيير دور المستخدم')
-            ->modalDescription('الأدمن بيدير المستخدمين والكتالوج والنشر. المشرف بيضيف ويراجع من غير نشر. «مستخدم عادي» بيشيل الدخول للوحة.')
+            ->modalDescription('الأدمن بيدير المستخدمين والكتالوج والنشر. المشرف بيضيف ويراجع من غير نشر. «يتشال من الفريق» بيرجّعه مستخدم تطبيق عادي ويقفل عليه اللوحة.')
             ->modalSubmitActionLabel('حفظ')
             ->fillForm(fn (User $record) => ['role' => UserModeration::teamRole($record) ?? 'none'])
             ->schema([
                 Select::make('role')
                     ->label('الدور')
-                    ->options(['none' => 'مستخدم عادي', ...UserModeration::TEAM_ROLES])
+                    ->options([...UserModeration::TEAM_ROLES, 'none' => 'يتشال من الفريق'])
                     ->required()
                     ->native(false),
             ])
@@ -102,6 +102,38 @@ final class UserActions
                 fn (User $record, array $data, User $actor) => app(UserModeration::class)
                     ->changeRole($record, $actor, $data['role'] === 'none' ? null : (string) $data['role']),
                 'اتغيّر الدور',
+            ));
+    }
+
+    /**
+     * «إضافة للفريق»: مستخدم تطبيق موجود بيتعيّن أدمن أو مشرف. بيطلع من «مستخدمو التطبيق» ويظهر في «الفريق»،
+     * وبيدخل اللوحة بنفس إيميله وباسورده. للناس اللي مالهمش حساب: دعوة من شاشة «الفريق».
+     */
+    public static function promote(): Action
+    {
+        return Action::make('promote')
+            ->label('إضافة للفريق')
+            ->icon(Heroicon::OutlinedUserPlus)
+            ->color('gray')
+            ->modalHeading('إضافة للفريق')
+            ->modalDescription('هيبقى عضو في لوحة التحكم بالدور اللي تختاره، وبيدخلها بنفس إيميله وباسورده.')
+            ->modalSubmitActionLabel('إضافة')
+            ->schema([
+                Select::make('role')
+                    ->label('الدور')
+                    ->options(UserModeration::TEAM_ROLES)
+                    ->default('moderator')
+                    ->required()
+                    ->native(false),
+            ])
+            ->visible(fn (User $record) => ! $record->trashed()
+                && ! $record->isSuspended()
+                && UserModeration::teamRole($record) === null
+                && self::can('changeRole', $record))
+            ->action(self::run(
+                fn (User $record, array $data, User $actor) => app(UserModeration::class)
+                    ->changeRole($record, $actor, (string) $data['role']),
+                'اتضاف للفريق',
             ));
     }
 

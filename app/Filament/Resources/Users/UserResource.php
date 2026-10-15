@@ -14,10 +14,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 /**
- * A7 المستخدمين (02 القسم A7): قائمة بالحالات (نشط · موقوف · محذوف) والأدوار، وإجراءات الأدمن: إيقاف وإلغاء إيقاف
- * بسبب، وتغيير الدور، ودعوة عضو فريق. Admin بس (`UserPolicy`، والـ Moderator مالوش دخول للشاشة).
+ * A7 «مستخدمو التطبيق» (02 القسم A7): الناس اللي سجّلوا من التطبيق، بالحالات (نشط · موقوف · محذوف)، وإجراءات الأدمن:
+ * إيقاف وإلغاء إيقاف بسبب، و«إضافة للفريق». فريق اللوحة (أدمن ومشرف) في شاشة لوحدها: `TeamMemberResource`.
+ * Admin بس (`UserPolicy`، والـ Moderator مالوش دخول للشاشة).
  *
- * قايمة بس: مفيش إنشاء ولا تعديل ولا حذف لبيانات المستخدم من اللوحة (الحساب بيتعمل من التطبيق أو بدعوة).
+ * قايمة بس: مفيش إنشاء ولا تعديل ولا حذف لبيانات المستخدم من اللوحة (الحساب بيتعمل من التطبيق).
  */
 class UserResource extends Resource
 {
@@ -27,9 +28,9 @@ class UserResource extends Resource
 
     protected static ?string $modelLabel = 'مستخدم';
 
-    protected static ?string $pluralModelLabel = 'المستخدمين';
+    protected static ?string $pluralModelLabel = 'مستخدمو التطبيق';
 
-    protected static ?string $navigationLabel = 'المستخدمين';
+    protected static ?string $navigationLabel = 'مستخدمو التطبيق';
 
     protected static string|\UnitEnum|null $navigationGroup = 'المستخدمين';
 
@@ -43,7 +44,8 @@ class UserResource extends Resource
     }
 
     /**
-     * المحذوف (soft delete) بيظهر بحالة «محذوف»، والأدوار وحسابات الدخول الاجتماعي بتتحمّل مرة (من غير N+1).
+     * مستخدمو التطبيق بس (من غير أدمن ومشرف: دول في «الفريق»). المحذوف (soft delete) بيظهر بحالة «محذوف»،
+     * والأدوار وحسابات الدخول الاجتماعي بتتحمّل مرة (من غير N+1).
      *
      * @return Builder<User>
      */
@@ -51,6 +53,7 @@ class UserResource extends Resource
     {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
+            ->appUsers()
             ->with(['roles', 'socialAccounts']);
     }
 

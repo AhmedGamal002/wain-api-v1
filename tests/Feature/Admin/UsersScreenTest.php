@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Filament\Resources\Team\Pages\ListTeamMembers;
 use App\Filament\Resources\TeamInvitations\Pages\ListTeamInvitations;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Tables\UsersTable;
@@ -56,9 +57,16 @@ class UsersScreenTest extends TestCase
         return $moderator;
     }
 
+    /** شاشة «مستخدمو التطبيق». */
     private function list()
     {
         return Livewire::test(ListUsers::class);
+    }
+
+    /** شاشة «الفريق». */
+    private function team()
+    {
+        return Livewire::test(ListTeamMembers::class);
     }
 
     // ───────────────────────── الوصول ─────────────────────────
@@ -75,6 +83,7 @@ class UsersScreenTest extends TestCase
         $this->asModerator();
 
         $this->get('/admin/users')->assertForbidden();
+        $this->get('/admin/team')->assertForbidden();
         $this->get('/admin/team-invitations')->assertForbidden();
     }
 
@@ -82,7 +91,8 @@ class UsersScreenTest extends TestCase
     {
         $this->asAdmin();
 
-        $this->get('/admin/users')->assertOk()->assertSee('المستخدمين');
+        $this->get('/admin/users')->assertOk()->assertSee('مستخدمو التطبيق');
+        $this->get('/admin/team')->assertOk()->assertSee('الفريق');
         $this->get('/admin/team-invitations')->assertOk()->assertSee('دعوات الفريق');
     }
 
@@ -98,17 +108,54 @@ class UsersScreenTest extends TestCase
         $deleted->delete();
         $mod = User::factory()->create(['name' => 'مشرف'])->assignRole('moderator');
 
+        // فريق اللوحة مالوش مكان هنا: ده في شاشة «الفريق»
         $this->list()
-            ->assertCanSeeTableRecords([$active, $suspended, $deleted, $mod])
+            ->assertCanSeeTableRecords([$active, $suspended, $deleted])
+            ->assertCanNotSeeTableRecords([$mod])
             ->set('activeTab', 'suspended')
             ->assertCanSeeTableRecords([$suspended])
             ->assertCanNotSeeTableRecords([$active, $deleted, $mod])
             ->set('activeTab', 'deleted')
             ->assertCanSeeTableRecords([$deleted])
-            ->assertCanNotSeeTableRecords([$active, $suspended])
-            ->set('activeTab', 'team')
-            ->assertCanSeeTableRecords([$mod])
-            ->assertCanNotSeeTableRecords([$active, $suspended, $deleted]);
+            ->assertCanNotSeeTableRecords([$active, $suspended, $mod]);
+    }
+
+    public function test_the_two_screens_never_show_the_same_person(): void
+    {
+        $admin = $this->asAdmin();
+
+        $regular = User::factory()->create(['name' => 'مستخدم عادي']);
+        $owner = User::factory()->create(['name' => 'صاحب مكان'])->assignRole('owner');
+        $mod = User::factory()->create(['name' => 'مشرف'])->assignRole('moderator');
+        $deletedMod = User::factory()->create(['name' => 'مشرف محذوف'])->assignRole('moderator');
+        $deletedMod->delete();
+
+        $this->list()
+            ->assertCanSeeTableRecords([$regular, $owner])
+            ->assertCanNotSeeTableRecords([$admin, $mod, $deletedMod]);
+
+        $this->team()
+            ->assertCanSeeTableRecords([$admin, $mod, $deletedMod])
+            ->assertCanNotSeeTableRecords([$regular, $owner]);
+    }
+
+    public function test_the_team_tabs_filter_by_role_and_status(): void
+    {
+        $admin = $this->asAdmin();
+        $mod = User::factory()->create()->assignRole('moderator');
+        $suspendedMod = User::factory()->create(['status' => 'suspended', 'suspended_at' => now()])->assignRole('moderator');
+
+        $this->team()
+            ->assertCanSeeTableRecords([$admin, $mod, $suspendedMod])
+            ->set('activeTab', 'admin')
+            ->assertCanSeeTableRecords([$admin])
+            ->assertCanNotSeeTableRecords([$mod, $suspendedMod])
+            ->set('activeTab', 'moderator')
+            ->assertCanSeeTableRecords([$mod, $suspendedMod])
+            ->assertCanNotSeeTableRecords([$admin])
+            ->set('activeTab', 'suspended')
+            ->assertCanSeeTableRecords([$suspendedMod])
+            ->assertCanNotSeeTableRecords([$admin, $mod]);
     }
 
     public function test_the_status_label_puts_deleted_over_suspended(): void
@@ -143,22 +190,31 @@ class UsersScreenTest extends TestCase
             ->assertCanNotSeeTableRecords([$google, $apple]);
     }
 
-    public function test_the_role_filter_and_labels(): void
+    public function test_the_role_labels_and_the_filters_of_each_screen(): void
     {
         $this->asAdmin();
 
         $plain = User::factory()->create();
+        $owner = User::factory()->create()->assignRole('owner');
         $mod = User::factory()->create()->assignRole('moderator');
+        $admin = User::query()->role('admin')->firstOrFail();
 
         $this->assertSame(['مستخدم'], UsersTable::roleLabels($plain->load('roles')));
         $this->assertSame(['مشرف'], UsersTable::roleLabels($mod->load('roles')));
 
+        // أصحاب الأماكن بس في شاشة مستخدمي التطبيق
         $this->list()
+            ->filterTable('owners', true)
+            ->assertCanSeeTableRecords([$owner])
+            ->assertCanNotSeeTableRecords([$plain]);
+
+        // الدور في شاشة الفريق
+        $this->team()
             ->filterTable('role', 'moderator')
             ->assertCanSeeTableRecords([$mod])
-            ->assertCanNotSeeTableRecords([$plain])
-            ->filterTable('role', 'none')
-            ->assertCanSeeTableRecords([$plain])
+            ->assertCanNotSeeTableRecords([$admin])
+            ->filterTable('role', 'admin')
+            ->assertCanSeeTableRecords([$admin])
             ->assertCanNotSeeTableRecords([$mod]);
     }
 
@@ -259,7 +315,7 @@ class UsersScreenTest extends TestCase
     {
         $admin = $this->asAdmin();
 
-        $this->list()
+        $this->team()
             ->assertActionHidden(TestAction::make('suspend')->table($admin))
             ->assertActionHidden(TestAction::make('changeRole')->table($admin));
 
@@ -275,7 +331,7 @@ class UsersScreenTest extends TestCase
 
         $this->list()
             ->assertActionHidden(TestAction::make('suspend')->table($user))
-            ->assertActionHidden(TestAction::make('changeRole')->table($user));
+            ->assertActionHidden(TestAction::make('promote')->table($user));
 
         $this->expectException(UserModerationException::class);
         app(UserModeration::class)->suspend($user->refresh(), User::query()->role('admin')->first(), 'سبب');
@@ -316,14 +372,20 @@ class UsersScreenTest extends TestCase
         $admin = $this->asAdmin();
         $user = User::factory()->create();
 
+        // من مستخدمي التطبيق: «إضافة للفريق»
         $this->list()
-            ->callAction(TestAction::make('changeRole')->table($user), ['role' => 'moderator'])
+            ->assertCanSeeTableRecords([$user])
+            ->callAction(TestAction::make('promote')->table($user), ['role' => 'moderator'])
             ->assertNotified();
 
         $this->assertTrue($user->refresh()->hasRole('moderator'));
         $this->assertSame('moderator', UserModeration::teamRole($user));
 
-        $this->list()
+        // وبقى في الفريق، مش في مستخدمي التطبيق
+        $this->list()->assertCanNotSeeTableRecords([$user]);
+        $this->team()->assertCanSeeTableRecords([$user]);
+
+        $this->team()
             ->callAction(TestAction::make('changeRole')->table($user), ['role' => 'admin'])
             ->assertNotified();
 
@@ -331,12 +393,16 @@ class UsersScreenTest extends TestCase
         $this->assertTrue($user->hasRole('admin'));
         $this->assertFalse($user->hasRole('moderator'));
 
-        $this->list()
+        $this->team()
             ->callAction(TestAction::make('changeRole')->table($user), ['role' => 'none'])
             ->assertNotified();
 
         $this->assertNull(UserModeration::teamRole($user->refresh()));
         $this->assertFalse($user->canAccessPanel(Filament::getPanel('admin')));
+
+        // اتشال من الفريق: رجع مستخدم تطبيق
+        $this->team()->assertCanNotSeeTableRecords([$user]);
+        $this->list()->assertCanSeeTableRecords([$user]);
 
         $log = Activity::query()->where('event', 'role_changed')->latest('id')->first();
         $this->assertSame($admin->id, $log->causer_id);
@@ -379,7 +445,7 @@ class UsersScreenTest extends TestCase
         Mail::fake();
         $admin = $this->asAdmin();
 
-        $this->list()
+        $this->team()
             ->callAction('invite', ['email' => 'New.Mod@Example.com', 'role' => 'moderator'])
             ->assertHasNoFormErrors()
             ->assertNotified();
