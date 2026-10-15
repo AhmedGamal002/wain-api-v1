@@ -5,6 +5,8 @@ namespace App\Http\Resources;
 use App\Models\Attribute;
 use App\Models\Place;
 use App\Models\PlacePhoto;
+use App\Models\Review;
+use App\Support\PlaceRating;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -16,7 +18,7 @@ use Illuminate\Support\Collection;
  * - المنشور والمغلق نهائياً بس هو اللي بيوصل هنا (`Place::viewable`).
  * - المغلق نهائياً (`status = closed`): `is_open_now` و`hours` من غير حالة (مفيش «مفتوح دلوقتي» لمكان قفل)،
  *   والموبايل بيخفي أزرار التواصل (03 القسم 6.5).
- * - `latest_reviews` فاضية لحد F8 (أسبوع 11)، و`is_saved` false لحد F9 (أسبوع 11).
+ * - `latest_reviews` أحدث 5 تقييمات منشورة و`rating_distribution` توزيع النجوم (F8). `is_saved` false لحد F9.
  *
  * @mixin Place
  */
@@ -64,8 +66,29 @@ class PlaceDetailResource extends JsonResource
             'verified_at' => $place->verified_at?->timezone('Africa/Cairo')->toDateString(),
             'is_claimed' => $place->claimed_by !== null,
             'share_url' => config('wain.share_base_url').'/'.$place->slug,
-            'latest_reviews' => [],
+            'rating_distribution' => PlaceRating::distribution($place->id),
+            'latest_reviews' => $this->latestReviews($place, $request),
         ];
+    }
+
+    /**
+     * أحدث 5 تقييمات منشورة (صفحة المكان، F7/F8). تقييم المستخدم نفسه بأي حالة في `GET /places/{slug}/reviews`
+     * (`mine`)، مش هنا.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function latestReviews(Place $place, Request $request): array
+    {
+        $reviews = Review::query()
+            ->published()
+            ->where('place_id', $place->id)
+            ->with(['user', 'reviewAttributes', 'photos'])
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
+
+        return ReviewResource::collection($reviews)->resolve($request);
     }
 
     /**

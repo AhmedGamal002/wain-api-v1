@@ -37,6 +37,9 @@ Schedule::command('search:prune-logs')->dailyAt('03:35')->withoutOverlapping();
 Schedule::command('places:aggregate-stats')->dailyAt('03:25')->withoutOverlapping();
 Schedule::command('events:prune')->dailyAt('03:45')->withoutOverlapping();
 
+// Review photos (F8): uploaded but never attached to a review within 24 hours.
+Schedule::command('reviews:prune-photos')->dailyAt('04:10')->withoutOverlapping();
+
 // CSV imports (A10): previews nobody confirmed and finished results are dropped after 30 days.
 Schedule::command('places:prune-imports')->dailyAt('03:47')->withoutOverlapping();
 

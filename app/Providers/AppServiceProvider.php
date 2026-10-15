@@ -7,9 +7,11 @@ use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Place;
+use App\Models\Review;
 use App\Models\User;
 use App\Policies\CatalogPolicy;
 use App\Policies\PlacePolicy;
+use App\Policies\ReviewPolicy;
 use App\Policies\UserPolicy;
 use App\Support\Search\CatalogSearchRefresh;
 use App\Support\Search\DatabasePlaceSearch;
@@ -151,6 +153,12 @@ class AppServiceProvider extends ServiceProvider
             ]));
         });
 
+        // كتابة التقييمات ورفع صورها (F8): لكل مستخدم مسجّل في الدقيقة، وبرضه بره الحد العام (`api`).
+        RateLimiter::for('reviews', fn (Request $request) => Limit::perMinute((int) config('wain.rate_limit.reviews'))
+            ->by('reviews|'.($request->user('sanctum')?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute((int) config('wain.rate_limit.uploads'))
+            ->by('uploads|'.($request->user('sanctum')?->getAuthIdentifier() ?? $request->ip())));
+
         // رابط دعوة الفريق (A7): صفحة الفورم وزرار القبول. الـ token عشوائي 64 حرف فالتخمين مش بيحصل، والحد لمنع
         // الطرق على الرابط وعلى فورم الباسورد.
         RateLimiter::for('team-invitation', fn (Request $request) => Limit::perMinute(10)->by('team-invitation|'.$request->ip()));
@@ -172,6 +180,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Place::class, PlacePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Review::class, ReviewPolicy::class);
     }
 
     /**

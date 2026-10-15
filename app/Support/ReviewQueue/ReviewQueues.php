@@ -3,6 +3,7 @@
 namespace App\Support\ReviewQueue;
 
 use App\Filament\Pages\ReviewQueue\PendingPlaces;
+use App\Filament\Pages\ReviewQueue\PendingReviews;
 use App\Filament\Pages\ReviewQueue\ReviewQueuePage;
 
 /**
@@ -21,6 +22,7 @@ final class ReviewQueues
     {
         return [
             PendingPlaces::class,
+            PendingReviews::class,
         ];
     }
 

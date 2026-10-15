@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Filament\Pages\ReviewQueue\PendingPlaces;
+use App\Filament\Pages\ReviewQueue\PendingReviews;
 use App\Filament\Pages\ReviewQueue\ReviewQueuePage;
 use App\Models\Place;
 use App\Models\User;
@@ -202,7 +203,7 @@ class ReviewQueueTest extends TestCase
         $this->asAdmin();
         $this->pending();
 
-        $this->assertSame([PendingPlaces::class], ReviewQueues::visible());
+        $this->assertSame([PendingPlaces::class, PendingReviews::class], ReviewQueues::visible());
         $this->assertSame(PendingPlaces::class, ReviewQueues::first());
         $this->assertSame(1, ReviewQueues::total());
 

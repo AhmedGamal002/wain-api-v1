@@ -133,6 +133,9 @@ return [
         'auth_ip_minute' => (int) env('WAIN_RATE_LIMIT_AUTH_IP_MINUTE', 60),
         'auth_ip_hour' => (int) env('WAIN_RATE_LIMIT_AUTH_IP_HOUR', 600),
         'auth_email' => (int) env('WAIN_RATE_LIMIT_AUTH_EMAIL', 10),
+        // كتابة تقييم ورفع صور (F8): في الدقيقة لكل مستخدم، بره الحد العام. الرفع أوسع (5 صور لتقييم واحد).
+        'reviews' => (int) env('WAIN_RATE_LIMIT_REVIEWS', 10),
+        'uploads' => (int) env('WAIN_RATE_LIMIT_UPLOADS', 30),
     ],
 
 ];

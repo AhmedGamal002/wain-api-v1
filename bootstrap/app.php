@@ -2,6 +2,7 @@
 
 use App\Exceptions\ApiErrorRenderer;
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\SetApiLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,7 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SetApiLocale::class);
 
         // المستخدم الموقوف على الـ API (A7): بعد auth:sanctum على أي route مسجّل
-        $middleware->alias(['active' => EnsureAccountIsActive::class]);
+        $middleware->alias([
+            'active' => EnsureAccountIsActive::class,
+            // تقييم أو اقتراح أو رفع صورة (F8): 403 EMAIL_NOT_VERIFIED لحد ما الإيميل يتأكد
+            'verified-email' => EnsureEmailIsVerified::class,
+        ]);
 
         // الحد العام للطلبات على كل routes/api.php (limiter `api` في AppServiceProvider)
         $middleware->throttleApi('api');

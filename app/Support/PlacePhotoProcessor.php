@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\PlacePhoto;
+use App\Models\ReviewPhoto;
 use GdImage;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -14,8 +15,8 @@ use RuntimeException;
  * لوحده (GD ما بينسخش الـ metadata)، بعد ما الاتجاه اتصحّح منه. الصورة الأصغر من عرض النسخة بتفضل بحجمها
  * (من غير تكبير). الغلاف بيتقص 3:2 من النص (القص في المتصفح لو اشتغل، وده الضمان من السيرفر).
  *
- * الكتابة على `wain.photos.disk` بمسارات نسبية `places/{place}/{photo}-{size}.webp`، فنقلها لـ R2 في أسبوع 9
- * تغيير disk بس.
+ * الكتابة على `wain.photos.disk` بمسارات نسبية `places/{place}/{photo}-{size}.webp` (وصور التقييمات
+ * `reviews/{user}/{photo}-{size}.webp`)، فنقلها لـ R2 في أسبوع 9 تغيير disk بس.
  */
 final class PlacePhotoProcessor
 {
@@ -29,7 +30,7 @@ final class PlacePhotoProcessor
      *
      * @throws RuntimeException لو الأصل مش موجود أو مش صورة أو أكبر من الحد أو GD مش قادر يفتحه
      */
-    public function process(PlacePhoto $photo, bool $cover = false): array
+    public function process(PlacePhoto|ReviewPhoto $photo, bool $cover = false): array
     {
         if (! function_exists('imagewebp')) {
             throw new RuntimeException('GD من غير دعم WebP على السيرفر');
@@ -67,6 +68,7 @@ final class PlacePhotoProcessor
         $disk = Storage::disk(config('wain.photos.disk'));
         $quality = (int) config('wain.photos.quality');
         $variants = [];
+        $directory = $photo instanceof ReviewPhoto ? "reviews/{$photo->user_id}" : "places/{$photo->place_id}";
 
         foreach ((array) config('wain.photos.widths') as $name => $target) {
             $resized = $width > $target ? imagescale($source, (int) $target, -1) : $source;
@@ -83,7 +85,7 @@ final class PlacePhotoProcessor
                 throw new RuntimeException("فشل ترميز النسخة {$name}");
             }
 
-            $path = "places/{$photo->place_id}/{$photo->id}-{$name}.webp";
+            $path = "{$directory}/{$photo->id}-{$name}.webp";
 
             // الـ disks العادية (`public`) بترجّع false ساكتة لو الكتابة فشلت (R2 بيرمي لوحده: throw=true)
             if ($disk->put($path, $data) === false) {
@@ -99,7 +101,7 @@ final class PlacePhotoProcessor
     /**
      * يمسح نسخ الصورة (لما الصورة تتحذف أو تتعالج تاني).
      */
-    public function deleteVariants(PlacePhoto $photo): void
+    public function deleteVariants(PlacePhoto|ReviewPhoto $photo): void
     {
         $paths = array_values(array_filter((array) $photo->variants, fn ($path) => is_string($path)
             && ! str_starts_with($path, 'http')));

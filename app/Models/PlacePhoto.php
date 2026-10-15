@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPhotoVariants;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * صورة المكان (gallery أو menu). الأصل `path` ما بيطلعش في الـ API أبداً (03 القسم 5.3)،
@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class PlacePhoto extends Model
 {
+    use HasPhotoVariants;
+
     public $timestamps = false;
 
     protected $guarded = [];
@@ -33,30 +35,6 @@ class PlacePhoto extends Model
     public const TYPE_GALLERY = 'gallery';
 
     public const TYPE_MENU = 'menu';
-
-    /**
-     * رابط نسخة بمقاس (thumb أو medium أو large). الرابط المطلق (بيانات تجريبية) بيتمرّر زي ما هو،
-     * والمسار النسبي بيتحوّل لرابط من disk الصور (`wain.photos.disk`: public دلوقتي، وR2 بعد أسبوع 9).
-     */
-    public function variantUrl(string $size): ?string
-    {
-        $value = $this->variants[$size] ?? null;
-
-        if (! is_string($value) || $value === '') {
-            return null;
-        }
-
-        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
-            return $value;
-        }
-
-        return Storage::disk(config('wain.photos.disk'))->url($value);
-    }
-
-    public function isReady(): bool
-    {
-        return $this->status === self::STATUS_READY;
-    }
 
     /** @return BelongsTo<Place, $this> */
     public function place(): BelongsTo

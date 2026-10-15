@@ -10,8 +10,11 @@ use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\PlaceEventController;
+use App\Http\Controllers\Api\V1\PlaceReviewController;
+use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SearchSuggestionController;
+use App\Http\Controllers\Api\V1\UploadController;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +35,9 @@ Route::prefix('v1')->group(function () {
     Route::get('places/{slug}', [PlaceController::class, 'show'])
         ->where('slug', '(?!(?:'.implode('|', Place::RESERVED_SLUGS).')$)[^/]+');
 
+    // تقييمات المكان (F8): القراءة للكل (والمستخدم الداخل بيشوف تقييمه هو بأي حالة)
+    Route::get('places/{slug}/reviews', [PlaceReviewController::class, 'index']);
+
     // أحداث الموبايل (ANL-02، 03 القسم 5.5): 204 فوراً والكتابة على الـ queue. limiter لوحده (60 في الدقيقة) وبره
     // الحد العام (AppServiceProvider) عشان فتح صفحة وضغطات أزرارها ما ياكلوش من ميزانية التصفّح.
     Route::post('places/{slug}/events', [PlaceEventController::class, 'store'])
@@ -44,6 +50,17 @@ Route::prefix('v1')->group(function () {
     Route::get('search/suggestions', [SearchSuggestionController::class, 'index'])
         ->middleware('throttle:search-suggestions')
         ->name('search.suggestions');
+
+    // التقييمات والرفع (F8): حساب شغّال. الكتابة والرفع محتاجين إيميل متأكَّد (403 EMAIL_NOT_VERIFIED)، وتعديل
+    // التقييم وحذفه لصاحبه بس (تقييم حد تاني 404). limiter لكل مستخدم بره الحد العام للكتابة والرفع.
+    Route::middleware(['auth:sanctum', 'active'])->group(function () {
+        Route::post('uploads/photos', [UploadController::class, 'photo'])
+            ->middleware(['verified-email', 'throttle:uploads']);
+        Route::post('places/{slug}/reviews', [PlaceReviewController::class, 'store'])
+            ->middleware(['verified-email', 'throttle:reviews']);
+        Route::put('reviews/{id}', [ReviewController::class, 'update'])->whereNumber('id');
+        Route::delete('reviews/{id}', [ReviewController::class, 'destroy'])->whereNumber('id');
+    });
 
     Route::prefix('auth')->group(function () {
         // 5 محاولات في الدقيقة لكل IP + إيميل (SEC-01)
