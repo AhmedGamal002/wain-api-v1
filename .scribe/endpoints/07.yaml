@@ -1,0 +1,73 @@
+name: Uploads
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/uploads/photos
+    metadata:
+      custom: []
+      groupName: Uploads
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Upload a photo'
+      description: |-
+        `multipart/form-data`: `photo` (JPG أو PNG أو WebP، لحد 8MB) و`context` = `review`. بيرجّع `id` والحالة
+        `processing`. محتاج إيميل متأكَّد (`403 EMAIL_NOT_VERIFIED`). الصورة اللي ما اتربطتش بتقييم بعد 24 ساعة
+        بتتمسح. أكتر من 15 صورة معلّقة: `429 DAILY_LIMIT_REACHED`.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      context:
+        custom: []
+        name: context
+        description: ''
+        required: true
+        example: review
+        type: string
+        enumValues:
+          - review
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      photo:
+        custom: []
+        name: photo
+        description: 'Must be a file. value لازم يكون 8192 كيلوبايت أو أقل.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      context: review
+    fileParameters:
+      photo: null
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data": {"id": 12, "status": "processing"}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

@@ -10,7 +10,7 @@
     ],
     "info": {
         "name": "Wain API",
-        "_postman_id": "cb09c679-2108-471b-b507-efce482195e6",
+        "_postman_id": "f58b2d5e-1ee2-401c-95e2-a76a73e5276f",
         "description": "API \u062a\u0637\u0628\u064a\u0642 \u0648\u064a\u0646 (Wain): \u0627\u0644\u0623\u0645\u0627\u0643\u0646 \u0648\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0648\u0627\u0644\u062d\u0633\u0627\u0628. \u0627\u0644\u0639\u0642\u062f \u0628\u064a\u0646 \u0627\u0644\u0640 backend \u0648\u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644.",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
@@ -1281,6 +1281,267 @@
                             "header": [],
                             "code": 200,
                             "body": "{\"data\": {\"collections\": [], \"nearby\": []}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Reviews",
+            "description": "",
+            "item": [
+                {
+                    "name": "List a place's reviews",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places\/:slug\/reviews",
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "\u0631\u0642\u0645 \u0627\u0644\u0635\u0641\u062d\u0629.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10",
+                                    "description": "\u0644\u062d\u062f 20 (\u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a 10).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/places\/:slug\/reviews?page=1&per_page=10",
+                            "variable": [
+                                {
+                                    "id": "slug",
+                                    "key": "slug",
+                                    "value": 1,
+                                    "description": "The slug of the place."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a \u0627\u0644\u0645\u0646\u0634\u0648\u0631\u0629 \u0628\u0633\u060c \u0627\u0644\u0623\u062d\u062f\u062b \u0623\u0648\u0644 (\u0645\u0639 pagination: `data` \u0648`meta` \u0645\u0646 4 \u062d\u0642\u0648\u0644). \u0648\u0645\u0639\u0627\u0647\u0627 `summary`\n(\u0627\u0644\u0645\u062a\u0648\u0633\u0637 \u0648\u0627\u0644\u0639\u062f\u062f \u0648\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0646\u062c\u0648\u0645\u060c \u0645\u0646 \u0627\u0644\u0645\u0646\u0634\u0648\u0631 \u0628\u0633) \u0648`mine`: \u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u0627\u0644\u062d\u0627\u0644\u064a \u0644\u0644\u0645\u0643\u0627\u0646 \u0628\u0623\u064a \u062d\u0627\u0644\u0629 (\u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629\n\u0623\u0648 \u0645\u0631\u0641\u0648\u0636 \u0645\u0639 \u0627\u0644\u0633\u0628\u0628...) \u0623\u0648 `null`\u060c \u0648\u0628\u064a\u0638\u0647\u0631 \u0644\u0647 \u0647\u0648 \u0628\u0633. \u0627\u0644\u0645\u0643\u0627\u0646 \u0627\u0644\u0645\u062e\u0641\u064a \u0623\u0648 \u0627\u0644\u0645\u062d\u0630\u0648\u0641 \u0623\u0648 \u0627\u0644\u063a\u0644\u0637: `404 PLACE_NOT_AVAILABLE`.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [], \"meta\": {\"current_page\": 1, \"last_page\": 1, \"per_page\": 10, \"total\": 0}, \"summary\": {\"avg\": 0, \"count\": 0, \"distribution\": {\"5\": 0, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}}, \"mine\": null}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Write a review",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/places\/:slug\/reviews",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/places\/:slug\/reviews",
+                            "variable": [
+                                {
+                                    "id": "slug",
+                                    "key": "slug",
+                                    "value": 1,
+                                    "description": "The slug of the place."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"rating\":5,\"body\":\"\u0645\u0643\u0627\u0646 \u0647\u0627\u062f\u064a \u0648\u0627\u0644\u062e\u062f\u0645\u0629 \u0633\u0631\u064a\u0639\u0629\",\"visited_at\":\"2026-09\",\"attributes\":[\"quiet\",\"wifi\"],\"photo_ids\":[12,13]}"
+                        },
+                        "description": "\u062a\u0642\u064a\u064a\u0645 \u062c\u062f\u064a\u062f \u0644\u0644\u0645\u0643\u0627\u0646. \u0628\u064a\u062f\u062e\u0644 `pending` \u0648\u064a\u0638\u0647\u0631 \u0644\u0635\u0627\u062d\u0628\u0647 \u0628\u0633 \u0644\u062d\u062f \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0641\u0631\u064a\u0642. \u0645\u062d\u062a\u0627\u062c \u062d\u0633\u0627\u0628 \u0628\u0625\u064a\u0645\u064a\u0644 \u0645\u062a\u0623\u0643\u064e\u0651\u062f\n(`403 EMAIL_NOT_VERIFIED`)\u060c \u0648\u062a\u0642\u064a\u064a\u0645 \u0648\u0627\u062d\u062f \u0644\u0643\u0644 \u0645\u0633\u062a\u062e\u062f\u0645 \u0641\u064a \u0627\u0644\u0645\u0643\u0627\u0646 (`409 ALREADY_REVIEWED`\u060c \u0648\u0627\u0644\u062a\u0639\u062f\u064a\u0644 \u0628\u0640 `PUT`).\n\u0627\u0644\u0635\u0648\u0631 \u0628\u0640 `photo_ids` \u0645\u0646 `POST \/uploads\/photos`. \u0627\u0644\u0631\u0623\u064a 10\u20131000 \u062d\u0631\u0641 \u0648\u0645\u0645\u0646\u0648\u0639 \u0641\u064a\u0647 \u0623\u0631\u0642\u0627\u0645 \u062a\u0644\u064a\u0641\u0648\u0646\u0627\u062a \u0648\u0631\u0648\u0627\u0628\u0637."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\": {\"id\": 1, \"rating\": 5, \"body\": \"\u0645\u0643\u0627\u0646 \u0647\u0627\u062f\u064a \u0648\u0627\u0644\u062e\u062f\u0645\u0629 \u0633\u0631\u064a\u0639\u0629\", \"visited_at\": \"2026-09\", \"attributes\": [], \"photos\": [], \"user\": {\"name\": \"\u0633\u0644\u0645\u0649\", \"avatar_url\": null, \"is_deleted\": false}, \"published_at\": null, \"is_mine\": true, \"status\": \"pending\", \"status_reason\": null, \"edit\": null}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Edit your review",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reviews\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reviews\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "564",
+                                    "description": "The ID of the review."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"rating\":2,\"body\":\"n\",\"visited_at\":\"2026-10\",\"attributes\":[\"architecto\"],\"photo_ids\":[16]}"
+                        },
+                        "description": "\u0628\u0646\u0641\u0633 \u062d\u0642\u0648\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644 (\u0627\u0633\u062a\u0628\u062f\u0627\u0644). \u062a\u0642\u064a\u064a\u0645 **\u0645\u0646\u0634\u0648\u0631** \u0628\u064a\u0641\u0636\u0644 \u0638\u0627\u0647\u0631 \u0628\u0642\u064a\u0645\u0647 \u0627\u0644\u0642\u062f\u064a\u0645\u0629 \u0648\u0645\u062d\u0633\u0648\u0628 \u0641\u064a \u0627\u0644\u0645\u062a\u0648\u0633\u0637\u060c \u0648\u0627\u0644\u062c\u062f\u064a\u062f \u0641\u064a\n`edit` (`status: pending`) \u0644\u062d\u062f \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0641\u0631\u064a\u0642. \u062a\u0642\u064a\u064a\u0645 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0623\u0648 \u0645\u0631\u0641\u0648\u0636 \u0628\u064a\u062a\u0639\u062f\u0651\u0644 \u0641\u064a \u0645\u0643\u0627\u0646\u0647 \u0648\u064a\u0631\u062c\u0639 \u0642\u064a\u062f\n\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629. \u0627\u0644\u0645\u062e\u0641\u064a \u0628\u0633\u0628\u0628 \u0628\u0644\u0627\u063a\u0627\u062a: `403 FORBIDDEN`."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 1, \"rating\": 4, \"body\": \"\u2026\", \"visited_at\": null, \"attributes\": [], \"photos\": [], \"user\": {\"name\": \"\u0633\u0644\u0645\u0649\", \"avatar_url\": null, \"is_deleted\": false}, \"published_at\": \"2026-10-16T09:00:00Z\", \"is_mine\": true, \"status\": \"published\", \"status_reason\": null, \"edit\": {\"status\": \"pending\", \"reason\": null, \"payload\": {\"rating\": 4}}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete your review",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reviews\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reviews\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "564",
+                                    "description": "The ID of the review."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": null,
+                        "description": "\u0628\u064a\u0645\u0633\u062d \u0627\u0644\u062a\u0642\u064a\u064a\u0645 \u0648\u0635\u0648\u0631\u0647 \u0646\u0647\u0627\u0626\u064a\u0627\u064b \u0648\u064a\u0639\u064a\u062f \u062d\u0633\u0627\u0628 \u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u0645\u0643\u0627\u0646."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "{}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Uploads",
+            "description": "",
+            "item": [
+                {
+                    "name": "Upload a photo",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/uploads\/photos",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/uploads\/photos"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "context",
+                                    "value": "review",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "photo",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "`multipart\/form-data`: `photo` (JPG \u0623\u0648 PNG \u0623\u0648 WebP\u060c \u0644\u062d\u062f 8MB) \u0648`context` = `review`. \u0628\u064a\u0631\u062c\u0651\u0639 `id` \u0648\u0627\u0644\u062d\u0627\u0644\u0629\n`processing`. \u0645\u062d\u062a\u0627\u062c \u0625\u064a\u0645\u064a\u0644 \u0645\u062a\u0623\u0643\u064e\u0651\u062f (`403 EMAIL_NOT_VERIFIED`). \u0627\u0644\u0635\u0648\u0631\u0629 \u0627\u0644\u0644\u064a \u0645\u0627 \u0627\u062a\u0631\u0628\u0637\u062a\u0634 \u0628\u062a\u0642\u064a\u064a\u0645 \u0628\u0639\u062f 24 \u0633\u0627\u0639\u0629\n\u0628\u062a\u062a\u0645\u0633\u062d. \u0623\u0643\u062a\u0631 \u0645\u0646 15 \u0635\u0648\u0631\u0629 \u0645\u0639\u0644\u0651\u0642\u0629: `429 DAILY_LIMIT_REACHED`."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\": {\"id\": 12, \"status\": \"processing\"}}",
                             "name": ""
                         }
                     ]

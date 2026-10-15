@@ -1,192 +1,76 @@
-name: Auth
+name: Reviews
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/register
+      - GET
+    uri: 'api/v1/places/{slug}/reviews'
     metadata:
       custom: []
-      groupName: Auth
+      groupName: Reviews
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'POST /auth/register — بيعمل الحساب ويرجّع token، فالمستخدم يدخل على طول.'
-      description: ''
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      name:
-        custom: []
-        name: name
-        description: 'value لازم يكون 2 حروف على الأقل. value لازم يكون أقل من 50 حرف.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      email:
-        custom: []
-        name: email
-        description: 'اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
-        required: true
-        example: zbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: ''
-        required: true
-        example: '|]|{+-'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      terms_accepted:
-        custom: []
-        name: terms_accepted
-        description: 'Must be accepted.'
-        required: true
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      name: b
-      email: zbailey@example.net
-      password: '|]|{+-'
-      terms_accepted: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/login
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /auth/login — رسالة واحدة للإيميل والباسورد الغلط (ما نقولش إن الإيميل مش موجود).'
-      description: '5 محاولات في الدقيقة لكل IP + إيميل (limiter `auth`).'
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        custom: []
-        name: email
-        description: 'اكتب إيميل صحيح.'
-        required: true
-        example: gbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: ''
-        required: true
-        example: '|]|{+-'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      email: gbailey@example.net
-      password: '|]|{+-'
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/password/forgot
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Forgot password: send a code'
+      title: "List a place's reviews"
       description: |-
-        بيبعت كود 6 أرقام للإيميل (صالح 15 دقيقة، و5 محاولات). **الرد واحد دايماً** سواء الإيميل مسجّل أو لأ،
-        عشان ما نكشفش مين عنده حساب (نفس الشكل ونفس `resend_in` في كل مرة، والإرسال بعد ما الرد يتبعت). وهو نفسه
-        «ابعت تاني»: لو لسه ما عدّتش 60 ثانية من آخر طلب بيرجّع نفس الرد من غير ما يبعت كود جديد، و`resend_in` هو
-        الباقي بالثواني. الكود الجديد بيلغي القديم.
-
-        5 محاولات في الدقيقة لكل IP + إيميل، ولكل خطوة من الـ 3 (forgot وverify وreset) ميزانيتها لوحدها
-        (`429 TOO_MANY_REQUESTS` ومعاه هيدر `Retry-After`)، وفوقها سقف أوسع على الـ IP كله وعلى الإيميل من أي IP.
+        التقييمات المنشورة بس، الأحدث أول (مع pagination: `data` و`meta` من 4 حقول). ومعاها `summary`
+        (المتوسط والعدد وتوزيع النجوم، من المنشور بس) و`mine`: تقييم المستخدم الحالي للمكان بأي حالة (قيد المراجعة
+        أو مرفوض مع السبب...) أو `null`، وبيظهر له هو بس. المكان المخفي أو المحذوف أو الغلط: `404 PLACE_NOT_AVAILABLE`.
       authenticated: false
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
       Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
+    urlParameters:
+      slug:
         custom: []
-        name: email
-        description: 'الإيميل اللي هيتبعت له الكود. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
+        name: slug
+        description: 'The slug of the place.'
         required: true
-        example: user@example.com
-        type: string
+        example: 1
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanBodyParameters:
-      email: user@example.com
+    cleanUrlParameters:
+      slug: 1
+    queryParameters:
+      page:
+        custom: []
+        name: page
+        description: 'رقم الصفحة.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'لحد 20 (الافتراضي 10).'
+        required: false
+        example: 10
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      page: 1
+      per_page: 10
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         custom: []
         status: 200
-        content: '{"data": {"resend_in": 60}}'
+        content: '{"data": [], "meta": {"current_page": 1, "last_page": 1, "per_page": 10, "total": 0}, "summary": {"avg": 0, "count": 0, "distribution": {"5": 0, "4": 0, "3": 0, "2": 0, "1": 0}}, "mine": null}'
         headers: []
         description: ''
     responseFields: []
@@ -198,137 +82,286 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/auth/password/verify
+    uri: 'api/v1/places/{slug}/reviews'
     metadata:
       custom: []
-      groupName: Auth
+      groupName: Reviews
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Check the code'
+      title: 'Write a review'
       description: |-
-        بيتحقق من الكود. لو صح بيرجّع `reset_token` (لمرة واحدة، صالح 10 دقايق) يتبعت مع الباسورد الجديد،
-        عشان شاشة الكود تتحقق قبل ما تفتح شاشة الباسورد.
-
-        أخطاء (422، والرسالة تحت حقل `code`):
-        - `INVALID_CODE`: الكود غلط (أو مفيش كود مطلوب).
-        - `CODE_EXPIRED`: الكود انتهت صلاحيته، اطلب كود جديد.
-        - `CODE_ATTEMPTS_EXCEEDED`: خلّص الـ 5 محاولات، اطلب كود جديد.
-      authenticated: false
+        تقييم جديد للمكان. بيدخل `pending` ويظهر لصاحبه بس لحد موافقة الفريق. محتاج حساب بإيميل متأكَّد
+        (`403 EMAIL_NOT_VERIFIED`)، وتقييم واحد لكل مستخدم في المكان (`409 ALREADY_REVIEWED`، والتعديل بـ `PUT`).
+        الصور بـ `photo_ids` من `POST /uploads/photos`. الرأي 10–1000 حرف وممنوع فيه أرقام تليفونات وروابط.
+      authenticated: true
       deprecated: false
     headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
       Content-Type: application/json
       Accept: application/json
       Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      slug:
+        custom: []
+        name: slug
+        description: 'The slug of the place.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      slug: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      email:
+      rating:
         custom: []
-        name: email
-        description: 'نفس الإيميل اللي اتبعت له الكود. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
+        name: rating
+        description: 'من 1 لـ 5.'
         required: true
-        example: user@example.com
-        type: string
+        example: 5
+        type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      code:
+      body:
         custom: []
-        name: code
-        description: 'الكود 6 أرقام. value لازم يكون 6 أرقام.'
-        required: true
-        example: '482915'
+        name: body
+        description: 'الرأي (10–1000 حرف).'
+        required: false
+        example: 'مكان هادي والخدمة سريعة'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      visited_at:
+        custom: []
+        name: visited_at
+        description: 'شهر الزيارة `YYYY-MM`.'
+        required: false
+        example: 2026-09
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      attributes:
+        custom: []
+        name: attributes
+        description: 'خصائص لاحظتها (slugs، لحد 5).'
+        required: false
+        example:
+          - quiet
+          - wifi
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      photo_ids:
+        custom: []
+        name: photo_ids
+        description: 'صور مرفوعة قبل كده (لحد 5).'
+        required: false
+        example:
+          - 12
+          - 13
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      email: user@example.com
-      code: '482915'
+      rating: 5
+      body: 'مكان هادي والخدمة سريعة'
+      visited_at: 2026-09
+      attributes:
+        - quiet
+        - wifi
+      photo_ids:
+        - 12
+        - 13
     fileParameters: []
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data": {"reset_token": "Zq1...", "expires_in": 600}}'
+        status: 201
+        content: '{"data": {"id": 1, "rating": 5, "body": "مكان هادي والخدمة سريعة", "visited_at": "2026-09", "attributes": [], "photos": [], "user": {"name": "سلمى", "avatar_url": null, "is_deleted": false}, "published_at": null, "is_mine": true, "status": "pending", "status_reason": null, "edit": null}}'
         headers: []
         description: ''
     responseFields: []
-    auth: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/password/reset
+      - PUT
+    uri: 'api/v1/reviews/{id}'
     metadata:
       custom: []
-      groupName: Auth
+      groupName: Reviews
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Set the new password'
+      title: 'Edit your review'
       description: |-
-        بيغيّر الباسورد بالـ `reset_token` (مرة واحدة). **كل الـ tokens القديمة بتتمسح**، فالمستخدم يدخل
-        من جديد بالباسورد الجديد (`204`). الكود اللي وصل للإيميل بيثبّت إن الإيميل بتاعه، فالحساب بيتأكّد.
-
-        - `RESET_TOKEN_INVALID` (422): الـ token غلط أو منتهي أو اتستخدم، ابدأ من أول.
-        - أخطاء الباسورد (422 `VALIDATION_ERROR`) تحت حقل `password`.
-      authenticated: false
+        بنفس حقول الإرسال (استبدال). تقييم **منشور** بيفضل ظاهر بقيمه القديمة ومحسوب في المتوسط، والجديد في
+        `edit` (`status: pending`) لحد موافقة الفريق. تقييم قيد المراجعة أو مرفوض بيتعدّل في مكانه ويرجع قيد
+        المراجعة. المخفي بسبب بلاغات: `403 FORBIDDEN`.
+      authenticated: true
       deprecated: false
     headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
       Content-Type: application/json
       Accept: application/json
       Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the review.'
+        required: true
+        example: '564'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: '564'
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      email:
+      rating:
         custom: []
-        name: email
-        description: 'الإيميل. اكتب إيميل صحيح. value لازم يكون أقل من 255 حرف.'
+        name: rating
+        description: 'value لازم يكون بين 1 و5.'
         required: true
-        example: user@example.com
-        type: string
+        example: 2
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      reset_token:
+      body:
         custom: []
-        name: reset_token
-        description: 'الـ `reset_token` اللي رجع من `POST /auth/password/verify` (لمرة واحدة، 10 دقايق).'
-        required: true
-        example: k3Jx...
+        name: body
+        description: 'value لازم يكون 10 حروف على الأقل. value لازم يكون أقل من 1000 حرف.'
+        required: false
+        example: 'n'
         type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      visited_at:
+        custom: []
+        name: visited_at
+        description: 'Must be a valid date in the format <code>Y-m</code>.'
+        required: false
+        example: 2026-10
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      attributes:
+        custom: []
+        name: attributes
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password:
+      photo_ids:
         custom: []
-        name: password
-        description: 'الباسورد الجديد: 8 حروف على الأقل وفيه حرف ورقم.'
-        required: true
-        example: newpass123
-        type: string
+        name: photo_ids
+        description: ''
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      email: user@example.com
-      reset_token: k3Jx...
-      password: newpass123
+      rating: 2
+      body: 'n'
+      visited_at: 2026-10
+      attributes:
+        - architecto
+      photo_ids:
+        - 16
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 1, "rating": 4, "body": "…", "visited_at": null, "attributes": [], "photos": [], "user": {"name": "سلمى", "avatar_url": null, "is_deleted": false}, "published_at": "2026-10-16T09:00:00Z", "is_mine": true, "status": "published", "status_reason": null, "edit": {"status": "pending", "reason": null, "payload": {"rating": 4}}}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/reviews/{id}'
+    metadata:
+      custom: []
+      groupName: Reviews
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete your review'
+      description: 'بيمسح التقييم وصوره نهائياً ويعيد حساب متوسط المكان.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: ar
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the review.'
+        required: true
+        example: '564'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: '564'
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
@@ -337,183 +370,6 @@ endpoints:
         content: '{}'
         headers: []
         description: ''
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/logout
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /auth/logout — بيمسح الـ token الحالي بس (باقي أجهزة المستخدم تفضل شغالة).'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: api/v1/auth/me
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'GET /auth/me'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 401
-        content: '{"message":"\u0633\u062c\u0651\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0639\u0634\u0627\u0646 \u062a\u0643\u0645\u0651\u0644.","code":"UNAUTHENTICATED"}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/email/resend
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Send the verification code'
-      description: |-
-        بيبعت كود 6 أرقام لإيميل الحساب (صالح 15 دقيقة، و5 محاولات). هو نفسه «ابعت تاني»: بعد 60 ثانية من
-        آخر إرسال بس، قبلها `429 TOO_MANY_REQUESTS` ومعاه هيدر `Retry-After` بالثواني. الكود الجديد بيلغي القديم.
-        لو الإيميل متأكّد خلاص: `422 EMAIL_ALREADY_VERIFIED`. وفوق ده 5 طلبات في الدقيقة لكل مستخدم
-        (`429 TOO_MANY_REQUESTS`).
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data": {"resend_in": 60}}'
-        headers: []
-        description: ''
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/email/verify
-    metadata:
-      custom: []
-      groupName: Auth
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Verify the email'
-      description: |-
-        بيتحقق من الكود وبيأكّد الإيميل. بيرجّع المستخدم (`email_verified: true`). لو الإيميل متأكّد قبل كده
-        بيرجّع المستخدم من غير ما يعمل حاجة.
-
-        أخطاء (422، تحت حقل `code`): `INVALID_CODE` و`CODE_EXPIRED` و`CODE_ATTEMPTS_EXCEEDED`.
-        5 طلبات في الدقيقة لكل مستخدم (`429 TOO_MANY_REQUESTS`).
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_TOKEN}'
-      Content-Type: application/json
-      Accept: application/json
-      Accept-Language: ar
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      code:
-        custom: []
-        name: code
-        description: 'الكود 6 أرقام اللي اتبعت لإيميل الحساب. value لازم يكون 6 أرقام.'
-        required: true
-        example: '482915'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      code: '482915'
-    fileParameters: []
-    responses: []
     responseFields: []
     auth:
       - headers
