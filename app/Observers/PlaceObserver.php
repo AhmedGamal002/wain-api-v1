@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
  * بيملى الحقول المشتقة للمكان ويطلق `PlaceChanged` بعد أي حفظ أو حذف أو استرجاع (03 القسم 5.5).
  *
  * اللي هنا مشتق من حقول المكان نفسه بس: الـ slug و`location` و`price_range` و`tier_rank` و`published_at`
- * وحفظ الـ slug القديم. أي حاجة بتبني حاجة تانية (`search_text` و`place_hours` والـ cache) listener على
+ * و`submitted_at` وحفظ الـ slug القديم. أي حاجة بتبني حاجة تانية (`search_text` و`place_hours` والـ cache) listener على
  * `PlaceChanged`، ومتتحطّش هنا (CLAUDE.md «الملكية والـ PR»).
  */
 class PlaceObserver
@@ -58,6 +58,11 @@ class PlaceObserver
         // أول مرة اتنشر (لـ «جديد» والترتيب بالأحدث). الإخفاء والإظهار بعد كده ما بيغيّروش.
         if ($place->status === Place::STATUS_ACTIVE && $place->published_at === null) {
             $place->published_at = now();
+        }
+
+        // دخل «قيد المراجعة» (إرسال أو إعادة إرسال بعد رفض): من هنا بيتحسب عمره في طابور المراجعة (A6)
+        if ($place->status === Place::STATUS_PENDING && ($creating || $place->isDirty('status'))) {
+            $place->submitted_at = now();
         }
 
         // آخر من عدّل: بس لو فيه تعديل فعلاً، عشان حفظ من غير تغيير ما يغيّرش الاسم

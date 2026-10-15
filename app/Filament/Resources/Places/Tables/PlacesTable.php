@@ -342,7 +342,7 @@ class PlacesTable
     /**
      * أيقونة رمادية للمكان من غير غلاف (data URI عشان ما نعتمدش على ملف).
      */
-    private static function placeholderImage(): string
+    public static function placeholderImage(): string
     {
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#e5e7eb"/>'
             .'<path d="M14 30l7-8 5 6 4-4 4 6H14z" fill="#9ca3af"/><circle cx="31" cy="17" r="3" fill="#9ca3af"/></svg>';

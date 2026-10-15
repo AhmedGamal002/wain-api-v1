@@ -107,6 +107,7 @@ class Place extends Model
             'rating_count' => 'integer',
             'tier_rank' => 'integer',
             'published_at' => 'datetime',
+            'submitted_at' => 'datetime',
             'verified_at' => 'datetime',
             'tier_starts_at' => 'datetime',
             'tier_ends_at' => 'datetime',
