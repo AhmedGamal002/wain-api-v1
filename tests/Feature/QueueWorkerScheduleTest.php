@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ImportPlacesFromCsv;
+use App\Jobs\ProcessPlacePhoto;
+use App\Jobs\ProcessReviewPhoto;
 use Illuminate\Console\Scheduling\Schedule;
+use ReflectionClass;
 use Tests\TestCase;
 
 /**
@@ -11,6 +15,15 @@ use Tests\TestCase;
  */
 class QueueWorkerScheduleTest extends TestCase
 {
+    public function test_a_job_is_not_handed_to_another_worker_while_it_is_still_allowed_to_run(): void
+    {
+        $longest = collect([ImportPlacesFromCsv::class, ProcessPlacePhoto::class, ProcessReviewPhoto::class])
+            ->map(fn (string $job) => (new ReflectionClass($job))->getProperty('timeout')->getDefaultValue())
+            ->max();
+
+        $this->assertGreaterThan($longest, (int) config('queue.connections.database.retry_after'));
+    }
+
     public function test_the_queue_worker_is_started_every_minute_and_stops_before_the_next_one(): void
     {
         $event = collect(app(Schedule::class)->events())
