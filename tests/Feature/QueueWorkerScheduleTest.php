@@ -20,6 +20,13 @@ class QueueWorkerScheduleTest extends TestCase
         $this->assertSame('* * * * *', $event->expression);
         $this->assertStringContainsString('--stop-when-empty', (string) $event->command);
         $this->assertStringContainsString('--max-time=55', (string) $event->command);
+        $this->assertStringContainsString('--memory=', (string) $event->command);
+
+        // its own process, so it never holds back the other commands due in the same minute
+        $this->assertTrue($event->runInBackground);
+
+        // a lock that outlives a killed worker by a day would stop the queue for that day
         $this->assertTrue($event->withoutOverlapping);
+        $this->assertLessThanOrEqual(10, $event->expiresAt);
     }
 }

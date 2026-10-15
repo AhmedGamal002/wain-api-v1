@@ -11,10 +11,16 @@ Artisan::command('inspire', function () {
 // The queue (06 section 4, FRD "Cache and queues"): the shared host cannot keep a worker alive (no Supervisor), so
 // the same minute cron that runs the scheduler starts one that drains what is waiting and stops before the next
 // minute (--max-time=55). Photos, rating recalculation and place events wait here: without this line nothing on
-// the host would ever run them. withoutOverlapping keeps a slow batch from being started twice.
-Schedule::command('queue:work --stop-when-empty --max-time=55 --tries=2')
+// the host would ever run them.
+//  - runInBackground: it is its own process, so up to 55 seconds of work never holds back the other commands due
+//    in the same minute (a scheduler runs its commands one after another).
+//  - withoutOverlapping(5): the lock lasts 5 minutes at most. The default is 24 hours, and a worker killed by the
+//    host in the middle of a batch would leave the queue stopped for a whole day.
+//  - --memory=128: it leaves by itself before the host's memory limit does.
+Schedule::command('queue:work --stop-when-empty --max-time=55 --tries=2 --memory=128')
     ->everyMinute()
-    ->withoutOverlapping();
+    ->runInBackground()
+    ->withoutOverlapping(5);
 
 // Daily clean-up (06 section 4). The cron on the host runs `schedule:run` every minute.
 // Expired and used password reset / email verification codes, and Sanctum tokens past their 30 days.
