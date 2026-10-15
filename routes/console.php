@@ -22,8 +22,9 @@ Schedule::command('queue:work --stop-when-empty --max-time=55 --tries=2 --memory
     ->runInBackground()
     ->withoutOverlapping(5);
 
-// Failed jobs (06 section 5): the admins get a bell notice when a job runs out of attempts, so a week is plenty to
-// look at it; older rows only make the table grow.
+// Failed jobs (06 section 5): a job that runs out of attempts waits in failed_jobs (`queue:failed`, `queue:retry`).
+// There is no bell for it on purpose (noise for the admins); a week is plenty to look at it, and older rows only
+// make the table grow.
 Schedule::command('queue:prune-failed --hours=168')->dailyAt('04:20')->withoutOverlapping();
 
 // Daily clean-up (06 section 4). The cron on the host runs `schedule:run` every minute.

@@ -15,6 +15,16 @@ use Tests\TestCase;
  */
 class QueueWorkerScheduleTest extends TestCase
 {
+    public function test_failed_jobs_are_pruned_every_day(): void
+    {
+        $event = collect(app(Schedule::class)->events())
+            ->first(fn ($scheduled) => str_contains((string) $scheduled->command, 'queue:prune-failed'));
+
+        $this->assertNotNull($event, 'queue:prune-failed is not in the schedule');
+        $this->assertSame('20 4 * * *', $event->expression);
+        $this->assertStringContainsString('--hours=168', (string) $event->command);
+    }
+
     public function test_a_job_is_not_handed_to_another_worker_while_it_is_still_allowed_to_run(): void
     {
         $longest = collect([ImportPlacesFromCsv::class, ProcessPlacePhoto::class, ProcessReviewPhoto::class])
